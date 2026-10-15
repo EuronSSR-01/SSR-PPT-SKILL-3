@@ -8,7 +8,7 @@
 python -m unittest discover -s tests -v
 ```
 
-共 29 项。不设置浏览器时运行 24 项库层测试（LibreOffice 渲染测试在未安装时跳过，读取 PDF 的测试在没有 PyMuPDF 时跳过），5 项浏览器测试显式跳过。要验证浏览器行为，在可启动本机浏览器的环境中设置：
+共 44 项（`test_validation.py`、`test_html.py`、`test_skill3.py`）。不设置浏览器时运行 39 项库层测试（LibreOffice 渲染测试在未安装时跳过，读取 PDF 的测试在没有 PyMuPDF 时跳过），5 项浏览器测试显式跳过。要验证浏览器行为，在可启动本机浏览器的环境中设置：
 
 ```powershell
 $env:SSR_TEST_BROWSER = 'chrome'
@@ -52,3 +52,12 @@ POSIX 使用 `SSR_TEST_BROWSER=chromium python -m unittest discover -s tests -v`
 - `--zoom` 的放大局部、编辑测试按类型汇总、`--export` 失败时如实记为渲染失败；
 - HTML 的标点孤字、多页内容区偏右与放大局部。
 双格式样例重新生成后严格检查通过：版面 0 错误 0 警告，11 个编辑目标通过。`--export` 的成功路径需要能正常调用 WPS 或 PowerPoint 的电脑，本机未能实测。
+
+2026-10-15，Claude Code／Windows（Chrome、LibreOffice 26.8），SKILL 3：44 项全部执行并通过（含 5 项浏览器测试）。新增的 `test_skill3.py`（15 项）覆盖：
+- 插画库：每种风格的每张图都通过 `illustrations.py check`，`INDEX.md` 与文件和 `data-scale` 一致，有 `sheet.png`；换色与单个色阶覆盖、未知色阶报错；场景按比例缩放；`check` 能指出文字、渐变、id、命名颜色、三位色值和占位色以外的颜色；命令行导出；`Deck.illustration` 插入单个、场景、线描风格和自己画的 SVG。
+- `image_fx.py` 的九种处理和底图；`find_images.py` 的许可识别、横竖判断、署名文字，以及用模拟接口测试搜索过滤（太小、非商业许可被排除）和下载后写入 `sources.md`。
+- `pptx_kit` 的折线图（每条线只标末值、数字格式、标签底色、纵轴起点）、多边形、渐变、半透明、竖排、字距；`references/pptx.md` 里的示例代码能直接运行。
+- `font_coverage.py` 用临时生成的小字体报告缺字并以非零退出。
+- LibreOffice 渲染下：超大展示字出血和同一句字错位叠印是警告、竖排文字不报孤字；普通文字超出页面和不同文字重叠仍是错误。
+- 示例图库：清单里的每张图和代码文件都存在，`design-examples.html` 含全部编号，文档里的本地链接都指向存在的文件，每张示例图都在对应文档里有链接。
+示例图库 165 页的生成与看图、版面检查结果见仓库 README 的“SKILL 3 的验证”。

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <path d="M14 214 H306" fill="none" stroke="#C8D0DB" stroke-width="3" stroke-linecap="round"/>
+  <path d="M52 68 H96 V212 H52 Z" fill="#D6E4FA" transform="translate(7 6)"/>
+  <path d="M136 46 H180 V212 H136 Z" fill="#D6E4FA" transform="translate(7 6)"/>
+  <path d="M222 60 H262 V212 H222 Z" fill="#D6E4FA" transform="translate(7 6)"/>
+  <path d="M14 212 V110 H52 M52 212 V68 H96 V212 M96 128 H136 M136 212 V52 L158 38 L180 52 V212 M180 96 H222 M222 212 V60 H262 V212 M262 124 H306 V212" fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M158 38 V20" fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 124 H44" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 140 H44" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 156 H44" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 172 H44" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 188 H44" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M64 80 V200" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M74 80 V200" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M84 80 V200" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 66 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 82 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 98 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 114 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 130 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 146 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 162 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 178 H170" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 110 H214" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 126 H214" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 142 H214" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 158 H214" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 174 H214" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 74 H254" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 90 H254" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 106 H254" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 122 H254" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 138 H254" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 154 H254" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 170 H254" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="272" y="140" width="24" height="20" rx="2" fill="#FDE3C8" stroke="#22303F" stroke-width="2"/>
+  <rect x="146" y="186" width="10" height="10" fill="#F28C28"/>
+</svg>

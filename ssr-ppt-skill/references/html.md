@@ -24,7 +24,7 @@
 - 每一页都要有不透明的背景，因为翻页时新页会叠在旧页上淡入。
 - 用绝对定位或 CSS Grid 在 1280×720 画布内精确排版，尺寸用 px。播放器按比例整体缩放画布，不要用 vw 或 vh。
 - 使用可分发的设计字体时，用 `scripts/embed_fonts.py` 子集化并内联；新增文字后重建子集并检查缺字。若按目标环境使用系统字体，明确所需字体与回退策略，不打包未经许可的文件。
-- 图标读取 `assets/icons/<名称>.svg` 的源码内联，去掉外层的 `class` 与注释即可；`stroke="currentColor"` 让图标跟随所在元素的文字颜色，用 `width`／`height` 控制大小。SVG 插画同样内联。
+- 图标读取 `assets/icons/<名称>.svg` 的源码内联，去掉外层的 `class` 与注释即可；`stroke="currentColor"` 让图标跟随所在元素的文字颜色，用 `width`／`height` 控制大小。SVG 插画同样内联：自带插画先用 `python scripts/illustrations.py export <名称> --primary <主色> --accent <强调色> --out build/x.svg` 换成演示的配色；照片的调色、双色调、颗粒可以用 `scripts/image_fx.py` 预处理，也可以用 CSS。
 
 ## 播放器
 

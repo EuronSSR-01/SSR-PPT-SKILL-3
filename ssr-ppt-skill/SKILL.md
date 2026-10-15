@@ -1,6 +1,6 @@
 ---
 name: ssr-ppt-skill
-description: "制作、美化或按公司模板修改 PPT、幻灯片、演示文稿、汇报、路演与发布会演示。借助风格配方、版式原型、字体与中文排版、图标与配图、逐页策划和实际渲染验收，做出好看、有记忆点、字少图多的演示；交付离线 HTML 演示与原生可编辑 PPTX。适用于支持 SKILL.md 的各类 agent，如 Codex、Claude Code、Cursor、Grok Build、Antigravity、DeepSeek Harness；用户提到 SSR-PPT-SKILL、做 PPT、幻灯片、演示文稿、slides、deck 或 PowerPoint 时使用。仅供能直接查看图片的模型使用。"
+description: "制作、美化或按公司模板修改 PPT、幻灯片、演示文稿、汇报、路演与发布会演示。借助风格配方、版式原型、字体与中文排版、插画与图标素材、开放许可配图、成品示例图、逐页策划和实际渲染验收，做出好看、有记忆点、字少图多的演示；交付离线 HTML 演示与原生可编辑 PPTX。适用于支持 SKILL.md 的各类 agent，如 Codex、Claude Code、Cursor、Grok Build、Antigravity、DeepSeek Harness；用户提到 SSR-PPT-SKILL、做 PPT、幻灯片、演示文稿、slides、deck 或 PowerPoint 时使用。仅供能直接查看图片的模型使用。"
 ---
 
 # SSR-PPT-SKILL
@@ -17,14 +17,13 @@ description: "制作、美化或按公司模板修改 PPT、幻灯片、演示�
 
 本 Skill 提供两类东西：
 
-- **方法**：找焦点、定构图、排节奏、做验收。
-- **推荐资源**：风格配方、版式原型、字体搭配、图表做法、图标库。每个配方和原型都先写明“适用”与“不适用”。
+- **方法**：找焦点、定构图、排节奏、配图、做验收。
+- **参考资源**：风格配方、版式原型、字体、插画素材、图标库、图表做法，以及它们的成品示例图（集中在 `assets/design-examples.html`）。配方讲“看起来什么样、怎么做”，原型讲“帮观众看懂什么、有几种排法”，由你按内容判断。
 
-使用推荐资源时：
+使用参考资源时：
 
-- 内容合适就优先参考。
-- 不合适就不用，直接按方法从内容出发设计。
-- 资源可以修改、组合，清单也不封闭；遇到新情况可以设计新的方案，效果好的在全套中复用。
+- 合适就参考，不合适就不用，直接按方法从内容出发设计。
+- 可以修改、组合；现有的配方、原型、插画风格和字体都只是样本，清单会继续增加。遇到新情况可以设计新的方案，效果好的在全套中复用，也可以按各文档末尾的方法收进技能。
 - 不为了套用资源而凑内容、删内容或扭曲内容。
 
 衡量标准是演示是否好看、让人记住、内容准确，而不是用到了多少推荐资源。策划稿中写明参考了什么、改了什么；没有参考的写“自定”即可，不需要额外理由。
@@ -60,7 +59,7 @@ description: "制作、美化或按公司模板修改 PPT、幻灯片、演示�
 **图示优先**（未选择时的默认）：凡是能用图来表示的文字信息，尽量用图来表示。这里的“图”首先指好看的图片、图标和示意插画，不是塞满文字的信息图。
 
 - **图标**：表头、卡片标题、流程节点、关键数字旁可以配图标，帮助识别和美化。用 `assets/icons/` 的线性图标（索引见 `assets/icons/INDEX.md`），全套一种风格、一种线宽、一两种颜色；不用 emoji。
-- **配图**：讲主体、场景或产品时配图。可以上网搜索授权合适的照片或插画，例如讲供应链就搜一张物流、仓储或工厂的图；也可以用 SVG 画出产品、物件和场景的示意，例如面料、拉链、鞋服、货车、门店。来源与许可按 [imagery.md](references/imagery.md) 记录。
+- **配图**：讲主体、场景或产品时配图，并且实际去找、去画，不只写在策划里。照片：`scripts/find_images.py` 搜开放许可的图片（带作者和许可），先看候选总览再选，下载时自动记入 `sources.md`。插画：`assets/illustrations/` 有货车、仓库、工厂、门店、面料、拉链、鞋服、银行卡等物体和场景，能换成演示的配色；缺的照它的 README 补画，或为项目自己画 SVG。做法和完整例子见 [imagery.md](references/imagery.md)。
 - **图里基本不放字**：图片和插画不承载大段文字，说明用原生文字放在图旁。数据和关系已经适合用图表、流程图表达的照常用，不为凑图示另造关系图。
 - **少字**：页面只留结论标题、关键数字、短标签和改变结论的条件；解释、背景和计算过程放备注。影响观众判断的口径、估算状态和前提，在相关页面用尽可能简短的说明保留；通常一句即可，必要时分别标注。同一句话不在多页重复。关于材料本身的说明（材料没写什么、为什么没画）写在策划稿或备注，不上页面。
 
@@ -77,7 +76,8 @@ description: "制作、美化或按公司模板修改 PPT、幻灯片、演示�
 | 浏览器：Playwright＋Chrome／Edge／Chromium，或 agent 自带的浏览器工具 | `preview.py html` 截图、交互、打印与版面检查 | 只能做 HTML 结构检查，截图、交互和版面检查标为未执行 |
 | WPS 或 PowerPoint（Windows） | `preview.py pptx --export wps`（或 `powerpoint`）：由目标软件把最终 PPTX 导出为 PDF，再逐页出图和做版面检查，看到的就是观众看到的换行和字体 | 没有或导出失败时（doctor 只查注册，能否调用以导出结果为准）：用 LibreOffice 渲染（近似），或手动导出 PDF 后用 `--pdf` |
 | LibreOffice＋PyMuPDF | `preview.py pptx` 渲染并检查，适合制作中途快速查看；与 WPS／PowerPoint 的换行和字距有差异 | 有 PyMuPDF 时用 `--export` 或 `--pdf`；都没有时 `--edit-test` 仍做对象清点、字体与编辑测试，渲染标为未执行 |
-| python-pptx | 新建 PPTX（默认路线，借助 `scripts/pptx_kit.py`：文字、形状、图标、SVG 插画、图表、表格）、模板修改、编辑测试 | 用已安装的其他原生库，例如 PptxGenJS |
+| python-pptx | 新建 PPTX（默认路线，借助 `scripts/pptx_kit.py`：文字、形状、图标、插画、条形图、折线图、表格）、模板修改、编辑测试 | 用已安装的其他原生库，例如 PptxGenJS |
+| 联网 | `find_images.py` 搜开放许可的照片；下载字体 | 用自带插画、自己画 SVG、图标和排版；在策划稿写明 |
 | Node.js＋PptxGenJS | 新建 PPTX 的另一选择 | 不必安装 |
 
 agent 特有的能力可以直接复用，例如 Codex 桌面的官方 presentations 环境，或 agent 自带的浏览器与预览面板；预览面板只用于展示，不能替代检查。缺少 Python 包或 npm 包时先说明用途，安装到当前用户或私有构建目录，不修改用户项目的依赖清单。无法安装时报告缺项与受影响的验收项。
@@ -98,13 +98,13 @@ agent 特有的能力可以直接复用，例如 Codex 桌面的官方 presentat
 
 ## 3. 定义视觉方向
 
-新建或美化版式时读取 [references/art-direction.md](references/art-direction.md)，并按其指引读取：
+新建或美化版式时，先打开 [assets/design-examples.html](assets/design-examples.html) 看成品示例（版式、配方、字体、配图，每张图都标了编号），再读取 [references/art-direction.md](references/art-direction.md)，并按其指引读取：
 
-- [references/style-recipes.md](references/style-recipes.md)：13 套风格配方，各自写明适用与不适用。有贴切的就选作起点，并结合主题改编色彩、母题和尺度；没有贴切的就按 art-direction 的方法自定方向。
-- [references/layouts.md](references/layouts.md)：22 个版式原型，各自写明适用与不适用。作为单页构图的起点，可以修改、组合；没有合适的就自定构图。
-- [references/typography.md](references/typography.md)：字体选择与获取、字号阶梯、中文排版、HTML 字体嵌入、PPTX 字体策略。
+- [references/style-recipes.md](references/style-recipes.md)：风格配方（目前 19 套）。每套写清看起来什么样、怎么做、素材怎么处理、换内容怎么调、哪里容易难看，并有同一份内容的 a–d 示例图。按内容判断选用、组合或自定，不按行业分配。
+- [references/layouts.md](references/layouts.md)：版式原型（目前 24 个）。每个先说帮观众看懂什么，再给几种排法的成品图。作为单页构图的起点，可以修改、组合；没有合适的就自定构图。
+- [references/typography.md](references/typography.md)：可选字体（每款有字样图、许可和字符覆盖）、搭配、字号阶梯、中文排版、缺字检查、HTML 字体嵌入、PPTX 字体策略。
+- [references/imagery.md](references/imagery.md)：每页配什么图；找开放许可的照片、用和补画插画、生成图的实际步骤与完整例子；照片处理；图标；可编辑范围。
 - [references/anti-patterns.md](references/anti-patterns.md)：平庸与“AI 味”反模式，策划时避开，验收时对照。
-- [references/imagery.md](references/imagery.md)：图标、网络图片、生成图、SVG 示意插画，以及没有素材时的图形处理。
 - [references/charts.md](references/charts.md)：图表选型与美化默认值，HTML 与原生 PPTX 各自的实现要点。
 
 用户模板、品牌或参考优先。没有参考时，自主确定一个具体的视觉概念，按 art-direction 的格式写进策划稿：概念、配方与改编（或自定）、参考调性、色彩、字体、字号、网格、形状语言、图片与图标处理、高潮页和禁用项。局部文字修改沿用已有视觉体系。
@@ -120,7 +120,7 @@ agent 特有的能力可以直接复用，例如 Codex 桌面的官方 presentat
 ## 4. 制作交付格式
 
 - **HTML**：读取 [references/html.md](references/html.md)。默认单文件离线可打开。把 `assets/player.css` 与 `assets/player.js` 内联进成品，它们负责翻页、进度、逐步揭示、概览、备注、全屏与打印，不限定页面视觉。图标内联 `assets/icons/` 的 SVG 源码。用 `scripts/embed_fonts.py` 子集化并内联设计字体。
-- **PPTX**：读取 [references/pptx.md](references/pptx.md)。新建用 python-pptx 时借助 `scripts/pptx_kit.py`：`icon()` 把图标做成可改颜色的原生形状，`svg_picture()` 把 SVG 插画转成高清图片插入。正文、表格、数据图表及要求可编辑的示意图使用原生对象。按 typography 为每段文字设置中文东亚字体。公司模板保留母版、版式、占位符与主题，默认不运行全局字体覆盖。
+- **PPTX**：读取 [references/pptx.md](references/pptx.md)。新建用 python-pptx 时借助 `scripts/pptx_kit.py`：`icon()` 把图标做成可改颜色的原生形状，`illustration()` 插入换好配色的插画，`svg_picture()` 插入任意 SVG，`line_chart()`／`bar_chart()` 生成原生图表；照片先用 `scripts/image_fx.py` 统一处理。`examples/gallery/` 里每个示例页都是可以照着改的代码。正文、表格、数据图表及要求可编辑的示意图使用原生对象。按 typography 为每段文字设置中文东亚字体。公司模板保留母版、版式、占位符与主题，默认不运行全局字体覆盖。
 - **两者都要**：共享页数、顺序、核心文字、数据与视觉规则，分别制作、分别验收。不把 HTML 截图或整页 SVG 塞进 PPTX 当作可编辑交付。
 
 ## 5. 实际预览验收

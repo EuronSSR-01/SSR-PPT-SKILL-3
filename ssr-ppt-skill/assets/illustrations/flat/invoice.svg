@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" data-scale="0.45">
+  <ellipse cx="164" cy="214" rx="100" ry="6" fill="#C8D0DB" opacity="0.7"/>
+  <g transform="rotate(-8 190 120)">
+    <path d="M130 34 H250 V190 L240 198 L230 190 L220 198 L210 190 L200 198 L190 190 L180 198 L170 190 L160 198 L150 190 L140 198 L130 190 Z" fill="#E8ECF1" stroke="#C8D0DB" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+  <path d="M96 34 H224 V196 L214 204 L204 196 L194 204 L184 196 L174 204 L164 196 L154 204 L144 196 L134 204 L124 196 L114 204 L104 196 L96 202 Z" fill="#FFFFFF" stroke="#C8D0DB" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="112" y="50" width="56" height="9" rx="4.5" fill="#2F6FDE"/>
+  <circle cx="204" cy="54" r="7" fill="#F28C28"/>
+  <g fill="#C8D0DB">
+    <rect x="112" y="78" width="62" height="5" rx="2.5"/><rect x="186" y="78" width="22" height="5" rx="2.5"/>
+    <rect x="112" y="94" width="48" height="5" rx="2.5"/><rect x="186" y="94" width="22" height="5" rx="2.5"/>
+    <rect x="112" y="110" width="70" height="5" rx="2.5"/><rect x="186" y="110" width="22" height="5" rx="2.5"/>
+    <rect x="112" y="126" width="40" height="5" rx="2.5"/><rect x="186" y="126" width="22" height="5" rx="2.5"/>
+  </g>
+  <g fill="#C8D0DB">
+    <rect x="112" y="143" width="8" height="2"/><rect x="124" y="143" width="8" height="2"/><rect x="136" y="143" width="8" height="2"/>
+    <rect x="148" y="143" width="8" height="2"/><rect x="160" y="143" width="8" height="2"/><rect x="172" y="143" width="8" height="2"/>
+    <rect x="184" y="143" width="8" height="2"/><rect x="196" y="143" width="8" height="2"/>
+  </g>
+  <rect x="112" y="154" width="36" height="7" rx="3.5" fill="#22303F"/>
+  <rect x="172" y="152" width="36" height="11" rx="3" fill="#F28C28"/>
+  <g fill="#22303F">
+    <rect x="112" y="172" width="3" height="16"/><rect x="118" y="172" width="2" height="16"/><rect x="123" y="172" width="4" height="16"/>
+    <rect x="130" y="172" width="2" height="16"/><rect x="135" y="172" width="3" height="16"/><rect x="141" y="172" width="2" height="16"/>
+    <rect x="146" y="172" width="4" height="16"/><rect x="153" y="172" width="2" height="16"/><rect x="158" y="172" width="3" height="16"/>
+  </g>
+</svg>

@@ -1,22 +1,28 @@
 # SSR-PPT-SKILL
 
-演示制作技能，采用通用的 Agent Skills（`SKILL.md`）格式，可用于 Codex、Claude Code、Cursor、Grok Build、Antigravity、DeepSeek Harness 等 agent：借助风格配方、版式原型、字体与中文排版、图标与配图、逐页策划和实际渲染验收，做出好看、有记忆点、字少图多的演示；支持公司模板、离线 HTML 和原生可编辑 PPTX。仅供能直接查看图片的模型使用。
+演示制作技能，采用通用的 Agent Skills（`SKILL.md`）格式，可用于 Codex、Claude Code、Cursor、Grok Build、Antigravity、DeepSeek Harness 等 agent：借助风格配方、版式原型、字体与中文排版、插画与图标素材、开放许可配图、成品示例图、逐页策划和实际渲染验收，做出好看、有记忆点、字少图多的演示；支持公司模板、离线 HTML 和原生可编辑 PPTX。仅供能直接查看图片的模型使用。
 
 名称保持 **SSR-PPT-SKILL**，技能名为 `ssr-ppt-skill`。调用方式见下文“使用”。
 
-## 这次升级
+## SKILL 3 版本
 
-- **设计规则回到第一版**：风格配方、版式原型、视觉定调、反模式、字体、图表和策划的写法回到 SKILL 2 的第一版（8de60d2）。后来加的“内容先行”和“图示优先就是多画关系图”的规则撤下，它们让成品文字越来越多、信息图越来越密。脚本和工具的改进保留。
-- **图示优先＝图片、图标、示意插画**：凡是能用图来表示的文字，尽量用图来表示。这里的图首先是好看的图：表头、卡片、流程节点和关键数字配图标；讲主体、场景、产品时上网搜授权合适的图片，或用 SVG 画出产品、物件和场景的示意。图里基本不放字，不追求塞满文字的信息图。页面只留结论、关键数字和短标签，解释放备注，同一句话不在多页重复。
-- **自带图标库**：`assets/icons/` 收录 127 个 Lucide 线性图标（ISC 许可，索引含中文含义）。`pptx_kit.py` 的 `icon()` 把图标做成 PowerPoint／WPS 里能改颜色、缩放不糊的原生形状；`svg_picture()` 把 SVG 插画按 2 倍分辨率转成图片插入。
-- **开场两问**：继承已有偏好；尚未明确的，开始前用同一条消息问：① 是否允许先询问几个问题；② 表达方式选“图示优先”还是“图文均可”。“需求明确时连续完成”只表示不必逐步确认，不等于不许提问；只有“不要问我”“全部你自己判断”这类针对整个任务的说法才算不问，“配色你自己判断”只把配色交给 agent。不让问又没说表达方式时，按图示优先并在策划中写明。
-- **只供能看图的模型使用**：制作和验收都要实际查看渲染后的页面；模型不能看图时直接停止。OCR、自动检查或另一个模型的描述都不能代替看图。
-- **把好模型会做的事写成步骤和脚本**：
-  - `preview.py pptx --export wps`（或 `powerpoint`）：在 Windows 上让 WPS／PowerPoint 把最终 PPTX 导出为 PDF 再检查，看到的就是观众看到的换行和字体；
-  - `--zoom`：每页另出四个放大的象限，整页看一遍后再细看一遍；
-  - 版面检查新增警告：一行只剩一个字（标点不计，含强制换行前）、文字跑出卡片或底框、至少 3 页的内容区偏向同一侧；
-  - 编辑测试按对象类型汇总实际测了什么，避免验收记录写成“测过图表和表格”。
-- **门槛不变**：事实与口径准确（不补造数字、关系和可比性）、版面完成、对象符合编辑要求、模板保护；记忆点是目标，用“出彩检查”自查。保留 13 套配方、22 个原型，推荐优先、不硬套。
+这个仓库是 **SSR-PPT-SKILL-3**，从 [SSR-PPT-SKILL-2](https://github.com/EuronSSR-01/SSR-PPT-SKILL-2) 的 df04b20 起步；SKILL 2 和 [SSR-PPT-SKILL-1.5](https://github.com/EuronSSR-01/SSR-PPT-SKILL-1.5)（SKILL 2 第一版的原样副本）保持不变，可以对照使用。技能名仍是 `ssr-ppt-skill`，和 SKILL 2 装在同一个目录会互相替换，只装一份。
+
+这一版的目标：让模型做出的演示更好看、图更多字更少；弱一些的模型有能照着做的完整例子，强一些的模型也能自由发挥。所有配方、原型、字体、插画都是样本，不是规定，清单会继续增加。
+
+- **成品示例图库**：`assets/design-examples.html` 集中展示 165 页示例，全部是 `pptx_kit.py` 做成的原生 PPTX 经渲染得到的图，内容是虚构的“知野生鲜社区店升级”：
+  - 版式原型 24 个、54 页：每个原型先说帮观众看懂什么，再给 2–3 种排法；新增 L23 物件标注、L24 便当格；
+  - 风格配方 19 套、76 页：原有 13 套全部保留并重写，新增 R14 扁平插画叙事、R15 线描说明书、R16 便当格、R17 政企庄重、R18 手账笔记、R19 复古印刷；每套用同一份内容做封面、数据页、图片页，再加一页特色页；
+  - 字体 28 页：20 页字样（共 26 款字体，同一句标题、同一段正文、同一组数字）、7 组搭配、数字字体对比；
+  - 配图 7 页：找图怎么挑、照片处理、文字压图、裁切、插画换色、补画物体、图标用法。
+  每页的代码在 `examples/gallery/`，可以照着改；`build.py` 能重新生成全部图片。
+- **风格配方改写**：不再按行业分配（删去“管理层汇报 → 咨询风”之类的对应表，也删去“混搭最多两套”）；每套写清看起来什么样、怎么做、素材怎么处理、换内容怎么调、哪里容易难看，由模型按内容判断，可以组合。
+- **插画素材库**：`assets/illustrations/` 有两种风格：扁平圆润 41 个（货车、冷藏车、仓库、叉车、货架、工厂、农田、面料、拉链、衬衫、门店、超市推车、银行、银行卡、票据、印章、电脑、数据看板、团队、客服……），线描 8 个。给出主色和强调色就整体换色，多个物体能拼成一条地平线上的场景；README 写清怎么补画一个物体、怎么新建一种风格、怎么只为项目画。`pptx_kit` 的 `illustration()` 一行插入。
+- **真的去找图**：`scripts/find_images.py` 搜 Openverse 和维基共享资源的开放许可照片，生成带编号的候选总览让模型看图挑选，下载时把作者、许可和来源追加进 `sources.md`。`scripts/image_fx.py` 统一处理照片（黑白、调色、双色调、压暗、圆角、圆形、颗粒）并生成柔光、点阵、半调底图。
+- **字体**：每款字体有字样图、许可和实测的字符覆盖（例如站酷系列只有 6,763 个常用字、庆科黄油体的“7”像“1”、系统宋体的小数点间距怪）；“全套最多两个字体家族”改为起步建议；`scripts/font_coverage.py` 检查字体缺字，写明 PPTX 缺字时怎么办。
+- **`pptx_kit.py` 新增**：原生折线图（线尾直接标值、标签可加底色）、自由多边形和折线、线性渐变（照片上的文字遮罩）、半透明、竖排文字、字距。
+- **版面检查更准**：54pt 以上的展示字有意出血、同一句字错位叠印（阴影、复古错版）改为警告；竖排文字不再被当成孤字；不同文字的重叠、普通文字超出页面仍是错误。
+- **保留不变**：开场两问、只供能看图的模型使用、事实与口径的门槛、逐页看两遍、WPS／PowerPoint 导出检查、编辑测试。
 
 未指定格式默认 HTML＋PPTX＋`planning.md`；仅要求一种格式、大纲、样稿或局部修改，就只完成约定范围。精确页数包含封面与结束页。
 
@@ -45,8 +51,8 @@
 用仓库自带的安装脚本（只依赖 Python 标准库），`--list` 会显示各目标路径与安装状态：
 
 ```bash
-git clone https://github.com/EuronSSR-01/SSR-PPT-SKILL-2.git
-cd SSR-PPT-SKILL-2
+git clone https://github.com/EuronSSR-01/SSR-PPT-SKILL-3.git
+cd SSR-PPT-SKILL-3
 python install.py --list
 python install.py --agent claude --agent agy           # 按需选择，可重复
 python install.py --agent cursor --project /path/to/repo   # 装到某个项目的 .agents/skills
@@ -103,7 +109,19 @@ python -m pip install fonttools brotli playwright pillow pymupdf python-pptx
 
 ## 样例与验证
 
-[双格式样例](ssr-ppt-skill/examples/dual-format/README.md) 共享一份虚构数据生成 4 页 HTML 和原生 PPTX，含长中文、分组流程、形状矩阵、统计图、原生表格和独立图片。它是可复现的有限路径，不是通用 HTML 转 PPTX 引擎。
+[双格式样例](ssr-ppt-skill/examples/dual-format/README.md) 共享一份虚构数据生成 4 页 HTML 和原生 PPTX，含长中文、分组流程、形状矩阵、统计图、原生表格和独立图片。它是可复现的有限路径，不是通用 HTML 转 PPTX 引擎。[示例图库](ssr-ppt-skill/examples/gallery/README.md) 的 165 页示例同样可以重新生成。
+
+### SKILL 3 的验证（Claude Code／Windows，Chrome、LibreOffice 26.8）
+
+- 回归测试 44 项（含 5 项浏览器测试）全部通过；新增 15 项覆盖插画库（每张图合规、索引一致、换色、场景比例、插入 PPTX）、图片处理、找图脚本（离线模拟接口）、`pptx_kit` 新功能、缺字检查、有意设计的三类警告，以及示例图和文档链接是否都存在。
+- 165 页示例逐张看过：发现并修改的问题包括标题与单位换行、孤字、竖排轴标签读反、方案表行名重复、引线穿过别的模块、折线图网格线穿过标签、小倍数图刻度不到 9pt、学术图线尾标签重叠、庆科黄油体的“7”像“1”。版面检查最终结果：版式 54 页 0 错误、1 条警告（有意的编号出血）；配方 76 页 0 错误、10 条警告（全部是有意的出血、错版叠印和网格线穿过超大数字）；字体与配图 35 页 0 错误、0 警告。
+- 双格式样例重新生成后严格检查通过：HTML、PPTX 版面都是 0 错误 0 警告，11 个编辑目标通过。
+- `assets/design-examples.html` 在 Chrome 中按桌面和手机宽度打开：165 张图全部加载，没有横向溢出，搜索和大图查看可用，没有控制台错误。
+- 安装脚本装到临时项目目录：391 个文件，哈希全部一致；`doctor.py` 报告插画库、示例和找图脚本。
+- 照片都由 `find_images.py` 实际搜到、看过候选总览后选用，许可为 CC0、公有领域或 CC BY（已署名）。
+- 尚未验证：示例只在 LibreOffice 中渲染，WPS／PowerPoint 的换行和字体可能不同；其他 agent 和模型用这一版做 PPT 的实际效果，需要在 DSH、Codex 等环境中对照。
+
+### 此前（SKILL 2）的验证记录
 
 本次在 Codex／Windows 中验证：
 - 9 项回归测试通过，含损坏内联图片、减少动态效果、分组文字、表格原有勾号、图表未改值、未支持图型和多主题／母版保留。
@@ -181,8 +199,14 @@ python -m pip install fonttools brotli playwright pillow pymupdf python-pptx
 |---|---|
 | `install.py`（仓库根目录） | 把技能安装到各 agent 的技能目录 |
 | `scripts/doctor.py` | 环境自检：已有能力与建议路线（只用标准库） |
-| `scripts/pptx_kit.py` | python-pptx 基础操作：画布坐标、中西文字体、无阴影形状、图标（原生形状）、SVG 插画、单系列高亮图表、无样式表格、裁切图片 |
+| `scripts/pptx_kit.py` | python-pptx 基础操作：画布坐标、中西文字体、字距与竖排、无阴影形状、多边形、渐变与半透明、图标（原生形状）、插画与 SVG、单系列高亮条形图、折线图、无样式表格、裁切图片 |
 | `assets/icons/` | 127 个 Lucide 线性图标（ISC 许可），`INDEX.md` 列出名称与中文含义 |
+| `assets/illustrations/` | 物体与场景插画：扁平圆润 41 个、线描 8 个，可整体换色；README 写清怎么补画和新建风格 |
+| `scripts/illustrations.py` | 插画列表、换色导出、拼场景、总览图、`check` 检查新画的图 |
+| `scripts/find_images.py` | 搜开放许可照片（Openverse、维基共享资源），候选总览、下载并记录来源与署名 |
+| `scripts/image_fx.py` | 照片处理（黑白、调色、双色调、压暗、圆角、圆形）与生成底图（颗粒、柔光、点阵、半调） |
+| `scripts/font_coverage.py` | 检查字体能否显示 PPTX／HTML／文本里的每个字 |
+| `assets/design-examples.html` | 165 页成品示例总览（版式、配方、字体、配图）；`examples/gallery/` 是生成它们的代码 |
 | `scripts/embed_fonts.py` | HTML 字体子集化、内联及缺字报告；嵌入前核许可 |
 | `scripts/preview.py html` | 离线浏览、图片解码、字体加载、键盘、逐页截图、打印与版面检查；`--zoom` 放大局部；每页正文字数，`--visual-first` 时提示长文字和字多的页 |
 | `scripts/preview.py pptx` | `--export wps／powerpoint` 由目标软件导出 PDF，或 LibreOffice 渲染，或 `--pdf` 传入 PDF；版面检查（孤字、文字跑出卡片、线条穿字、内容区偏一侧等）、对象与所有主题字体清单；指定对象编辑与重开，按类型汇总；`--zoom` 放大局部；每页正文字数，`--visual-first` 时提示长文字（不需要渲染） |
@@ -198,8 +222,9 @@ python -m pip install fonttools brotli playwright pillow pymupdf python-pptx
 ## 文件导航
 
 - [SKILL.md](ssr-ppt-skill/SKILL.md)：六个步骤的入口，开场两问与表达方式。
-- [策划](ssr-ppt-skill/references/planning.md)、[视觉定调](ssr-ppt-skill/references/art-direction.md)、[13 套配方](ssr-ppt-skill/references/style-recipes.md)、[22 个原型](ssr-ppt-skill/references/layouts.md)。
-- [字体](ssr-ppt-skill/references/typography.md)、[图标与配图](ssr-ppt-skill/references/imagery.md)、[图表和表格](ssr-ppt-skill/references/charts.md)、[反模式](ssr-ppt-skill/references/anti-patterns.md)、[图标索引](ssr-ppt-skill/assets/icons/INDEX.md)。
+- [成品示例总览](ssr-ppt-skill/assets/design-examples.html)、[示例图库说明](ssr-ppt-skill/examples/gallery/README.md)。
+- [策划](ssr-ppt-skill/references/planning.md)、[视觉定调](ssr-ppt-skill/references/art-direction.md)、[风格配方](ssr-ppt-skill/references/style-recipes.md)、[版式原型](ssr-ppt-skill/references/layouts.md)。
+- [字体](ssr-ppt-skill/references/typography.md)、[图片、插画与图标](ssr-ppt-skill/references/imagery.md)、[插画素材库](ssr-ppt-skill/assets/illustrations/README.md)、[图表和表格](ssr-ppt-skill/references/charts.md)、[反模式](ssr-ppt-skill/references/anti-patterns.md)、[图标索引](ssr-ppt-skill/assets/icons/INDEX.md)。
 - [HTML](ssr-ppt-skill/references/html.md)、[PPTX](ssr-ppt-skill/references/pptx.md)、[实际验收](ssr-ppt-skill/references/visual-review.md)。
 
 播放器资源内联进成品，不引用技能安装目录；构建结果放在已忽略的 `.build/`。

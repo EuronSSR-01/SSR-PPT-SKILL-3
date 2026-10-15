@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <path d="M14 214 H306" fill="none" stroke="#C8D0DB" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 212 V108 L74 82 V108 L124 82 V108 L174 82 V108 L224 82 V212 Z" fill="#D6E4FA" transform="translate(7 6)"/>
+  <path d="M224 212 V140 H296 V212 Z" fill="#E8ECF1" transform="translate(7 6)"/>
+  <path d="M24 212 V108 L74 82 V108 L124 82 V108 L174 82 V108 L224 82 V212 Z" fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M224 212 V140 H296 V212" fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M246 140 V44 H270 V140" fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M246 62 H270" fill="none" stroke="#F28C28" stroke-width="4"/>
+  <circle cx="272" cy="30" r="9" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="290" cy="20" r="6" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="40" y="124" width="26" height="18" rx="2" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="90" y="124" width="26" height="18" rx="2" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="140" y="124" width="26" height="18" rx="2" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="190" y="124" width="26" height="18" rx="2" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M70 212 V164 H120 V212" fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M70 178 H120" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M70 192 H120" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="240" y="160" width="16" height="14" rx="2" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="266" y="160" width="16" height="14" rx="2" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

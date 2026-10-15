@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" data-scale="0.7">
+  <g fill="#C8D0DB">
+    <rect x="6" y="208" width="14" height="6" rx="1"/>
+    <rect x="38" y="208" width="14" height="6" rx="1"/>
+    <rect x="70" y="208" width="14" height="6" rx="1"/>
+    <rect x="102" y="208" width="14" height="6" rx="1"/>
+    <rect x="134" y="208" width="14" height="6" rx="1"/>
+    <rect x="166" y="208" width="14" height="6" rx="1"/>
+    <rect x="198" y="208" width="14" height="6" rx="1"/>
+    <rect x="230" y="208" width="14" height="6" rx="1"/>
+    <rect x="262" y="208" width="14" height="6" rx="1"/>
+    <rect x="294" y="208" width="14" height="6" rx="1"/>
+  </g>
+  <rect x="0" y="203" width="320" height="5" rx="1" fill="#22303F"/>
+  <rect x="60" y="114" width="40" height="8" rx="2" fill="#C8D0DB"/>
+  <path d="M72 114 L86 98 L102 104" fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14 130 C14 125 18 122 23 122 H220 C254 122 284 136 300 158 C307 167 306 184 296 190 H14 Z" fill="#E8ECF1"/>
+  <path d="M14 180 H302 C301 185 299 188 296 190 H14 Z" fill="#C8D0DB"/>
+  <rect x="14" y="140" width="228" height="18" rx="3" fill="#22303F"/>
+  <g fill="#D6E4FA">
+    <rect x="22" y="143" width="20" height="12" rx="2"/>
+    <rect x="48" y="143" width="20" height="12" rx="2"/>
+    <rect x="74" y="143" width="20" height="12" rx="2"/>
+    <rect x="128" y="143" width="20" height="12" rx="2"/>
+    <rect x="154" y="143" width="20" height="12" rx="2"/>
+    <rect x="180" y="143" width="20" height="12" rx="2"/>
+    <rect x="206" y="143" width="20" height="12" rx="2"/>
+  </g>
+  <path d="M248 140 C266 142 282 150 291 162 H250 Z" fill="#22303F"/>
+  <path d="M256 145 C266 147 276 152 282 158 H258 Z" fill="#D6E4FA" opacity="0.5"/>
+  <rect x="14" y="166" width="288" height="6" fill="#2F6FDE"/>
+  <rect x="14" y="174" width="284" height="3" fill="#F28C28"/>
+  <rect x="104" y="122" width="5" height="68" fill="#C8D0DB"/>
+  <rect x="290" y="176" width="8" height="5" rx="2" fill="#FFFFFF"/>
+  <g fill="#22303F">
+    <rect x="34" y="188" width="56" height="10" rx="3"/>
+    <rect x="148" y="188" width="56" height="10" rx="3"/>
+    <rect x="232" y="188" width="52" height="10" rx="3"/>
+    <circle cx="46" cy="198" r="6"/>
+    <circle cx="78" cy="198" r="6"/>
+    <circle cx="160" cy="198" r="6"/>
+    <circle cx="192" cy="198" r="6"/>
+    <circle cx="244" cy="198" r="6"/>
+    <circle cx="272" cy="198" r="6"/>
+  </g>
+</svg>

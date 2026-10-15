@@ -37,7 +37,7 @@ from xml.etree import ElementTree
 from pptx import Presentation
 from pptx.chart.data import CategoryChartData
 from pptx.dml.color import RGBColor
-from pptx.enum.chart import XL_CHART_TYPE, XL_LABEL_POSITION, XL_TICK_LABEL_POSITION
+from pptx.enum.chart import XL_CHART_TYPE, XL_LABEL_POSITION, XL_MARKER_STYLE, XL_TICK_LABEL_POSITION
 from pptx.enum.dml import MSO_LINE
 from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
@@ -353,7 +353,7 @@ class Deck:
         slide.notes_slide.notes_text_frame.text = text
 
     # ------------------------------------------------------------ text
-    def _style_run(self, run, font=None, ea=None, size=None, color=None, bold=None, italic=None):
+    def _style_run(self, run, font=None, ea=None, size=None, color=None, bold=None, italic=None, spacing=None):
         if font:
             run.font.name = font
             set_ea(run._r, ea or font)
@@ -365,17 +365,24 @@ class Deck:
             run.font.bold = bold
         if italic is not None:
             run.font.italic = italic
+        if spacing:  # letter spacing in em of this run's size (0.1 = 10 %), stored as hundredths of a point
+            run._r.get_or_add_rPr().set("spc", str(round(spacing * (size or 22) * self.k / 12700 * 100)))
 
     def text(self, slide, x, y, w, h, content, size=22, font="Microsoft YaHei", ea=None, color="1A1A1A",
-             bold=False, align="left", valign="top", line_spacing=None, wrap=True, space_after=0):
+             bold=False, align="left", valign="top", line_spacing=None, wrap=True, space_after=0,
+             spacing=None, vertical=False):
         """Text box. content: a string ("\\n" starts a paragraph) or a list of paragraphs, each a string or
-        a list of runs: ("text", {"color": ..., "bold": ..., "size": ..., "font": ...})."""
+        a list of runs: ("text", {"color": ..., "bold": ..., "size": ..., "font": ..., "spacing": ...}).
+        spacing: letter spacing in em (0.1 opens it up, -0.02 tightens a large title).
+        vertical=True sets vertical East Asian text (columns run right to left)."""
         box = slide.shapes.add_textbox(self.px(x), self.px(y), self.px(w), self.px(h))
         tf = box.text_frame
         tf.auto_size = MSO_AUTO_SIZE.NONE
         tf.word_wrap = wrap
         tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
         tf.vertical_anchor = ANCHOR[valign]
+        if vertical:
+            tf._txBody.bodyPr.set("vert", "eaVert")
         paragraphs = content.split("\n") if isinstance(content, str) else content
         for index, para in enumerate(paragraphs):
             p = tf.paragraphs[0] if index == 0 else tf.add_paragraph()
@@ -388,40 +395,88 @@ class Deck:
                 run = p.add_run()
                 run.text = text
                 self._style_run(run, font=opts.get("font", font), ea=opts.get("ea", ea), size=opts.get("size", size),
-                                color=opts.get("color", color), bold=opts.get("bold", bold), italic=opts.get("italic"))
+                                color=opts.get("color", color), bold=opts.get("bold", bold), italic=opts.get("italic"),
+                                spacing=opts.get("spacing", spacing))
         return box
 
     # ------------------------------------------------------------ shapes
-    def rect(self, slide, x, y, w, h, fill=None, line=None, line_width=1, radius=None):
-        """Rectangle without inherited shadow; radius (px) gives rounded corners."""
-        kind = MSO_SHAPE.ROUNDED_RECTANGLE if radius else MSO_SHAPE.RECTANGLE
-        shape = slide.shapes.add_shape(kind, self.px(x), self.px(y), self.px(w), self.px(h))
-        if radius:
-            shape.adjustments[0] = min(0.5, radius / min(w, h))
+    def _paint(self, shape, fill, line, line_width, alpha=None, dash=False):
         if fill:
             shape.fill.solid()
             shape.fill.fore_color.rgb = rgb(fill)
+            if alpha is not None and alpha < 1:  # 0 = invisible, 1 = opaque
+                clr = shape.fill._xPr.find(qn("a:solidFill")).find(qn("a:srgbClr"))
+                node = OxmlElement("a:alpha")
+                node.set("val", str(round(alpha * 100000)))
+                clr.append(node)
         else:
             shape.fill.background()
         if line:
             shape.line.color.rgb = rgb(line)
             shape.line.width = self.pt(line_width)
+            if dash:
+                shape.line.dash_style = MSO_LINE.DASH
         else:
             shape.line.fill.background()
         return plain(shape)
 
-    def ellipse(self, slide, cx, cy, r, fill=None, line=None, line_width=1):
-        shape = slide.shapes.add_shape(MSO_SHAPE.OVAL, self.px(cx - r), self.px(cy - r), self.px(2 * r), self.px(2 * r))
-        if fill:
-            shape.fill.solid()
-            shape.fill.fore_color.rgb = rgb(fill)
-        else:
-            shape.fill.background()
+    def rect(self, slide, x, y, w, h, fill=None, line=None, line_width=1, radius=None, alpha=None, dash=False):
+        """Rectangle without inherited shadow; radius (px) gives rounded corners; alpha (0-1) makes the fill
+        see-through."""
+        kind = MSO_SHAPE.ROUNDED_RECTANGLE if radius else MSO_SHAPE.RECTANGLE
+        shape = slide.shapes.add_shape(kind, self.px(x), self.px(y), self.px(w), self.px(h))
+        if radius:
+            shape.adjustments[0] = min(0.5, radius / min(w, h))
+        return self._paint(shape, fill, line, line_width, alpha, dash)
+
+    def ellipse(self, slide, cx, cy, r, fill=None, line=None, line_width=1, alpha=None, ry=None, dash=False):
+        """Circle of radius r around (cx, cy); ry gives an ellipse."""
+        ry = r if ry is None else ry
+        shape = slide.shapes.add_shape(MSO_SHAPE.OVAL, self.px(cx - r), self.px(cy - ry), self.px(2 * r), self.px(2 * ry))
+        return self._paint(shape, fill, line, line_width, alpha, dash)
+
+    def polygon(self, slide, points, fill=None, line=None, line_width=1, alpha=None, closed=True, dash=False):
+        """Freeform shape through canvas points [(x, y), ...]: arrows, ribbons, motif lines, map areas.
+        closed=False with only a line colour draws a polyline (e.g. a route)."""
+        builder = slide.shapes.build_freeform(self.px(points[0][0]), self.px(points[0][1]), scale=1.0)
+        builder.add_line_segments([(self.px(px_), self.px(py_)) for px_, py_ in points[1:]], close=closed)
+        shape = builder.convert_to_shape()
+        shape = self._paint(shape, fill if closed else None, line, line_width, alpha, dash)
         if line:
-            shape.line.color.rgb = rgb(line)
-            shape.line.width = self.pt(line_width)
-        else:
-            shape.line.fill.background()
+            ln = shape.line._get_or_add_ln()
+            ln.set("cap", "rnd")
+            if ln.find(qn("a:round")) is None:
+                ln.append(OxmlElement("a:round"))
+        return shape
+
+    def gradient_rect(self, slide, x, y, w, h, stops, angle=0):
+        """Rectangle with a linear gradient: stops = [(position 0-1, "HEX", alpha 0-1), ...]; angle in degrees
+        (0 = left to right, 90 = top to bottom). Typical use: a scrim behind text on a photo that fades to
+        clear, or a soft glow band; PowerPoint, WPS and LibreOffice all draw it."""
+        shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, self.px(x), self.px(y), self.px(w), self.px(h))
+        sp_pr = shape._element.spPr
+        grad = OxmlElement("a:gradFill")
+        grad.set("rotWithShape", "1")
+        gs_lst = OxmlElement("a:gsLst")
+        for pos, colour, alpha in stops:
+            gs = OxmlElement("a:gs")
+            gs.set("pos", str(round(pos * 100000)))
+            clr = OxmlElement("a:srgbClr")
+            clr.set("val", colour.lstrip("#").upper())
+            if alpha < 1:
+                a = OxmlElement("a:alpha")
+                a.set("val", str(round(alpha * 100000)))
+                clr.append(a)
+            gs.append(clr)
+            gs_lst.append(gs)
+        grad.append(gs_lst)
+        lin = OxmlElement("a:lin")
+        lin.set("ang", str(round(angle * 60000)))
+        lin.set("scaled", "0")
+        grad.append(lin)
+        geom = sp_pr.find(qn("a:prstGeom"))
+        geom.addnext(grad)
+        shape.line.fill.background()
         return plain(shape)
 
     def line(self, slide, x1, y1, x2, y2, color="1A1A1A", width=1, arrow=False, dash=False):
@@ -533,6 +588,31 @@ class Deck:
         doc.close()
         return self.picture(slide, out, x, y, w, h, fit=fit)
 
+    def illustration(self, slide, name, x, y, w, h, out=None, fit="contain", style=None, primary=None,
+                     accent=None, ink=None, surface=None, line=None, leaf=None, soil=None, tokens=None):
+        """Illustration from assets/illustrations/<style>/ (default style "flat"; names in its INDEX.md) or
+        any SVG file drawn with the same placeholder colours, recoloured to the deck's primary and accent
+        colours and inserted via svg_picture. name may also be a list for a scene on one ground line, e.g.
+        ["factory", "truck", "store"] ("truck:0.8" sets one item's size). The PPTX holds a PNG: the picture
+        can be moved, resized and cropped, not edited part by part; to change the drawing, edit the SVG
+        (illustrations.py export) and insert it again. tokens={"primary_light": "1A3346"} overrides single
+        colour tokens (see assets/illustrations/README.md), e.g. darker light tones on a dark slide."""
+        spec = importlib.util.spec_from_file_location("ssr_illustrations", Path(__file__).with_name("illustrations.py"))
+        ill = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ill)
+        colours = ill.palette(primary, accent, ink, surface, line, leaf, soil, extra=tokens)
+        if isinstance(name, (list, tuple)):
+            svg = ill.scene(list(name), colours=colours, style=style)
+        else:
+            svg = ill.load(name, colours, style)
+        if out is None:
+            import tempfile
+            folder = Path(tempfile.gettempdir()) / "ssr-illustrations"
+            folder.mkdir(exist_ok=True)
+            label = "scene" if isinstance(name, (list, tuple)) else Path(str(name)).stem
+            out = folder / f"{label}-{abs(hash((svg, w, h))) % 10**8}.png"
+        return self.svg_picture(slide, svg, x, y, w, h, out=out, fit=fit)
+
     # ------------------------------------------------------------ charts and tables
     def bar_chart(self, slide, x, y, w, h, categories, values, highlight=(), horizontal=True,
                   color="E8590C", base="CBC5B8", series_name="值", number_format="0",
@@ -595,6 +675,88 @@ class Deck:
         category_axis.tick_label_position = XL_TICK_LABEL_POSITION.LOW  # beside the plot, not on the zero line
         if horizontal:
             category_axis.reverse_order = True  # first category on top
+        set_ea(chart._chartSpace, font)
+        return frame
+
+    def line_chart(self, slide, x, y, w, h, categories, series, colors=None, width=2.5, labels="last",
+                   number_format="0", font="Microsoft YaHei", size=16, label_color="666158", axis_color="1A1A1A",
+                   axis_line="CFCFC8", grid=None, markers=False, min_value=None, max_value=None, label_bg=None):
+        """Native line chart. series: {"name": [values, ...], ...}; the first series is the story and gets the
+        first colour (default orange), the rest grey unless colors=[...] says otherwise. labels: "last" puts
+        each series' value at its last point, "all" labels every point, None shows none. No legend: name
+        the lines in the title or with text at the line ends. grid="E2DED5" draws light value gridlines;
+        then pass label_bg (the slide colour) so no gridline runs through a value label.
+        The value axis starts at zero unless min_value says otherwise (say so on the slide if it does not)."""
+        names = list(series)
+        data = CategoryChartData()
+        data.categories = list(categories)
+        for name in names:
+            data.add_series(name, list(series[name]))
+        kind = XL_CHART_TYPE.LINE_MARKERS if markers else XL_CHART_TYPE.LINE
+        frame = slide.shapes.add_chart(kind, self.px(x), self.px(y), self.px(w), self.px(h), data)
+        chart = frame.chart
+        chart.has_legend = False
+        chart.has_title = False
+        chart.font.name = font
+        chart.font.size = self.pt(size)
+        palette = colors or (["E8590C"] + ["9A9A94"] * (len(names) - 1))
+        numeric = [v for name in names for v in series[name] if v is not None]
+        for i, s in enumerate(chart.plots[0].series):
+            colour = palette[i % len(palette)]
+            s.smooth = False
+            s.format.line.color.rgb = rgb(colour)
+            s.format.line.width = self.pt(width if i == 0 else width * 0.7)
+            if markers:
+                s.marker.size = max(3, round(width * 2.4))
+                s.marker.format.fill.solid()
+                s.marker.format.fill.fore_color.rgb = rgb(colour)
+                s.marker.format.line.fill.background()
+            else:
+                s.marker.style = XL_MARKER_STYLE.NONE
+            values = series[names[i]]
+            idx = [j for j, v in enumerate(values) if v is not None]
+            show = idx if labels == "all" else idx[-1:] if labels == "last" else []
+            for j in show:
+                dl = s.points[j].data_label
+                dl.has_text_frame = False
+                dl.show_value = True
+                dl.position = XL_LABEL_POSITION.RIGHT if (labels == "last") else XL_LABEL_POSITION.ABOVE
+                dl.font.size = self.pt(size)
+                dl.font.color.rgb = rgb(colour if i == 0 else label_color)
+                dl.font.bold = i == 0
+                d_lbl = dl._dLbl  # point labels have no number_format property: write c:numFmt before c:spPr
+                fmt = OxmlElement("c:numFmt")
+                fmt.set("formatCode", number_format)
+                fmt.set("sourceLinked", "0")
+                sp_pr = d_lbl.find(qn("c:spPr"))
+                sp_pr.addprevious(fmt)
+                if label_bg:
+                    fill = OxmlElement("a:solidFill")
+                    clr = OxmlElement("a:srgbClr")
+                    clr.set("val", label_bg.lstrip("#").upper())
+                    fill.append(clr)
+                    sp_pr.append(fill)
+        value_axis, category_axis = chart.value_axis, chart.category_axis
+        value_axis.visible = bool(grid)
+        value_axis.has_major_gridlines = bool(grid)
+        value_axis.has_minor_gridlines = False
+        if grid:
+            value_axis.major_gridlines.format.line.color.rgb = rgb(grid)
+            value_axis.major_gridlines.format.line.width = self.pt(1)
+            value_axis.format.line.fill.background()
+            value_axis.tick_labels.font.size = self.pt(size * 0.85)
+            value_axis.tick_labels.font.color.rgb = rgb(label_color)
+            value_axis.tick_labels.number_format = number_format
+            value_axis.tick_labels.number_format_is_linked = False
+        low, high = min(numeric), max(numeric)
+        bottom = min_value if min_value is not None else min(0, low)
+        top = max_value if max_value is not None else high + (high - bottom) * 0.12
+        value_axis.minimum_scale, value_axis.maximum_scale = bottom, top
+        category_axis.has_major_gridlines = False
+        category_axis.format.line.color.rgb = rgb(axis_line)
+        category_axis.tick_labels.font.size = self.pt(size)
+        category_axis.tick_labels.font.color.rgb = rgb(axis_color)
+        category_axis.tick_label_position = XL_TICK_LABEL_POSITION.LOW
         set_ea(chart._chartSpace, font)
         return frame
 

@@ -150,6 +150,10 @@ def collect(probe):
     report["office_export"] = office_apps()
     icons = Path(__file__).resolve().parent.parent / "assets" / "icons"
     report["icons"] = len(list(icons.glob("*.svg"))) if icons.is_dir() else 0
+    art = icons.parent / "illustrations"
+    report["illustrations"] = {p.name: len(list(p.glob("*.svg"))) for p in sorted(art.iterdir()) if p.is_dir()} \
+        if art.is_dir() else {}
+    report["examples"] = (icons.parent / "design-examples.html").exists()
 
     node = shutil.which("node")
     if node:
@@ -192,6 +196,12 @@ def routes(r):
                        "PptxGenJS (Node)" if r["pptxgenjs"] else "missing: install python-pptx"),
         "icons": (f"{r.get('icons', 0)} line icons in assets/icons (pptx_kit Deck.icon / inline SVG in HTML)"
                   if r.get("icons") else "missing: assets/icons; reinstall the skill"),
+        "illustrations": ("drawings in assets/illustrations: " + ", ".join(f"{k} {v}" for k, v in r["illustrations"].items())
+                          + " (pptx_kit Deck.illustration, recoloured; add more as its README shows)"
+                          if r.get("illustrations") else "missing: assets/illustrations; reinstall the skill"),
+        "examples": ("open assets/design-examples.html for finished example pages (layouts, recipes, type, imagery)"
+                     if r.get("examples") else "missing: assets/design-examples.html; reinstall the skill"),
+        "photos": "scripts/find_images.py searches openly licensed photos (needs network access; not checked here)",
         "html_review": "preview.py html: screenshots, interaction, print and layout checks" if html_check else
                        "missing: playwright and a Chromium-family browser; HTML review limited to structure",
         "pptx_render": pptx_render,

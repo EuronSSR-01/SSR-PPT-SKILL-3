@@ -709,6 +709,7 @@ def find_soffice(explicit):
 
 PLACEHOLDER = re.compile(r"lorem ipsum|\bTODO\b|\bTBD\b|X{3,}|占位|待补充|待填写|此处填写|示例文字", re.I)
 SYMBOLS = re.compile(r"^[\W_]+$")
+DISPLAY_PT = 54  # text at least this large is display type (huge numbers, cover words) that may bleed on purpose
 
 
 def thin_segments(drawings, max_width=6.0):
@@ -944,7 +945,9 @@ def pdf_layout(page, pm, frame=None):
             continue  # reported below as an error
         group_text = " ".join(t for t, _ in g["lines"])
         # A line of one character inside a paragraph: a wrapped tail or the word before a forced break.
-        for text, bbox in g["lines"][1:]:
+        # Vertical East Asian text comes out as a stack of one-character lines; that is not an orphan.
+        vertical = all(sum(c.isalnum() for c in t) <= 1 for t, _ in g["lines"])
+        for text, bbox in ([] if vertical else g["lines"][1:]):
             if lone_character(text):
                 add("orphan_line", "warning", group_text, bbox,
                     "A line holds one character; rewrite, widen the box or break the line deliberately.")
@@ -958,15 +961,20 @@ def pdf_layout(page, pm, frame=None):
             add("text_outside_box", "warning", group_text, g["bbox"],
                 "Text starts inside a card or panel and runs past its edge; shorten the text or enlarge the box.")
 
-    for bi, li, s in spans:
-        x0, y0, x1, y1 = s["bbox"]
-        if x0 < -1 or y0 < -1 or x1 > width + 1 or y1 > height + 1:
-            add("text_outside_slide", "error", s["text"], s["bbox"], "Text runs past the slide edge.")
-
     def em_box(s):
         x0, y0, x1, y1 = s["bbox"]
         inset = max(0.0, (y1 - y0 - s["size"]) / 2)
         return x0, y0 + inset, x1, y1 - inset
+
+    for bi, li, s in spans:
+        x0, y0, x1, y1 = em_box(s)  # the glyphs' em box: line-spacing slack above a huge glyph is not text
+        if x0 < -1 or y0 < -1 or x1 > width + 1 or y1 > height + 1:
+            if s["size"] >= DISPLAY_PT:
+                add("text_outside_slide", "warning", s["text"], s["bbox"],
+                    "Display text runs past the slide edge. Fine for an intended bleed (a huge number or word "
+                    "cropped by the edge); otherwise move it in.")
+            else:
+                add("text_outside_slide", "error", s["text"], s["bbox"], "Text runs past the slide edge.")
 
     # Compare every pair of spans: text extraction may merge overlapping boxes into one block or line.
     # Neighbouring spans and consecutive lines only touch; em-box height ignores line-spacing slack.
@@ -979,7 +987,12 @@ def pdf_layout(page, pm, frame=None):
                 continue
             B = em_box(b)
             if min(A[2], B[2]) - max(A[0], B[0]) > 2 and min(A[3], B[3]) - max(A[1], B[1]) > 2:
-                add("text_overlap", "error", a["text"], a["bbox"], f"Overlaps “{b['text'].strip()[:40]}”.")
+                if a["text"].strip() == b["text"].strip():
+                    add("text_overlap", "warning", a["text"], a["bbox"],
+                        "The same text is drawn twice, offset (a shadow or misprint effect). Fine when intended; "
+                        "otherwise delete the copy.")
+                else:
+                    add("text_overlap", "error", a["text"], a["bbox"], f"Overlaps “{b['text'].strip()[:40]}”.")
                 break
 
     for text, bbox in lines_through_text(page, flags):
