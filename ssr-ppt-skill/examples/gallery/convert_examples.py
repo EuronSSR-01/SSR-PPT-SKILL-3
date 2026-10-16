@@ -249,7 +249,7 @@ def library_before(deck, s):
 
 
 @example("convert", "C03-b", "图书馆改造 B：改写后，六个小图各管一件事",
-         "座位画成方格（一格 20 个，考试周还差的两格用虚线），开放时间画在一条时间轴上、晚上延长的一段换色，"
+         "座位画成方格（一格 20 个，期中考试周高峰预计还缺的两格用虚线），开放时间画在一条时间轴上、晚上延长的一段换色，"
          "人次画成两根柱，新增的借还机和讨论室直接画出台数和间数，费用画成比例条，建议画成一周七格、周六虚线。"
          "10 条信息：9 条在图里。", fonts=FONTS)
 def library_after(deck, s):
@@ -274,9 +274,9 @@ def library_after(deck, s):
             deck.rect(s, x + 20 + q * 21, yy + 28, 16, 16, fill=fill, radius=2)
     yy = y + 168
     gap = (L_["peak"] - after) // 20
-    t(deck, s, x + 20, yy, 320, 24, [[("考试周预计需要约 ", {"color": B["muted"]}),
+    t(deck, s, x + 20, yy, 320, 24, [[("期中考试周预计高峰需约 ", {"color": B["muted"]}),
                                       (str(L_["peak"]), {"bold": True, "color": B["gold_d"], "size": 20}),
-                                      ("，差约 ", {"color": B["muted"]}),
+                                      ("，缺约 ", {"color": B["muted"]}),
                                       (str(L_["peak"] - after), {"bold": True, "color": B["gold_d"], "size": 20})]],
       size=16)
     for q in range(after // 20 + gap):
@@ -376,14 +376,15 @@ OPEN_FACTS = [f"{name}：约 {n:,} 人次。" for name, n in SITES] + [
     f"入口在{O['gate']}。",
 ]
 OPEN_TITLE = "开放日：实验楼和宿舍样板间人最多"
-# rough positions on the campus (not to scale, no paths: the material gives none)
+# Part of this example's material: a rough campus layout assumed for the example (relative directions only,
+# not to scale, no distances or paths). The B page takes the positions from here, not from the visitor counts.
 PLACES = {"宿舍样板间": (610, 196), "实验楼": (262, 250), "体育馆": (664, 396), "图书馆": (430, 372),
           "艺术楼": (210, 452), "食堂": (590, 520), "校史馆": (300, 548)}
 
 
 @example("convert", "C04-a", "开放日人数 A：改写前，七行数字",
          "七个展点一行一个数字，排队和入口写在最后：要逐行读、自己比大小，也看不出人挤在哪里。"
-         "材料与 B、C 页相同（SITES、OPEN_FACTS），11 条信息全是字。", fonts=FONTS)
+         "材料与 B、C 页相同（SITES、OPEN_FACTS），11 条信息全是字；B 页的方位另取自为示例设定的示意布局（PLACES）。", fonts=FONTS)
 def open_day_before(deck, s):
     frame_school(deck, s, OPEN_TITLE, 6, "校园开放日 · 复盘")
     t(deck, s, B_L, 116, 1104, 26, f"{O['date']} · {O['count']}", size=18, color=B["muted"])
@@ -397,7 +398,7 @@ def open_day_before(deck, s):
 
 @example("convert", "C04-b", "开放日人数 B：改写后，按大致位置摆",
          "展点按校园里的大致方位摆，圆越大人次越多，排长队的两处换色并配沙漏，入口画在南门。"
-         "看得出人挤在哪里、离入口多远，适合安排路线和志愿者；比较多少要在圆之间来回找。"
+         "看得出各展点的相对方位和人流集中在哪一片；位置示意不按比例，不能据此判断距离或规划路线；比较多少要在圆之间来回找。"
          "11 条信息：8 条在图里，时间和口径留在图例。", fonts=FONTS)
 def open_day_place(deck, s):
     frame_school(deck, s, OPEN_TITLE, 6, "校园开放日 · 复盘")

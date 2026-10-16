@@ -473,9 +473,10 @@ def bare_slide(summary, visuals, visual_first):
         summary["findings"].append({
             "kind": "no_picture_slide", "severity": "hint", "text": "(whole slide)", "rect": None,
             "units": summary["units"],
-            "detail": f"About {summary['units']} 字 and no picture, illustration, chart or table. Draw what can be "
-                      "seen, counted or followed (things, places, numbers, steps, flows): an illustration or photo, "
-                      "icons with short labels, dots, bars, arrows. If shapes on the slide already draw it, say so."})
+            "detail": f"About {summary['units']} 字 and no picture, illustration, chart or table detected. Look at the "
+                      "slide: draw what can be seen, counted or followed (things, places, numbers, steps, flows) with "
+                      "an illustration or photo, icons with short labels, dots, bars, arrows. Shapes that already draw "
+                      "it count: say so. Do not add a decorative picture just to clear the hint."})
     return summary
 
 
@@ -791,8 +792,9 @@ def small_text(items, page_height):
 def small_text_detail(count, total, sizes, unit):
     shown = ", ".join(f"{s:g}{unit}" for s in sizes[:4])
     return (f"About {count} of {total} 字 of body text is under 16px on a 1280-wide canvas (12pt on a 13.33-inch "
-            f"slide): {shown}. Talks want body text of 20px (15pt) or more, reading decks 18px (13.5pt), labels "
-            "beside pictures 16px (12pt). Keep the information: split the slide or draw it, do not shrink it.")
+            f"slide): {shown}. Look at what was flagged. Body text and chart labels below the typography.md floor "
+            "(talks 20px, reading 18px, labels 16px): enlarge, split the slide or draw it, never shrink to fit. "
+            "Sources, page numbers, footnotes and photo credits may stay small (12px or more); note where and why.")
 
 
 def thin_segments(drawings, max_width=6.0):
