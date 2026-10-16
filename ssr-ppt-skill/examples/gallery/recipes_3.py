@@ -1,5 +1,6 @@
-"""Style recipe examples R14-R19, added in SKILL 3 to show that the recipe list keeps growing: flat illustration
-story, line-drawing manual, bento grid, formal report, notebook, and riso print. Fictional content."""
+"""Style recipe examples R14-R21, added in SKILL 3 to show that the recipe list keeps growing: flat illustration
+story, line-drawing manual, bento grid, formal report, notebook, riso print, colour fields and cool airy.
+Fictional content."""
 import content as C
 from gallery import bg, crop, example, generated, photo, treated
 
@@ -10,7 +11,7 @@ HOS, MONO, KAI, QINGKE = "HarmonyOS Sans SC", "JetBrains Mono", "LXGW WenKai", "
 
 
 # ====================================================================== R14 flat illustration story
-R14 = dict(sky="EAF2FC", ground="DCE7D3", ink="22303F", gray="5D6B7A", primary="2F6FDE", accent="F28C28", card="FFFFFF")
+R14 = dict(sky="EAF2FC", ground="DCE7D3", ink="22303F", gray="5D6B7A", primary="2F6FDE", accent="F28C28", accent_text="CE7722", card="FFFFFF")
 
 
 def r14_ill(deck, s, name, x, y, w, h, **kw):
@@ -54,7 +55,7 @@ def r14_picture(deck, s):
         deck.rect(s, x, 170, 340, 240, fill=k["sky"], radius=28)
         deck.rect(s, x, 380, 340, 30, fill=k["sky"])
         r14_ill(deck, s, name, x + 30, 190, 280, 210)
-        deck.text(s, x + 30, 440, 280, 60, time, size=40, font=MISANS_HEAVY, color=k["accent"] if i == 1 else k["primary"])
+        deck.text(s, x + 30, 440, 280, 60, time, size=40, font=MISANS_HEAVY, color=k["accent_text"] if i == 1 else k["primary"])
         deck.text(s, x + 30, 506, 280, 36, text, size=24, font=MISANS_SEMI, color=k["ink"])
         if i < 2:
             deck.icon(s, "arrow-right", x + 350, 380, size=32, color="9AB3DC")
@@ -77,7 +78,7 @@ def r14_signature(deck, s):
 
 
 # ====================================================================== R15 line-drawing manual
-R15 = dict(ink="22303F", gray="6A7684", accent="F28C28", tint="D6E4FA", paper="FFFFFF")
+R15 = dict(ink="22303F", gray="6A7684", accent="F28C28", accent_text="AC631C", tint="D6E4FA", paper="FFFFFF")
 
 
 def num_badge(deck, s, x, y, n, r=16, fill=None):
@@ -117,7 +118,7 @@ def r15_data(deck, s):
     num_badge(deck, s, 432, 344, 1, fill=k["accent"])
     num_badge(deck, s, 852, 462, 2)
     deck.rect(s, 90, 570, 1100, 1, fill=k["ink"])
-    deck.text(s, 90, 590, 40, 30, "①", size=22, font=HOS, color=k["accent"])
+    deck.text(s, 90, 590, 40, 30, "①", size=22, font=HOS, color=k["accent_text"])
     deck.text(s, 130, 592, 450, 30, "3 月：门店改为按日订货", size=19, font=HOS, color=k["ink"])
     deck.text(s, 600, 590, 40, 30, "②", size=22, font=HOS, color=k["ink"])
     deck.text(s, 640, 592, 500, 30, "6 月：5.9%，比 1 月低 3.7 个百分点", size=19, font=HOS, color=k["ink"])
@@ -163,7 +164,7 @@ def r15_signature(deck, s):
 
 
 # ====================================================================== R16 bento
-R16 = dict(bg="F2F2F4", tile="FFFFFF", ink="1C1C1E", gray="8E8E93", accent="FF5A36", soft="FFE9E3")
+R16 = dict(bg="F2F2F4", tile="FFFFFF", ink="1C1C1E", gray="6D6D71", accent="CC482B", soft="FFE9E3")
 
 
 def tile(deck, s, x, y, w, h, fill=None):
@@ -181,7 +182,7 @@ def r16_cover(deck, s):
     tile(deck, s, 48, 464, 344, 208, fill=k["accent"])
     deck.text(s, 80, 494, 300, 100, [[("30", {"size": 80, "font": MISANS_HEAVY}), (" 分钟", {"size": 26, "font": MISANS_SEMI})]],
               color="FFFFFF", font=MISANS)
-    deck.text(s, 82, 612, 300, 30, "下单到送达", size=20, font=MISANS, color="FFE3DB")
+    deck.text(s, 82, 612, 300, 30, "下单到送达", size=20, font=MISANS, color="FFFFFF")
     tile(deck, s, 408, 464, 344, 208)
     deck.illustration(s, "store", 440, 474, 280, 190, primary="3A6FD8", accent=k["accent"])
     tile(deck, s, 768, 464, 464, 208, fill=k["ink"])
@@ -219,7 +220,7 @@ def r16_picture(deck, s):
     tile(deck, s, 48, 472, 872, 200, fill=k["ink"])
     deck.text(s, 88, 506, 800, 60, "从地里到家里，不超过 18 小时", size=36, font=MISANS_HEAVY, color="FFFFFF")
     deck.text(s, 88, 576, 800, 60, "照片：~MVI~ (warped)、Wonderlane（CC BY 2.0），rawpixel（CC0）", size=15, font=MISANS,
-              color="8E8E93")
+              color="AEAEB2")
     tile(deck, s, 936, 472, 296, 200)
     deck.text(s, 968, 500, 240, 80, [[("5", {"size": 64, "font": MISANS_HEAVY}), (" 座", {"size": 24, "font": MISANS_SEMI})]],
               color=k["ink"], font=MISANS)
@@ -237,7 +238,7 @@ def r16_signature(deck, s):
         tile(deck, s, x, y, w, h, fill=k["accent"] if hot else None)
         deck.icon(s, icon, x + 32, y + 32, size=40, color="FFFFFF" if hot else k["accent"])
         deck.text(s, x + 32, y + h - 130, w - 64, 80, big, size=56, font=MISANS_HEAVY, color="FFFFFF" if hot else k["ink"])
-        deck.text(s, x + 32, y + h - 52, w - 64, 30, small, size=19, font=MISANS, color="FFE3DB" if hot else k["gray"])
+        deck.text(s, x + 32, y + h - 52, w - 64, 30, small, size=19, font=MISANS, color="FFFFFF" if hot else k["gray"])
 
 
 # ====================================================================== R17 formal report
@@ -461,3 +462,147 @@ def r19_signature(deck, s):
     misprint(deck, s, 80, 70, 600, 80, "下单到送达", 56, dx=4, dy=3)
     deck.text(s, 80, 590, 400, 70, "分钟", size=60, font=QINGKE, color=k["ink"])
     r19_grain(deck, s)
+
+
+# ====================================================================== R20 colour fields
+# Added after DSH runs kept choosing warm paper + ink + one red: a recipe that starts from saturated flat
+# colour fields instead of a paper tone.
+R20 = dict(field="0E5E4E", mint="D8EEE6", coral="C9442D", ink="0F1F1A", gray="3F5550", on_field="CFE8DF",
+           white="FFFFFF", bar="9CC9BB")
+
+
+@example("recipes", "R20-a", "R20 色块分区 · 封面", "整页切成两块：一大块饱和的平涂色压着白色大标题，另一块白底只放一个超大数字。", (HOS,))
+def r20_cover(deck, s):
+    k = R20
+    bg(s, k["white"])
+    deck.rect(s, 0, 0, 760, 720, fill=k["field"])
+    deck.text(s, 80, 80, 600, 26, "知野生鲜 · 2027", size=18, font=HOS, color=k["on_field"], spacing=0.08)
+    deck.text(s, 80, 190, 640, 260, "把产地\n搬进社区", size=96, font=HOS, bold=True, color=k["white"], line_spacing=1.08)
+    deck.text(s, 82, 470, 600, 36, C.COVER_SUB, size=24, font=HOS, color=k["on_field"])
+    deck.text(s, 820, 170, 420, 240, "126", size=200, font=HOS, bold=True, color=k["field"], wrap=False)
+    deck.text(s, 828, 410, 400, 36, "家社区店完成升级", size=26, font=HOS, color=k["ink"])
+    deck.rect(s, 830, 470, 80, 10, fill=k["coral"])
+    deck.text(s, 828, 640, 400, 24, "2027 年 7 月 · 虚构示例", size=16, font=HOS, color=k["gray"])
+
+
+@example("recipes", "R20-b", "R20 色块分区 · 数据页", "色块做页眉压住标题；图表用同一种绿的深浅，只有结论数字用整块主色。", (HOS,))
+def r20_data(deck, s):
+    k = R20
+    bg(s, k["white"])
+    deck.rect(s, 0, 0, 1280, 150, fill=k["field"])
+    deck.text(s, 80, 40, 1100, 56, "损耗率连续 6 个月下降", size=40, font=HOS, bold=True, color=k["white"])
+    deck.text(s, 82, 100, 900, 28, "生鲜损耗率，%，2027 年 1–6 月（虚构示例）", size=18, font=HOS, color=k["on_field"])
+    deck.bar_chart(s, 70, 190, 780, 450, C.MONTHS, C.LOSS, highlight={5}, horizontal=False, color=k["field"],
+                   base=k["bar"], number_format='0.0"%"', font=HOS, size=18, label_color=k["ink"], axis_color=k["gray"],
+                   gap_width=45)
+    deck.rect(s, 900, 190, 300, 300, fill=k["field"])
+    deck.text(s, 930, 220, 260, 30, "6 月", size=22, font=HOS, color=k["on_field"])
+    deck.text(s, 926, 270, 260, 130, [[("5.9", {"size": 104, "bold": True}), ("%", {"size": 40, "bold": True})]],
+              font=HOS, color=k["white"], wrap=False)
+    deck.text(s, 930, 410, 250, 60, "比 1 月低 3.7 个百分点", size=20, font=HOS, color=k["on_field"])
+    deck.rect(s, 900, 520, 80, 10, fill=k["coral"])
+    deck.text(s, 900, 548, 300, 80, "3 月起按日订货，\n临期商品晚 8 点折扣", size=20, font=HOS, color=k["ink"], line_spacing=1.4)
+
+
+@example("recipes", "R20-c", "R20 色块分区 · 图片页", "照片占半页出血，另一半是整块主色，白字写一句话和三个数字。", (HOS,))
+def r20_picture(deck, s):
+    k = R20
+    deck.picture(s, photo("farm"), 560, 0, 720, 720)
+    deck.rect(s, 0, 0, 560, 720, fill=k["field"])
+    deck.text(s, 64, 110, 460, 160, "清晨采摘，\n当天进城", size=56, font=HOS, bold=True, color=k["white"], line_spacing=1.15)
+    for i, (num, unit, label) in enumerate(C.FACTS):
+        y = 330 + i * 96
+        deck.rect(s, 64, y, 432, 1, fill=k["on_field"])
+        deck.text(s, 64, y + 14, 220, 70, [[(num, {"size": 52, "bold": True}), (" " + unit, {"size": 22})]],
+                  font=HOS, color=k["white"], wrap=False)
+        deck.text(s, 280, y + 34, 220, 30, label, size=20, font=HOS, color=k["on_field"])
+    deck.text(s, 64, 670, 460, 22, "照片：~MVI~ (warped)，CC BY 2.0（示意）", size=13, font=HOS, color=k["on_field"])
+
+
+@example("recipes", "R20-d", "R20 色块分区 · 特色页", "四宫格成绩单：四块不同的平涂色各放一个数字，颜色本身就是分组。", (HOS,))
+def r20_signature(deck, s):
+    k = R20
+    cells = [(0, 0, k["field"], k["white"], k["on_field"]), (640, 0, k["mint"], k["field"], k["gray"]),
+             (0, 360, k["coral"], k["white"], k["white"]), (640, 360, k["white"], k["field"], k["gray"])]
+    for (x, y, fill, big, small), (num, unit, label, icon) in zip(cells, C.KPIS):
+        deck.rect(s, x, y, 640, 360, fill=fill)
+        deck.icon(s, icon, x + 64, y + 56, size=44, color=big, stroke=2.0)
+        deck.text(s, x + 60, y + 120, 560, 150, [[(num, {"size": 128, "bold": True}), (" " + unit, {"size": 40, "bold": True})]],
+                  font=HOS, color=big, wrap=False)
+        deck.text(s, x + 64, y + 280, 540, 34, label, size=24, font=HOS, color=small)
+    deck.text(s, 1000, 64, 220, 26, "上半年成绩单", size=18, font=HOS, color=k["gray"], align="right")
+
+
+# ====================================================================== R21 cool and airy
+R21 = dict(bg="F5F8FB", card="FFFFFF", ink="1E2A4A", gray="4A5875", line="DCE3EE", mint="DDF3EC", sky="DDEBFB",
+           lilac="E9E5FA", accent="3B5BDB", green="12B886")
+
+
+@example("recipes", "R21-a", "R21 清透柔和 · 封面", "冷白底上几团浅薄荷、浅天蓝、浅紫的圆形色块托着一张插画；深靛蓝字，轻、干净、友好。", (MISANS_HEAVY,))
+def r21_cover(deck, s):
+    k = R21
+    bg(s, k["bg"])
+    deck.ellipse(s, 990, 300, 230, fill=k["sky"])
+    deck.ellipse(s, 1150, 520, 140, fill=k["mint"])
+    deck.ellipse(s, 840, 540, 100, fill=k["lilac"])
+    deck.illustration(s, "store", 810, 250, 380, 285, primary=k["accent"], accent=k["green"])
+    deck.text(s, 80, 190, 680, 240, "把产地\n搬进社区", size=84, font=MISANS_HEAVY, color=k["ink"], line_spacing=1.1)
+    deck.text(s, 84, 430, 620, 36, C.COVER_SUB, size=24, font=MISANS, color=k["gray"])
+    deck.rect(s, 84, 500, 220, 40, fill=k["card"], line=k["line"], radius=20)
+    deck.text(s, 84, 510, 220, 24, "2027 · 虚构示例", size=16, font=MISANS, color=k["gray"], align="center")
+
+
+@example("recipes", "R21-b", "R21 清透柔和 · 数据页", "白色圆角卡片放图表，右侧三张浅色小卡各放一个前后对比；只用一种靛蓝做强调。", (MISANS_HEAVY,))
+def r21_data(deck, s):
+    k = R21
+    bg(s, k["bg"])
+    deck.text(s, 80, 50, 1100, 60, "损耗率半年降到 5.9%", size=40, font=MISANS_HEAVY, color=k["ink"])
+    deck.text(s, 82, 112, 900, 28, "生鲜损耗率，%，2027 年 1–6 月（虚构示例）", size=18, font=MISANS, color=k["gray"])
+    deck.rect(s, 80, 168, 760, 480, fill=k["card"], radius=24)
+    deck.line_chart(s, 100, 188, 720, 440, C.MONTHS, {"知野": C.LOSS, "同城同业": C.LOSS_PEERS}, colors=[k["accent"], "AEB9CC"],
+                    number_format='0.0"%"', font=MISANS, size=16, label_color=k["gray"], axis_color=k["gray"],
+                    axis_line=k["line"], grid="EEF2F7", label_bg=k["card"], width=3.5, min_value=4)
+    icons = ["clock", "leaf", "repeat"]
+    for i, ((name, before, after), fill, icon) in enumerate(zip(C.BEFORE_AFTER, (k["mint"], k["sky"], k["lilac"]), icons)):
+        y = 168 + i * 168
+        deck.rect(s, 880, y, 320, 144, fill=fill, radius=24)
+        deck.ellipse(s, 930, y + 50, 26, fill=k["card"])
+        deck.icon(s, icon, 916, y + 36, size=28, color=k["accent"], stroke=2.0)
+        deck.text(s, 976, y + 22, 210, 54, after, size=36, font=MISANS_HEAVY, color=k["ink"], wrap=False)
+        deck.text(s, 976, y + 84, 210, 44, f"{name}\n原来 {before}", size=16, font=MISANS, color=k["gray"], line_spacing=1.3)
+
+
+@example("recipes", "R21-c", "R21 清透柔和 · 图片页", "照片做大圆角放在浅色卡片里，旁边三张浅色小卡写数字；没有阴影，靠浅色块分组。", (MISANS_HEAVY,))
+def r21_picture(deck, s):
+    k = R21
+    bg(s, k["bg"])
+    deck.rect(s, 64, 64, 652, 560, fill=k["sky"], radius=36)
+    deck.picture(s, treated("market-people", "round_corners", ext="png", radius=48, size=(1200, 900)), 96, 96, 588, 441)
+    deck.text(s, 96, 560, 588, 24, "社区菜市场（示意图片）。照片：Wonderlane，CC BY 2.0", size=14, font=MISANS, color=k["gray"])
+    deck.text(s, 770, 96, 450, 60, "社区店里的早市", size=40, font=MISANS_HEAVY, color=k["ink"])
+    deck.text(s, 772, 160, 440, 70, "“" + C.QUOTE + "”", size=22, font=MISANS, color=k["gray"], line_spacing=1.4)
+    for i, ((num, unit, label), fill) in enumerate(zip(C.FACTS, (k["mint"], k["lilac"], k["card"]))):
+        y = 262 + i * 122
+        deck.rect(s, 770, y, 430, 104, fill=fill, line=k["line"] if fill == k["card"] else None, radius=24)
+        deck.text(s, 800, y + 18, 200, 70, [[(num, {"size": 48, "font": MISANS_HEAVY}), (" " + unit, {"size": 22})]],
+                  font=MISANS, color=k["ink"], wrap=False)
+        deck.text(s, 990, y + 40, 200, 30, label, size=20, font=MISANS, color=k["gray"])
+
+
+@example("recipes", "R21-d", "R21 清透柔和 · 特色页", "像手机 App 的引导页：五张浅色卡片一字排开，每张一个编号、一个图标、一句话。", (MISANS_HEAVY,))
+def r21_signature(deck, s):
+    k = R21
+    bg(s, k["bg"])
+    deck.text(s, 80, 60, 1100, 60, "从地里到家里，五站", size=40, font=MISANS_HEAVY, color=k["ink"])
+    icons = {"farm": "leaf", "truck": "truck", "warehouse": "warehouse", "store": "store", "person": "house"}
+    fills = (k["mint"], k["sky"], k["lilac"], k["mint"], k["sky"])
+    for i, ((ill, name, text), fill) in enumerate(zip(C.STEPS, fills)):
+        x = 80 + i * 228
+        deck.rect(s, x, 170, 208, 400, fill=fill, radius=28)
+        deck.rect(s, x + 24, 194, 56, 32, fill=k["card"], radius=16)
+        deck.text(s, x + 24, 200, 56, 22, f"{i + 1:02d}", size=16, font=MISANS_HEAVY, color=k["accent"], align="center")
+        deck.ellipse(s, x + 104, 320, 48, fill=k["card"])
+        deck.icon(s, icons[ill], x + 82, 298, size=44, color=k["accent"], stroke=2.0)
+        deck.text(s, x + 20, 410, 168, 36, name, size=24, font=MISANS_HEAVY, color=k["ink"], align="center")
+        deck.text(s, x + 20, 456, 168, 60, text, size=18, font=MISANS, color=k["gray"], align="center", line_spacing=1.35)
+    deck.text(s, 80, 610, 1120, 28, "全程不超过 18 小时（虚构示例）", size=18, font=MISANS, color=k["gray"])

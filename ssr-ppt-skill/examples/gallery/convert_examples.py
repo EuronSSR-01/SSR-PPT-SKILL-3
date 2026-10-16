@@ -66,7 +66,7 @@ def bullets(deck, s, x, y, w, lines, color="4F5866", size=18, step=40, h=30):
 
 
 # ================================================================== 青川医院：页眉色带
-A = dict(main="0F5C6E", mid="2A8C9E", soft="7FB9C4", tint="E3F1F3", hot="E2725B", hot_d="B24A33",
+A = dict(main="0F5C6E", mid="267F90", soft="7FB9C4", tint="E3F1F3", hot="C45A44", hot_d="B24A33",
          ink="1E2B33", muted="56636B", faint="8C979E", panel="F1F6F7", grey="C3CDD1")
 A_L, A_R = 64, 1216
 
@@ -146,7 +146,7 @@ def visit_after(deck, s):
         deck.rect(s, x, y0, w, h, fill=colour)
         if i == 0:
             deck.icon(s, icon, x + 18, y0 + 12, size=32, color="FFFFFF", stroke=2.2)
-            t(deck, s, x + 62, y0 + 13, 300, 32, [[("候诊 ", {"size": 22}), (label, {"size": 24, "bold": True})]],
+            t(deck, s, x + 62, y0 + 13, 300, 32, [[("候诊 ", {"size": 22, "bold": True}), (label, {"size": 24, "bold": True})]],
               color="FFFFFF", wrap=False)
         else:
             cx = x + w / 2
@@ -201,8 +201,8 @@ def visit_after(deck, s):
 
 
 # ================================================================== 启明中学：左侧竖条
-B = dict(main="283C7A", mid="4A62A8", soft="AEBBE0", tint="E8ECF7", gold="E9A23B", gold_d="A86A10",
-         ink="1E2433", muted="5A6273", faint="8E95A3", panel="F4F5F9", grey="D3D8E2")
+B = dict(main="283C7A", mid="4A62A8", soft="AEBBE0", tint="E8ECF7", gold="E9A23B", gold_d="9A600E",
+         ink="1E2433", muted="5A6273", faint="696E79", panel="F4F5F9", grey="D3D8E2")
 B_L, B_R = 88, 1192
 
 
@@ -456,8 +456,8 @@ def open_day_sorted(deck, s):
 
 
 # ================================================================== 恒川电机：顶部细条，页脚标志
-C = dict(main="2F5D7C", mid="5E88A6", soft="A9C1D3", tint="E6EDF2", hot="E8742A", hot_d="B4521A",
-         ink="23262B", muted="5C636D", faint="8F959D", panel="F3F4F6", warm="FFF1E6", grey="CDD3D9")
+C = dict(main="2F5D7C", mid="547994", soft="A9C1D3", tint="E6EDF2", hot="E8742A", hot_d="B4521A",
+         ink="23262B", muted="5C636D", faint="666A6F", panel="F3F4F6", warm="FFF1E6", grey="CDD3D9")
 C_L, C_R = 64, 1216
 
 

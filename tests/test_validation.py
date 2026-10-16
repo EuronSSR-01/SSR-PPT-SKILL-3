@@ -500,6 +500,44 @@ class LineThroughTextTests(unittest.TestCase):
             doc.close()
         self.assertEqual(kinds, [["small_text"], []])
 
+    def test_text_under_a_later_shape_and_low_contrast_on_a_rendered_page(self):
+        pm = preview.pymupdf_or_none()
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ink.pdf"
+            doc = pm.open()
+            page = doc.new_page(width=960, height=540)
+            page.insert_text((80, 200), "Visible sentence here", fontname="helv", fontsize=20)
+            page.insert_text((80, 300), "Covered sentence here", fontname="helv", fontsize=20)
+            page.draw_rect(pm.Rect(70, 270, 400, 310), color=None, fill=(0.9, 0.3, 0.2))     # painted after the text
+            page.insert_text((80, 400), "Pale grey label text", fontname="helv", fontsize=20, color=(0.72, 0.72, 0.72))
+            doc.save(path)
+            doc.close()
+            doc = pm.open(path)
+            findings = preview.pdf_layout(doc[0], pm)
+            doc.close()
+        found = {(f["kind"], f["severity"], f["text"]) for f in findings}
+        self.assertIn(("text_hidden", "error", "Covered sentence here"), found)
+        self.assertIn(("low_contrast", "warning", "Pale grey label text"), found)
+        self.assertFalse(any("Visible" in text for _, _, text in found))
+
+    def test_template_sample_text_left_in_the_deck(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+
+            def deck(path, pages):
+                prs = Presentation()
+                for texts in pages:
+                    slide = prs.slides.add_slide(prs.slide_layouts[6])
+                    for i, text in enumerate(texts):
+                        slide.shapes.add_textbox(Inches(1), Inches(1 + i), Inches(6), Inches(0.8)).text = text
+                prs.save(path)
+            fixed = "某某公司 · 内部资料"            # on every template page: a fixed element, not sample text
+            deck(work / "template.pptx", [[fixed, "市场拓展部季度汇报", "2031年9月3日"], [fixed, "此处为示例标题内容"],
+                                          [fixed, "目录"]])
+            deck(work / "deck.pptx", [["城北分店 · 市场拓展部", "2025年3月8日"], ["门店客流回升", fixed]])
+            found = preview.template_sample_text(work / "deck.pptx", work / "template.pptx")
+        self.assertEqual([(f["slide"], f["shared"]) for f in found], [(1, "市场拓展部")])
+
     def test_pptx_check_uses_supplied_pdf(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)

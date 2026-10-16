@@ -1097,7 +1097,109 @@ def pdf_layout(page, pm, frame=None):
         count, total, sizes = found
         add("small_text", "warning", small[0]["text"], box,
             small_text_detail(count, total, sorted({round(z / unit, 1) for z in sizes}), "pt"))
+
+    # What the rendering shows: text that leaves no ink (covered by a shape or picture drawn later, or set in
+    # the background colour) and text with too little contrast against what is painted behind it.
+    pixmap = page.get_pixmap(matrix=pm.Matrix(INK_ZOOM, INK_ZOOM), alpha=False)
+    picture = Image_from_pixmap(pixmap)
+    for text, bbox, hidden, total in hidden_text(page, flags, picture, INK_ZOOM):
+        add("text_hidden", "error", text, bbox,
+            f"{hidden} of {total} characters leave no ink in the rendering: a shape or picture drawn later covers "
+            "them, or they are set in the background colour. Bring the text forward or move the shape.")
+    for (fg, bg, large), (ratio, chars, text, bbox) in low_contrast(page, picture, INK_ZOOM).items():
+        add("low_contrast", "warning", text, bbox,
+            f"Contrast {ratio:.2f}:1 for #{fg} on #{bg} (needs {3 if large else 4.5}:1 for "
+            f"{'large' if large else 'body'} text); {chars} 字 use this pair. Darken the text or lighten the "
+            "background; text on photos is not measured.")
     return findings
+
+
+INK_ZOOM = 2.0  # rendering scale for the ink and contrast checks (2 px per point)
+
+
+def Image_from_pixmap(pixmap):
+    Image = need("PIL.Image", "python -m pip install pillow")
+    return Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
+
+
+def hidden_text(page, flags, picture, zoom):
+    """Spans whose glyph cores show (almost) no variation in the rendering: (text, bbox, hidden, total).
+    Reported when at least 3 characters and half of the span's letters and digits leave no ink."""
+    gray = picture.convert("L")
+    out = []
+    for block in page.get_text("rawdict", flags=flags)["blocks"]:
+        if block.get("type") != 0:
+            continue
+        for span in (s for line in block["lines"] for s in line["spans"]):
+            chars = [c for c in span["chars"] if c["c"].isalnum()]
+            if len(chars) < 2:
+                continue
+            hidden = 0
+            for c in chars:
+                x0, y0, x1, y1 = glyph_core(c["bbox"], span["size"])
+                box = (int(x0 * zoom), int(y0 * zoom), max(int(x0 * zoom) + 1, int(x1 * zoom)),
+                       max(int(y0 * zoom) + 1, int(y1 * zoom)))
+                if box[0] < 0 or box[1] < 0 or box[2] > gray.width or box[3] > gray.height:
+                    continue  # off the page: reported as text outside the slide
+                lo, hi = gray.crop(box).getextrema()
+                hidden += hi - lo < 24
+            if hidden >= 3 and hidden >= 0.5 * len(chars):
+                out.append(("".join(c["c"] for c in span["chars"]).strip(), span["bbox"], hidden, len(chars)))
+    return out
+
+
+def relative_luminance(rgb):
+    def channel(v):
+        v /= 255
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = rgb
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+
+
+def contrast_ratio(a, b):
+    hi, lo = sorted((relative_luminance(a), relative_luminance(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def low_contrast(page, picture, zoom):
+    """Text colour against the background behind each span, read from the rendering: the background is the
+    5th or 95th percentile pixel inside the span box, whichever is farther from the text colour. Only body
+    text between the header and footer bands; text over pictures is left out (a photo has no one colour).
+    Returns {(fg, bg, large): (ratio, characters, first text, bbox)} for pairs under 4.5:1 (3:1 large)."""
+    width, height = page.rect.width, page.rect.height
+    unit = 1280 / width
+    pictures = [info["bbox"] for info in page.get_image_info()]
+    found = {}
+    for block in page.get_text("dict")["blocks"]:
+        for line in block.get("lines", []):
+            for span in line["spans"]:
+                text = span["text"].strip()
+                x0, y0, x1, y1 = span["bbox"]
+                if len(text) < 2 or SYMBOLS.match(text) or y0 < height * 0.115 or y1 > height * 0.92:
+                    continue
+                if any(x0 < p[2] and p[0] < x1 and y0 < p[3] and p[1] < y1 for p in pictures):
+                    continue
+                c = span["color"]
+                fg = ((c >> 16) & 255, (c >> 8) & 255, c & 255)
+                box = (int(x0 * zoom), int(y0 * zoom), max(int(x0 * zoom) + 2, int(x1 * zoom)),
+                       max(int(y0 * zoom) + 2, int(y1 * zoom)))
+                crop = picture.crop(box)
+                pixels = sorted(crop.get_flattened_data() if hasattr(crop, "get_flattened_data") else crop.getdata(),
+                                key=relative_luminance)
+                if not pixels:
+                    continue
+                lo, hi = pixels[int(len(pixels) * 0.05)], pixels[min(len(pixels) - 1, int(len(pixels) * 0.95))]
+                fl = relative_luminance(fg)
+                bg = hi if abs(relative_luminance(hi) - fl) > abs(relative_luminance(lo) - fl) else lo
+                size = span["size"] * unit
+                large = size >= 24 or (size >= 18.66 and bool(span["flags"] & 16))
+                ratio = contrast_ratio(fg, bg)
+                if ratio < (3 if large else 4.5):
+                    key = ("%02X%02X%02X" % fg, "%02X%02X%02X" % bg, large)
+                    old = found.get(key)
+                    found[key] = (ratio, len(text), text, span["bbox"]) if old is None else \
+                        (old[0], old[1] + len(text), old[2], old[3])
+    return found
 
 
 def sha256(path):
@@ -1346,6 +1448,64 @@ def pptx_text(pptx, visual_first):
             del leaf["box"]
         slides.append(bare_slide({"slide": idx, **text_density(leaves, groups, visual_first)}, visuals, visual_first))
     return {"visual_first": visual_first, "slides": slides}
+
+
+def slide_paragraphs(slide):
+    """Non-empty paragraph texts on a slide, including groups and table cells."""
+    from pptx.enum.shapes import MSO_SHAPE_TYPE
+    out = []
+
+    def visit(shapes):
+        for s in shapes:
+            if s.shape_type == MSO_SHAPE_TYPE.GROUP:
+                visit(s.shapes)
+                continue
+            frames = [s.text_frame] if s.has_text_frame else []
+            if getattr(s, "has_table", False) and s.has_table:
+                frames += [cell.text_frame for row in s.table.rows for cell in row.cells]
+            for tf in frames:
+                out.extend(" ".join(p.text.split()) for p in tf.paragraphs if p.text.strip())
+    visit(slide.shapes)
+    return out
+
+
+def longest_common(a, b):
+    """Length and text of the longest common substring of a and b."""
+    best, end = 0, 0
+    prev = [0] * (len(b) + 1)
+    for i, ca in enumerate(a, 1):
+        cur = [0] * (len(b) + 1)
+        for j, cb in enumerate(b, 1):
+            if ca == cb:
+                cur[j] = prev[j - 1] + 1
+                if cur[j] > best:
+                    best, end = cur[j], i
+        prev = cur
+    return best, a[end - best:end]
+
+
+def template_sample_text(pptx, template, min_len=5):
+    """Text the deck still shares with the sample slides of the company template: department names, dates,
+    sample titles left in place. Text that sits on most template slides (a fixed footer, a slogan) is part of
+    the template and is left out, and so are shared runs under min_len characters. Returns
+    [{"slide", "text", "template_text", "shared"}]."""
+    from pptx import Presentation
+    samples = [set(slide_paragraphs(s)) for s in Presentation(template).slides]
+    seen = {}
+    for paras in samples:
+        for p in paras:
+            seen[p] = seen.get(p, 0) + 1
+    fixed = max(2, len(samples) // 2)
+    candidates = [p for p, n in seen.items() if n <= fixed and len(p.replace(" ", "")) >= min_len]
+    found = []
+    for idx, slide in enumerate(Presentation(pptx).slides, 1):
+        for para in slide_paragraphs(slide):
+            for sample in candidates:
+                n, shared = longest_common(para, sample)
+                if n >= min_len and len(shared.strip()) >= min_len and not shared.strip().isdigit():
+                    found.append({"slide": idx, "text": para[:60], "template_text": sample[:60], "shared": shared.strip()})
+                    break
+    return found
 
 
 def walk_shapes(shapes, parent=()):
@@ -1619,6 +1779,9 @@ def cmd_pptx(args):
               "inventory": inventory(src), "layout": layout, "text": pptx_text(src, args.visual_first)}
     frame = deck_frame([(item["slide"], item.get("frame")) for item in layout], "pt", tolerance=2, threshold=12)
     report["deck_layout"] = [frame] if frame else []
+    if args.template:
+        # Sample text of the company template left in the deck (department names, dates, sample titles).
+        report["template_text"] = template_sample_text(src, Path(args.template).resolve())
     if pdf:
         # The checks only cover the version that was exported: record both files so they can be matched.
         stale = pdf.stat().st_mtime < src.stat().st_mtime
@@ -1682,6 +1845,12 @@ def cmd_pptx(args):
             print(f"  slide {item['slide']:02d} {f['severity']:<7} {f['kind']:<18} “{f['text']}” {f['detail']}")
     for f in report["deck_layout"]:
         print(f"  deck     {f['severity']:<7} {f['kind']:<18} {f['detail']}")
+    if "template_text" in report:
+        print(f"template sample text still in the deck: {len(report['template_text'])} (replace it with the material, "
+              "or list it as 待确认; text on most template slides is left out as a fixed element)")
+        for f in report["template_text"]:
+            print(f"  slide {f['slide']:02d} warning template_text       “{f['text']}” shares “{f['shared']}” with "
+                  f"the template's “{f['template_text']}”")
     if args.zoom and pngs:
         print(f"zoom   -> {zoom_dir} (four enlarged quarters per slide: look again at text, breaks and edges)")
     if report["text"]:
@@ -1703,13 +1872,13 @@ def cmd_pptx(args):
     if pngs:
         report["checks"].append(check(
             "layout", "failed" if layout_errors else "passed",
-            f"{layout_errors} errors (outside slide, overlapping text), {layout_warnings} warnings "
-            "(orphan line, text past its box, small font, placeholder, line through text, off-centre content "
-            "frame). "
+            f"{layout_errors} errors (outside slide, overlapping text, text hidden under a shape), {layout_warnings} "
+            "warnings (orphan line, text past its box, small font, low contrast, placeholder, line through text, "
+            "off-centre content frame). "
             + (f"Measured on the PDF exported by {args.export}. " if args.export and pdf else
                "Measured on the supplied PDF; it covers only the version that was exported. " if pdf else
                "Measured on the LibreOffice rendering; PowerPoint/WPS text metrics can differ. ")
-            + "No contrast check for PPTX.",
+            + "Contrast is read from the rendering; text on photos is not measured.",
             errors=layout_errors, warnings=layout_warnings))
     else:
         report["checks"].append(check("layout", "not_run", "Needs a rendering; " + (render_note or "")))
@@ -1764,6 +1933,8 @@ def main():
     x.add_argument("--strict", action="store_true", help="nonzero exit unless required automatic checks pass")
     x.add_argument("--visual-first", action="store_true", help=VISUAL_FIRST_HELP)
     x.add_argument("--zoom", action="store_true", help=ZOOM_HELP)
+    x.add_argument("--template", help="the company template the deck was built from: list text the deck still "
+                                      "shares with the template's sample slides (department, date, sample titles)")
     x.set_defaults(func=cmd_pptx)
 
     s = sub.add_parser("sheet", help="contact sheet from PNG files or a directory")
@@ -1788,6 +1959,8 @@ def main():
         ap.error("--edit-targets requires --edit-test")
     if getattr(args, "pdf", None) and not Path(args.pdf).is_file():
         ap.error(f"--pdf: no such file {args.pdf}")
+    if getattr(args, "template", None) and not Path(args.template).is_file():
+        ap.error(f"--template: no such file {args.template}")
     args.func(args)
 
 

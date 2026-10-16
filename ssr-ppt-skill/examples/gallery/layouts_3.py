@@ -25,7 +25,7 @@ def bleed_illustration(deck, s):
         deck.ellipse(s, x, y, r, fill="FFFFFF", alpha=0.7)
     deck.ellipse(s, 1090, 110, 34, fill="F6E7B0")
     deck.ellipse(s, 1104, 100, 30, fill="13213A")
-    deck.text(s, M, 120, 760, 80, "晚上 8 点以后", size=28, font=SANS, color="AFC4E6")
+    deck.text(s, M, 120, 760, 80, "晚上 8 点以后", size=28, font=SANS, color="B9CBEA")
     deck.text(s, M, 170, 900, 100, "临期蔬菜打七折，第二天不过夜", size=52, font=SANS, bold=True, color="FFFFFF")
     ill(deck, s, ["city", "store", "shopping-cart", "person"], -20, 330, 1320, 390, primary="4A6FB3", accent="F2B13C",
         ink="0B1426", surface="2A3C5E", line="2F4166")
@@ -306,4 +306,4 @@ def bento(deck, s):
     x, y, w, h = cell(2, 2, 2, 1, fill=INK)
     deck.text(s, x + 28, y + 30, w - 56, 90, "“早上摘的菜，中午就在社区店里了。”", size=26, font=SANS, bold=True,
               color="FFFFFF", line_spacing=1.4)
-    deck.text(s, x + 28, y + h - 44, w - 56, 28, C.QUOTE_BY, size=16, font=SANS, color=FAINT)
+    deck.text(s, x + 28, y + h - 44, w - 56, 28, C.QUOTE_BY, size=16, font=SANS, color="AEB6C2")  # light grey on the dark tile

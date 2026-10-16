@@ -9,7 +9,7 @@
 | `layouts_1.py`–`layouts_3.py` | 版式原型 L01–L24 |
 | `convert_examples.py` | 改写 C01–C05：同一页改写前（A，文字）和改写后（B，信息不减、大部分画成图；C04 另有按排序画的 C），套在三个虚构机构的模板里；每组的材料是文件里的 `*_FACTS` 列表 |
 | `art/` | 只为某个示例画的插画（例如 C05 的空压机），画法同 `assets/illustrations/README.md` 的“只为一个项目画” |
-| `recipes_1.py`–`recipes_3.py` | 风格配方 R1–R19，每套 a 封面、b 数据页、c 图片页、d 特色页 |
+| `recipes_1.py`–`recipes_3.py` | 风格配方 R1–R21，每套 a 封面、b 数据页、c 图片页、d 特色页 |
 | `type_specimens.py` | 字体字样、字体搭配、数字对比 |
 | `imagery_examples.py` | 找图、照片处理、文字压图、裁切、插画换色、补画物体、图标 |
 | `photos.json` | 示例用到的照片：链接、作者、许可（构建时下载） |

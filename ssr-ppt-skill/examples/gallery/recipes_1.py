@@ -224,7 +224,7 @@ def r3_signature(deck, s):
 
 
 # ====================================================================== R04 Japanese magazine
-R4 = dict(bg="F3F0E8", text="2A2925", gray="7A766C", line="D8D3C7", acc="9C3B2E")
+R4 = dict(bg="F3F0E8", text="2A2925", gray="6F6B62", line="D8D3C7", acc="9C3B2E")
 CORM = "Cormorant Garamond"
 
 

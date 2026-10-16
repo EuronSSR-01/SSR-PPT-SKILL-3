@@ -11,7 +11,7 @@ KAI, MONO, PLEX = "LXGW WenKai", "JetBrains Mono", "IBM Plex Mono"
 
 
 # ====================================================================== R08 quiet luxury
-R8 = dict(ivory="F6F2EA", char="1B1A18", gray="8A8378", champ="B59B74")
+R8 = dict(ivory="F6F2EA", char="1B1A18", gray="716B62", champ="B59B74", champ_text="7B694F")
 
 
 @example("recipes", "R08-a", "R8 静奢品牌 · 封面", "压暗的材质照片铺底，居中细字重标题；香槟色只用在细线和小字。", (SERIF_LIGHT, CORM))
@@ -31,11 +31,11 @@ def r8_cover(deck, s):
 def r8_data(deck, s):
     k = R8
     bg(s, k["ivory"])
-    deck.text(s, 0, 108, 1280, 24, "L O S S   R A T E   ·   J U N E   2 0 2 7", size=16, font=CORM, color=k["champ"],
+    deck.text(s, 0, 108, 1280, 24, "L O S S   R A T E   ·   J U N E   2 0 2 7", size=16, font=CORM, color=k["champ_text"],
               align="center", ea=SERIF)
     deck.text(s, 0, 150, 1280, 220, "5.9%", size=170, font=PLAYFAIR, color=k["char"], align="center", ea=SERIF)
     deck.text(s, 0, 380, 1280, 30, "生鲜损耗率，半年下降 3.7 个百分点", size=20, font=SERIF_LIGHT, color=k["char"], align="center")
-    deck.line_chart(s, 390, 440, 500, 190, C.MONTHS, {"损耗率": C.LOSS}, colors=[k["champ"]], labels="last",
+    deck.line_chart(s, 390, 440, 500, 190, C.MONTHS, {"损耗率": C.LOSS}, colors=[k["champ_text"]], labels="last",
                     number_format='0.0"%"', font=SERIF, size=16, axis_color=k["gray"], axis_line="E3DCCF", width=1.5,
                     min_value=4)
 
@@ -64,11 +64,11 @@ def r8_signature(deck, s):
     deck.ellipse(s, 640, 260, 124, line=k["champ"], line_width=0.75)
     deck.text(s, 0, 420, 1280, 60, "颜色最鲜的时候上架", size=36, font=SERIF_LIGHT, color=k["ivory"], align="center", spacing=0.06)
     deck.text(s, 0, 478, 1280, 34, "Picked at their brightest", size=22, font=CORM, color=k["champ"], align="center", ea=SERIF)
-    deck.text(s, 0, 640, 1280, 20, "Photo: USDA, public domain", size=13, font=CORM, color=k["gray"], align="center", ea=SERIF)
+    deck.text(s, 0, 640, 1280, 20, "Photo: USDA, public domain", size=13, font=CORM, color="A39C91", align="center", ea=SERIF)
 
 
 # ====================================================================== R09 warm and human
-R9 = dict(bg="FBF6EF", text="2D2A26", gray="6E665C", terra="C65D3B", olive="6D7B3B", mist="7A9CB8", block="F1E6D6")
+R9 = dict(bg="FBF6EF", text="2D2A26", gray="6E665C", terra="C65D3B", terra_text="A44D31", olive="6D7B3B", mist="7A9CB8", block="F1E6D6")
 
 
 @example("recipes", "R09-a", "R9 温暖人文 · 封面", "大圆角色块托住一张有人、有动作的照片；手写感的楷体点一句。", (MISANS_HEAVY, KAI))
@@ -77,7 +77,7 @@ def r9_cover(deck, s):
     bg(s, k["bg"])
     deck.rect(s, 600, 60, 620, 600, fill=k["block"], radius=32)
     deck.picture(s, treated("tomato-picking", "round_corners", ext="png", radius=56, size=(1040, 820)), 640, 100, 540, 426)
-    deck.text(s, 664, 556, 500, 60, "“早上摘的菜，中午就在社区店里了。”", size=22, font=KAI, color=k["terra"])
+    deck.text(s, 664, 556, 500, 60, "“早上摘的菜，中午就在社区店里了。”", size=22, font=KAI, color=k["terra_text"])
     deck.text(s, 80, 190, 520, 220, "把产地\n搬进社区", size=80, font=MISANS_HEAVY, color=k["text"], line_spacing=1.1)
     deck.text(s, 84, 430, 480, 30, C.COVER_SUB, size=22, font=MISANS, color=k["gray"])
     deck.text(s, 664, 610, 520, 20, "照片：Alachua County，公有领域", size=12, font=MISANS, color=k["gray"])
@@ -305,6 +305,7 @@ def r11_signature(deck, s):
 # ====================================================================== R12 academic
 R12 = dict(text="1F2328", gray="57606A", line="D0D7DE", red="B31B1B")
 VIRIDIS = ["440154", "414487", "2A788E", "22A884", "5DB14A", "A89A00"]
+VIRIDIS_TEXT = ["440154", "414487", "26708A", "1B8367", "458337", "807500"]  # same hues, dark enough for text
 SSERIF = "Source Serif 4"
 
 
@@ -329,7 +330,7 @@ def r12_data(deck, s):
     order = sorted(C.CITIES, key=lambda c: -C.CITY_LOSS[c][-1])
     for i, c in enumerate(order):
         deck.text(s, 1090, 250 + i * 34, 140, 28, f"{c}  {C.CITY_LOSS[c][-1]:.1f}", size=16, font=SANS, bold=True,
-                  color=VIRIDIS[C.CITIES.index(c)])
+                  color=VIRIDIS_TEXT[C.CITIES.index(c)])
     deck.text(s, 80, 620, 1120, 60, "图 1｜各城市生鲜损耗率（%），2027 年 1–6 月。右侧城市名按 6 月数值从高到低排列，与线尾上下位置一致。n = 126 家门店"
               "（虚构示例）。", size=17, font=SERIF, color=k["gray"], line_spacing=1.45)
 

@@ -214,7 +214,7 @@ HTML_PAGE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>设计示例</title>
 <style>
-:root { --bg:#F6F5F2; --card:#FFFFFF; --ink:#1F2A37; --muted:#6B7685; --line:#E2E0DA; --accent:#E8590C; }
+:root { --bg:#F3F4F6; --card:#FFFFFF; --ink:#1F2A37; --muted:#4F5866; --line:#DDE1E6; --accent:#2F5BD3; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#15171B; --card:#1E2127; --ink:#E9ECF0; --muted:#9AA3AE; --line:#2C3038; --accent:#FF8A4C; } }
 :root[data-theme="dark"] { --bg:#15171B; --card:#1E2127; --ink:#E9ECF0; --muted:#9AA3AE; --line:#2C3038; --accent:#FF8A4C; }
 * { box-sizing: border-box; }

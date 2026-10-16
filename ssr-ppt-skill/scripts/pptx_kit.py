@@ -616,7 +616,7 @@ class Deck:
 
     # ------------------------------------------------------------ charts and tables
     def bar_chart(self, slide, x, y, w, h, categories, values, highlight=(), horizontal=True,
-                  color="E8590C", base="CBC5B8", series_name="值", number_format="0",
+                  color="2F3E4E", base="C9CFD6", series_name="值", number_format="0",
                   font="Microsoft YaHei", size=16, label_color="666158", axis_color="1A1A1A",
                   gap_width=60, max_value=None, min_value=None):
         """Native bar (horizontal) or column chart with one real series; highlight = indices to colour.
@@ -683,7 +683,7 @@ class Deck:
                    number_format="0", font="Microsoft YaHei", size=16, label_color="666158", axis_color="1A1A1A",
                    axis_line="CFCFC8", grid=None, markers=False, min_value=None, max_value=None, label_bg=None):
         """Native line chart. series: {"name": [values, ...], ...}; the first series is the story and gets the
-        first colour (default orange), the rest grey unless colors=[...] says otherwise. labels: "last" puts
+        first colour (a neutral dark slate unless colors=[...] gives the deck's own), the rest grey. labels: "last" puts
         each series' value at its last point, "all" labels every point, None shows none. No legend: name
         the lines in the title or with text at the line ends. grid="E2DED5" draws light value gridlines;
         then pass label_bg (the slide colour) so no gridline runs through a value label.
@@ -700,7 +700,7 @@ class Deck:
         chart.has_title = False
         chart.font.name = font
         chart.font.size = self.pt(size)
-        palette = colors or (["E8590C"] + ["9A9A94"] * (len(names) - 1))
+        palette = colors or (["2F3E4E"] + ["9AA3AE"] * (len(names) - 1))  # neutral: pass the deck's own colours
         numeric = [v for name in names for v in series[name] if v is not None]
         for i, s in enumerate(chart.plots[0].series):
             colour = palette[i % len(palette)]

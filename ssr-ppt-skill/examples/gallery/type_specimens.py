@@ -3,7 +3,7 @@ pairings and a numbers comparison. Coverage figures were measured from the font 
 from gallery import bg, example
 
 SANS = "Noto Sans SC"
-INK, GRAY, LINE, ACCENT, PAPER = "1F2A37", "6B7685", "D9DEE5", "E8590C", "FAF8F4"
+INK, GRAY, LINE, ACCENT, PAPER = "1F2A37", "4F5866", "D9DEE5", "C2440A", "F6F7F9"
 HEAD_CN = "把产地搬进社区"
 BODY_CN = "清晨采摘的蔬菜，四小时内进入城市仓，按门店订单分拣，第二天上午摆上社区店的货架。"
 HEAD_EN = "Fresh to the Neighbourhood"
@@ -173,12 +173,12 @@ PAIRS = [
     ("P03", "产品科技：鸿蒙黑体 + JetBrains Mono", "HarmonyOS Sans SC", True, "HarmonyOS Sans SC", "JetBrains Mono", False,
      "0C1117", "E6EDF3", "4CC2FF"),
     ("P04", "年轻有力：得意黑 + 思源黑体 Medium + Archivo Black", "Smiley Sans Oblique", False, "Noto Sans SC Medium",
-     "Archivo Black", False, "F2E94E", "0B0B0B", "2B59FF"),
-    ("P05", "人文温度：MiSans + 霞鹜文楷", "MiSans Heavy", False, "MiSans", "MiSans Heavy", False, "FBF6EF", "2D2A26", "C65D3B"),
+     "Archivo Black", False, "F2E94E", "0B0B0B", "2853ED"),
+    ("P05", "人文温度：MiSans + 霞鹜文楷", "MiSans Heavy", False, "MiSans", "MiSans Heavy", False, "FBF6EF", "2D2A26", "B25435"),
     ("P06", "东方雅致：思源宋体 SemiBold + 霞鹜文楷 + Cormorant", "Noto Serif SC SemiBold", False, "LXGW WenKai",
      "Cormorant Garamond", False, "EFE9DE", "1E1D1B", "A8322D"),
     ("P07", "稳妥系统：微软雅黑 + 等线 + Bahnschrift", "Microsoft YaHei", True, "DengXian", "Bahnschrift SemiBold Condensed",
-     False, "FFFFFF", "1F2A37", "E8590C"),
+     False, "FFFFFF", "1F2A37", "C2440A"),
 ]
 
 

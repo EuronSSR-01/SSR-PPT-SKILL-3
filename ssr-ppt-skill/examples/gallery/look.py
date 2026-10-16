@@ -10,15 +10,15 @@ SERIF_BLACK = "Noto Serif SC Black"
 KAI = "LXGW WenKai"
 
 INK = "1F2A37"
-MUTED = "6B7685"
-FAINT = "9AA3AE"
+MUTED = "4F5866"
+FAINT = "646C78"
 LINE = "D9DEE5"
 BG = "FFFFFF"
-WARM = "F7F5F0"
+WARM = "F3F5F8"   # a light neutral panel; the name is historical
 PRIMARY = "1F4E9E"
 PRIMARY_LIGHT = "E3EBF7"
-ACCENT = "E8590C"
-ACCENT_LIGHT = "FCE6D9"
+ACCENT = "C2440A"
+ACCENT_LIGHT = "FDF0E8"
 
 M = 80          # outer margin (px on a 1280 x 720 canvas)
 W = 1120        # content width

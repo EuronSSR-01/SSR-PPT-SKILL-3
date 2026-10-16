@@ -1605,6 +1605,94 @@
   ]
  },
  {
+  "section": "recipes",
+  "id": "R20-a",
+  "title": "R20 色块分区 · 封面",
+  "note": "整页切成两块：一大块饱和的平涂色压着白色大标题，另一块白底只放一个超大数字。",
+  "file": "recipes/R20-a.png",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "HarmonyOS Sans SC"
+  ]
+ },
+ {
+  "section": "recipes",
+  "id": "R20-b",
+  "title": "R20 色块分区 · 数据页",
+  "note": "色块做页眉压住标题；图表用同一种绿的深浅，只有结论数字用整块主色。",
+  "file": "recipes/R20-b.png",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "HarmonyOS Sans SC"
+  ]
+ },
+ {
+  "section": "recipes",
+  "id": "R20-c",
+  "title": "R20 色块分区 · 图片页",
+  "note": "照片占半页出血，另一半是整块主色，白字写一句话和三个数字。",
+  "file": "recipes/R20-c.jpg",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "HarmonyOS Sans SC"
+  ]
+ },
+ {
+  "section": "recipes",
+  "id": "R20-d",
+  "title": "R20 色块分区 · 特色页",
+  "note": "四宫格成绩单：四块不同的平涂色各放一个数字，颜色本身就是分组。",
+  "file": "recipes/R20-d.png",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "HarmonyOS Sans SC"
+  ]
+ },
+ {
+  "section": "recipes",
+  "id": "R21-a",
+  "title": "R21 清透柔和 · 封面",
+  "note": "冷白底上几团浅薄荷、浅天蓝、浅紫的圆形色块托着一张插画；深靛蓝字，轻、干净、友好。",
+  "file": "recipes/R21-a.png",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "MiSans Heavy"
+  ]
+ },
+ {
+  "section": "recipes",
+  "id": "R21-b",
+  "title": "R21 清透柔和 · 数据页",
+  "note": "白色圆角卡片放图表，右侧三张浅色小卡各放一个前后对比；只用一种靛蓝做强调。",
+  "file": "recipes/R21-b.png",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "MiSans Heavy"
+  ]
+ },
+ {
+  "section": "recipes",
+  "id": "R21-c",
+  "title": "R21 清透柔和 · 图片页",
+  "note": "照片做大圆角放在浅色卡片里，旁边三张浅色小卡写数字；没有阴影，靠浅色块分组。",
+  "file": "recipes/R21-c.jpg",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "MiSans Heavy"
+  ]
+ },
+ {
+  "section": "recipes",
+  "id": "R21-d",
+  "title": "R21 清透柔和 · 特色页",
+  "note": "像手机 App 的引导页：五张浅色卡片一字排开，每张一个编号、一个图标、一句话。",
+  "file": "recipes/R21-d.png",
+  "source": "examples/gallery/recipes_3.py",
+  "fonts": [
+   "MiSans Heavy"
+  ]
+ },
+ {
   "section": "type",
   "id": "N01",
   "title": "数字字体对比",

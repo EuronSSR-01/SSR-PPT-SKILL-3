@@ -45,7 +45,7 @@ def cover_scene(deck, s):
 def section_number(deck, s):
     bg(s, PRIMARY)
     deck.text(s, 10, 290, 660, 600, "02", size=440, font=SANS_BLACK, color="2E62B8", line_spacing=1.0)
-    deck.text(s, 640, 236, 560, 24, "第二部分", size=18, font=SANS, color="AFC4E6", spacing=0.1)
+    deck.text(s, 640, 236, 560, 24, "第二部分", size=18, font=SANS, color="B9CBEA", spacing=0.1)
     deck.text(s, 640, 272, 600, 90, "城市仓怎么建", size=64, font=SANS, bold=True, color="FFFFFF")
     deck.text(s, 640, 380, 520, 80, "这一章回答：建几座、建在哪、多久收回投入", size=24, font=SANS,
               color="DCE6F5", line_spacing=1.4)
@@ -155,7 +155,7 @@ def number_picture(deck, s):
 def chart_trend(deck, s):
     title(deck, s, "损耗率连续 6 个月下降，6 月降到 5.9%", sub="生鲜损耗率，%，2027 年 1–6 月（虚构示例）")
     deck.line_chart(s, M, 170, 820, 460, C.MONTHS, {"知野": C.LOSS, "同城同业": C.LOSS_PEERS},
-                    number_format='0.0"%"', font=SANS, size=16, grid="E9ECF0", width=4,
+                    colors=[ACCENT, "9A9A94"], number_format='0.0"%"', font=SANS, size=16, grid="E9ECF0", width=4,
                     label_bg="FFFFFF")
     deck.text(s, 940, 230, 260, 30, "同城同业均值", size=18, font=SANS, color=MUTED)
     deck.text(s, 940, 352, 260, 30, "知野生鲜", size=20, font=SANS, bold=True, color=ACCENT)
@@ -269,7 +269,7 @@ def options_cols(deck, s):
         if rec:
             deck.rect(s, x - 20, 150, 290, 470, fill=PRIMARY_LIGHT)
             deck.rect(s, x - 20, 150, 290, 6, fill=ACCENT)
-            deck.text(s, x, 170, 120, 26, "推荐", size=16, font=SANS, bold=True, color=ACCENT)
+            deck.text(s, x, 170, 120, 26, "推荐", size=16, font=SANS, bold=True, color="A93B08")  # darker accent on the tinted column
         deck.text(s, x, 200, 260, 50, name, size=28, font=SANS, bold=True, color=INK)
         for j, fact in enumerate(facts):
             deck.text(s, x, 300 + j * 90, 260, 40, fact, size=24, font=SANS, bold=rec, color=INK if rec else MUTED)
