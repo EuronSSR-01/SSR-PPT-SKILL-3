@@ -295,7 +295,7 @@ def bento(deck, s):
     x, y, w, h = cell(2, 1, 2, 1)
     deck.text(s, x + 24, y + 18, 300, 28, "月订单，万单", size=16, font=SANS, color=MUTED)
     deck.bar_chart(s, x + 16, y + 44, w - 32, h - 56, C.MONTHS, C.ORDERS, highlight={5}, horizontal=False, color=ACCENT,
-                   base="C9CFD8", font=SANS, size=13, label_color=INK, gap_width=50)
+                   base="C9CFD8", font=SANS, size=16, label_color=INK, gap_width=50)
     x, y, w, h = cell(0, 2, 1, 1, fill=PRIMARY_LIGHT)
     ill(deck, s, "truck", x + 20, y + 14, w - 40, h - 60)
     deck.text(s, x + 24, y + h - 42, w - 48, 28, "每日 3 趟补货", size=18, font=SANS, bold=True, color=INK)

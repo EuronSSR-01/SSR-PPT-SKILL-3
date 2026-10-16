@@ -56,7 +56,7 @@ def roadmap(deck, s):
     title(deck, s, "四条工作线并行，会员体系是下一个重点", sub="按季度，2026 年 7 月至 2028 年 3 月（虚构示例）")
     x0, cw, y0, rh = 300, 128, 200, 96
     for i, q in enumerate(QUARTERS):
-        deck.text(s, x0 + i * cw, y0 - 36, cw, 24, q, size=15, font=SANS, color=MUTED, align="center")
+        deck.text(s, x0 + i * cw, y0 - 38, cw, 26, q, size=16, font=SANS, color=MUTED, align="center")
         deck.rect(s, x0 + i * cw, y0 - 6, 1, rh * 4 + 8, fill=LINE)
     streams = [("城市仓", 0, 2, True, "3 座建成"), ("门店改造", 1, 4, True, "126 家"),
                ("会员体系", 3, 6, False, "12 月上线"), ("损耗看板", 2, 6, False, "12 月全部接入")]
@@ -68,7 +68,7 @@ def roadmap(deck, s):
         deck.text(s, x0 + a * cw + 24, y + 29, (b - a) * cw - 40, 28, note, size=17, font=SANS, bold=True, color="FFFFFF")
     now = x0 + 4 * cw + cw * 0.25
     deck.line(s, now, y0 - 10, now, y0 + rh * 4 + 6, color=ACCENT, width=2)
-    deck.text(s, now - 40, y0 + rh * 4 + 12, 80, 24, "现在", size=15, font=SANS, bold=True, color=ACCENT, align="center")
+    deck.text(s, now - 40, y0 + rh * 4 + 12, 80, 26, "现在", size=16, font=SANS, bold=True, color=ACCENT, align="center")
 
 
 # ---------------------------------------------------------------- L12 process

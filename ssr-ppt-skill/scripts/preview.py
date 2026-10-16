@@ -280,7 +280,12 @@ LAYOUT_JS = r"""(index) => {
   const placeholder = /lorem ipsum|\bTODO\b|\bTBD\b|X{3,}|占位|待补充|待填写|此处填写|示例文字/i;
   for (const t of texts) if (placeholder.test(t.el.textContent))
     add('placeholder', 'warning', t.el, t.rects[0], 'Looks like placeholder text.');
-  return out;
+
+  // 8. small body text: own text of each element with its size, position in canvas px (judged in Python)
+  const own = el => Array.from(el.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join(' ');
+  const sized = texts.map(t => [own(t.el), t.fs, (t.rects[0].top - sr.top) / k,
+                                (t.rects[t.rects.length - 1].bottom - sr.top) / k, rel(t.rects[0])]);
+  return {findings: out, sized, height: sr.height / k};
 }"""
 
 # Body text per slide for the visual-first hints: leaf text blocks (SVG text lines included) and the card,
@@ -320,7 +325,15 @@ TEXT_JS = r"""(index) => {
     }
     leaves.push({text, rect: rel(r), group});
   }
-  return {leaves, groups: Array.from(groups.keys()).map(a => rel(a.getBoundingClientRect()))};
+  // pictures, illustrations, charts and tables: images, canvases and SVGs big enough not to be an icon
+  // (0.4% of the slide), tables of any size; not in the header or footer band
+  const visuals = Array.from(slide.querySelectorAll('img, svg, canvas, video, table')).filter(el => {
+    if (el.closest('.ssr-notes, .ssr-ui') || !shown(el) || (el.tagName.toLowerCase() === 'svg' && el.parentElement.closest('svg'))) return false;
+    const r = el.getBoundingClientRect(), middle = (r.top + r.bottom) / 2 - sr.top;
+    if (middle < sr.height * 0.115 || middle > sr.height * 0.92) return false;
+    return el.tagName.toLowerCase() === 'table' || r.width * r.height >= 0.004 * sr.width * sr.height;
+  }).length;
+  return {leaves, groups: Array.from(groups.keys()).map(a => rel(a.getBoundingClientRect())), visuals};
 }"""
 
 CJK_CHAR = re.compile(r"[㐀-鿿豈-﫿぀-ヿ가-힯]")
@@ -328,6 +341,9 @@ LATIN_WORD = re.compile(r"[A-Za-z0-9]+(?:[.,'’%-][A-Za-z0-9]+)*")
 LONG_TEXT = 60  # 字 in one paragraph or one box of points; a Latin word or number counts as two
 PAGE_TEXT = 150  # 字 of sentences on one slide
 LABEL_TEXT = 20  # a line up to this long is a label (a name, a number, a short caption beside a picture)
+SMALL_PX = 16  # body text under this size on a 1280-wide canvas (12pt on a 13.33-inch slide) is small
+SMALL_MIN, SMALL_SHARE = 40, 0.3  # warn when at least this many 字 and this share of the body text are small
+BARE_TEXT = 100  # 字 of body text on a slide with no picture, illustration, chart or table (visual-first hint)
 
 
 # Left and right edges of the content between the header band (top 11.5%) and the footer band (bottom 8%):
@@ -447,9 +463,29 @@ def text_density(leaves, groups, visual_first):
             "longest_paragraph": max((l["units"] for l in leaves), default=0), "findings": findings}
 
 
+def bare_slide(summary, visuals, visual_first):
+    """Record a slide's pictures (photos, illustrations, charts, tables; logos in the header or footer band
+    and small icons left out). With visual_first, a slide with BARE_TEXT 字 or more and none of them gets a
+    hint: a grid of labels and short phrases never trips the paragraph hints, so this is how it shows up.
+    Information drawn with plain shapes (dots, bars, arrows) has no picture either: look at the image."""
+    summary["visuals"] = visuals
+    if visual_first and visuals == 0 and summary["units"] >= BARE_TEXT:
+        summary["findings"].append({
+            "kind": "no_picture_slide", "severity": "hint", "text": "(whole slide)", "rect": None,
+            "units": summary["units"],
+            "detail": f"About {summary['units']} 字 and no picture, illustration, chart or table. Draw what can be "
+                      "seen, counted or followed (things, places, numbers, steps, flows): an illustration or photo, "
+                      "icons with short labels, dots, bars, arrows. If shapes on the slide already draw it, say so."})
+    return summary
+
+
 def print_text(text):
     print("text (字 per slide, body only; in sentences): "
           + "  ".join(f"{s['slide']:02d}:{s['units']}({s['sentence_units']})" for s in text["slides"]))
+    bare = [s["slide"] for s in text["slides"] if s.get("visuals") == 0 and s["units"] >= BARE_TEXT]
+    if bare:
+        print(f"no picture, illustration, chart or table on {len(bare)} of {len(text['slides'])} slides with "
+              f"{BARE_TEXT}+ 字: " + ", ".join(f"{n:02d}" for n in bare))
     if text["visual_first"]:
         hints = [(s["slide"], f) for s in text["slides"] for f in s["findings"]]
         print(f"visual-first hints: {len(hints)} (handle each one: draw the information, then cut repeats or move "
@@ -600,12 +636,25 @@ def cmd_html(args):
                     page.keyboard.press("ArrowRight")
             page.wait_for_timeout(60)
             page.locator("#ssr-deck").screenshot(path=str(slides_dir / f"slide-{i + 1:02d}.png"))
-            report["layout"].append({"slide": i + 1, "findings": page.evaluate(LAYOUT_JS, i)})
+            lint = page.evaluate(LAYOUT_JS, i)
+            found = small_text([item[:4] for item in lint["sized"]], lint["height"])
+            if found:
+                count, total, sizes = found
+                rects = [item[4] for item in lint["sized"] if is_small(item[1])
+                         and lint["height"] * 0.115 <= item[2] and item[3] <= lint["height"] * 0.92]
+                x0, y0 = min(r["x"] for r in rects), min(r["y"] for r in rects)
+                x1, y1 = max(r["x"] + r["w"] for r in rects), max(r["y"] + r["h"] for r in rects)
+                lint["findings"].append({"kind": "small_text", "severity": "warning", "text": "(body text)",
+                                         "rect": {"x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0},
+                                         "detail": small_text_detail(count, total, sizes, "px")})
+            report["layout"].append({"slide": i + 1, "findings": lint["findings"]})
             frames.append((i + 1, page.evaluate(FRAME_JS, i)))
             body = page.evaluate(TEXT_JS, i)
             leaves = [{"text": l["text"], "rect": l["rect"], "groups": [l["group"]] if l["group"] >= 0 else []}
                       for l in body["leaves"]]
-            report["text"]["slides"].append({"slide": i + 1, **text_density(leaves, body["groups"], args.visual_first)})
+            report["text"]["slides"].append(bare_slide({"slide": i + 1, **text_density(leaves, body["groups"],
+                                                                                       args.visual_first)},
+                                                       body["visuals"], args.visual_first))
 
         if not args.no_pdf:
             pdf_path = out / "print.pdf"
@@ -719,6 +768,31 @@ def find_soffice(explicit):
 PLACEHOLDER = re.compile(r"lorem ipsum|\bTODO\b|\bTBD\b|X{3,}|占位|待补充|待填写|此处填写|示例文字", re.I)
 SYMBOLS = re.compile(r"^[\W_]+$")
 DISPLAY_PT = 54  # text at least this large is display type (huge numbers, cover words) that may bleed on purpose
+
+
+def is_small(px):
+    return px < SMALL_PX - 0.5  # renderers draw 12pt chart text at about 11.8pt
+
+
+def small_text(items, page_height):
+    """items: [(text, size in canvas px, top, bottom)] on one slide, canvas px. Body text between the header
+    band (top 11.5%) and the footer band (bottom 8%), below headline size, counts. Returns (small, total,
+    sizes) in 字 when at least SMALL_MIN 字 and SMALL_SHARE of that body text is under SMALL_PX, else None."""
+    body = [(text, size) for text, size, top, bottom in items
+            if top >= page_height * 0.115 and bottom <= page_height * 0.92 and size < 36]
+    total = sum(text_units(text) for text, _ in body)
+    small = [(text, size) for text, size in body if is_small(size)]
+    count = sum(text_units(text) for text, _ in small)
+    if count >= SMALL_MIN and count >= SMALL_SHARE * total:
+        return count, total, sorted({round(size, 1) for _, size in small})
+    return None
+
+
+def small_text_detail(count, total, sizes, unit):
+    shown = ", ".join(f"{s:g}{unit}" for s in sizes[:4])
+    return (f"About {count} of {total} 字 of body text is under 16px on a 1280-wide canvas (12pt on a 13.33-inch "
+            f"slide): {shown}. Talks want body text of 20px (15pt) or more, reading decks 18px (13.5pt), labels "
+            "beside pictures 16px (12pt). Keep the information: split the slide or draw it, do not shrink it.")
 
 
 def thin_segments(drawings, max_width=6.0):
@@ -1008,6 +1082,19 @@ def pdf_layout(page, pm, frame=None):
         add("line_through_text", "warning", text, bbox,
             "A drawn line runs through this text; move the line or the label, or give the label a background. "
             "An intentional strike or decoration can stay.")
+
+    # Small body text, judged on a 1280-wide canvas so 4:3 and 16:9 slides of any size compare alike.
+    unit = 1280 / width
+    found = small_text([(s["text"], s["size"] * unit, s["bbox"][1] * unit, s["bbox"][3] * unit) for _, _, s in spans],
+                       height * unit)
+    if found:
+        small = [s for _, _, s in spans if is_small(s["size"] * unit)
+                 and height * 0.115 <= s["bbox"][1] and s["bbox"][3] <= height * 0.92]
+        box = (min(s["bbox"][0] for s in small), min(s["bbox"][1] for s in small),
+               max(s["bbox"][2] for s in small), max(s["bbox"][3] for s in small))
+        count, total, sizes = found
+        add("small_text", "warning", small[0]["text"], box,
+            small_text_detail(count, total, sorted({round(z / unit, 1) for z in sizes}), "pt"))
     return findings
 
 
@@ -1218,11 +1305,18 @@ def pptx_text(pptx, visual_first):
     slides = []
     for idx, slide in enumerate(prs.slides, 1):
         leaves, groups, frames, cards = [], [], [], []
+        visuals = 0  # pictures (not logos in the header or footer band), charts and tables
         for s, box in placed(slide.shapes, lambda x, y, w, h: (x, y, w, h)):
             is_ph = getattr(s, "is_placeholder", False)
             if is_ph and s.placeholder_format.type in skip_ph:
                 continue
             area = box[2] * box[3]
+            middle = box[1] + box[3] / 2
+            if (getattr(s, "has_chart", False) and s.has_chart) or (getattr(s, "has_table", False) and s.has_table):
+                visuals += 1
+            elif (s.shape_type == MSO_SHAPE_TYPE.PICTURE or type(s).__name__ == "PlaceholderPicture") \
+                    and area >= 0.004 * W * H and 0.115 * H <= middle <= 0.92 * H:
+                visuals += 1
             if s.shape_type == MSO_SHAPE_TYPE.AUTO_SHAPE and 0.02 * W * H <= area <= 0.4 * W * H:
                 cards.append(box)
             if not s.has_text_frame or not s.text_frame.text.strip() or box[1] >= 0.88 * H:
@@ -1248,7 +1342,7 @@ def pptx_text(pptx, visual_first):
                         leaf["groups"].append(g)
         for leaf in leaves:
             del leaf["box"]
-        slides.append({"slide": idx, **text_density(leaves, groups, visual_first)})
+        slides.append(bare_slide({"slide": idx, **text_density(leaves, groups, visual_first)}, visuals, visual_first))
     return {"visual_first": visual_first, "slides": slides}
 
 
@@ -1628,10 +1722,11 @@ def cmd_pptx(args):
 
 # ---------------------------------------------------------------- CLI
 
-VISUAL_FIRST_HELP = (f"the deck is visual-first: hint at any paragraph or box of points over {LONG_TEXT} 字 "
-                     f"and any slide over {PAGE_TEXT} 字 of sentences (lines over {LABEL_TEXT} 字; short labels "
-                     "are not counted; a Latin word or number counts as 2); draw the information instead of "
-                     "deleting it; hints only, never a failed check")
+VISUAL_FIRST_HELP = (f"the deck is visual-first: hint at any paragraph or box of points over {LONG_TEXT} 字, "
+                     f"any slide over {PAGE_TEXT} 字 of sentences (lines over {LABEL_TEXT} 字; short labels "
+                     "are not counted; a Latin word or number counts as 2) and any slide with "
+                     f"{BARE_TEXT} 字 or more but no picture, illustration, chart or table; draw the information "
+                     "instead of deleting it; hints only, never a failed check")
 ZOOM_HELP = "also write four enlarged, overlapping quarters of every slide to zoom/ for a second, closer look"
 
 

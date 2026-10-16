@@ -49,12 +49,15 @@ class HtmlTests(unittest.TestCase):
         clean = (f'<h1 {abs_}left:80px;top:80px;font-size:48px">干净的页面</h1>'
                  f'<p {abs_}left:80px;top:180px;width:600px;font-size:22px">正文不重叠、不出界，对比度充足。</p>'
                  f'<span {abs_}left:80px;top:260px;font-size:16px;color:#fff;background:#c0392b;padding:4px">徽标</span>')
+        small = "".join(f'<p {abs_}left:80px;top:{120 + i * 40}px;font-size:13px">第 {i + 1} 条说明写得很小，放了很多字</p>'
+                        for i in range(8)) + f'<p {abs_}left:80px;top:684px;font-size:12px">来源：页脚的小字不算</p>'
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)
             deck = work / "lint.html"
             deck.write_text('<!doctype html><meta charset="utf-8"><style>' + css + '</style><div class="ssr-player">'
                             '<main class="ssr-stage"><div id="ssr-deck" data-width="1280" data-height="720">'
                             f'<section class="ssr-slide">{bad}</section><section class="ssr-slide">{clean}</section>'
+                            f'<section class="ssr-slide">{small}</section>'
                             '</div></main></div><script>' + js + '</script>', encoding="utf-8")
             result = subprocess.run([sys.executable, str(SKILL / "scripts/preview.py"), "html", str(deck), "--out",
                                      str(work / "review"), "--browser", BROWSER, "--no-pdf"], capture_output=True, timeout=90)
@@ -70,6 +73,8 @@ class HtmlTests(unittest.TestCase):
             self.assertNotIn("出血", texts)            # data-bleed opt-out
             self.assertNotIn("“", texts)              # decorative punctuation is not an overlap
             self.assertEqual(report["layout"][1]["findings"], [])
+            self.assertNotIn("small_text", first)                       # one small label is not small body text
+            self.assertEqual([f["kind"] for f in report["layout"][2]["findings"]], ["small_text"])
             checks = {c["name"]: c["status"] for c in report["checks"]}
             self.assertEqual(checks["layout"], "failed")
             self.assertTrue((work / "review/layout/slide-01.png").exists())
@@ -95,8 +100,10 @@ class HtmlTests(unittest.TestCase):
             result = subprocess.run(base + ["--out", str(work / "hints"), "--visual-first"], capture_output=True, timeout=90)
             self.assertEqual(result.returncode, 0, result.stderr)
             text = json.loads((work / "hints/report.json").read_text(encoding="utf-8"))["text"]
-            self.assertEqual(sorted(f["kind"] for f in text["slides"][0]["findings"]), ["long_paragraph", "long_text_block"])
-            self.assertEqual(text["slides"][1]["findings"], [])
+            self.assertEqual(sorted(f["kind"] for f in text["slides"][0]["findings"]),
+                             ["long_paragraph", "long_text_block", "no_picture_slide"])
+            self.assertEqual(text["slides"][1]["findings"], [])     # the SVG counts as a picture
+            self.assertEqual(text["slides"][1]["visuals"], 1)
             self.assertGreater(text["slides"][1]["units"], 0)       # SVG labels count as body text
             plain = subprocess.run(base + ["--out", str(work / "plain")], capture_output=True, timeout=90)
             self.assertEqual(plain.returncode, 0, plain.stderr)

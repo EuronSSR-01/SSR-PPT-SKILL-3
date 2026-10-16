@@ -18,7 +18,7 @@ R8 = dict(ivory="F6F2EA", char="1B1A18", gray="8A8378", champ="B59B74")
 def r8_cover(deck, s):
     k = R8
     deck.picture(s, treated("fabric-gold", "darken", amount=0.62), 0, 0, 1280, 720)
-    deck.text(s, 0, 220, 1280, 24, "Z H I Y E   F R E S H   ·   2 0 2 7", size=15, font=CORM, color="CDBB98", align="center",
+    deck.text(s, 0, 220, 1280, 24, "Z H I Y E   F R E S H   ·   2 0 2 7", size=16, font=CORM, color="CDBB98", align="center",
               ea=SERIF)
     deck.text(s, 0, 270, 1280, 90, "把产地搬进社区", size=60, font=SERIF_LIGHT, color=k["ivory"], align="center", spacing=0.08)
     deck.rect(s, 610, 384, 60, 1, fill=k["champ"])
@@ -31,12 +31,12 @@ def r8_cover(deck, s):
 def r8_data(deck, s):
     k = R8
     bg(s, k["ivory"])
-    deck.text(s, 0, 110, 1280, 22, "L O S S   R A T E   ·   J U N E   2 0 2 7", size=13, font=CORM, color=k["champ"],
+    deck.text(s, 0, 108, 1280, 24, "L O S S   R A T E   ·   J U N E   2 0 2 7", size=16, font=CORM, color=k["champ"],
               align="center", ea=SERIF)
     deck.text(s, 0, 150, 1280, 220, "5.9%", size=170, font=PLAYFAIR, color=k["char"], align="center", ea=SERIF)
     deck.text(s, 0, 380, 1280, 30, "生鲜损耗率，半年下降 3.7 个百分点", size=20, font=SERIF_LIGHT, color=k["char"], align="center")
     deck.line_chart(s, 390, 440, 500, 190, C.MONTHS, {"损耗率": C.LOSS}, colors=[k["champ"]], labels="last",
-                    number_format='0.0"%"', font=SERIF, size=13, axis_color=k["gray"], axis_line="E3DCCF", width=1.5,
+                    number_format='0.0"%"', font=SERIF, size=16, axis_color=k["gray"], axis_line="E3DCCF", width=1.5,
                     min_value=4)
 
 
@@ -52,7 +52,7 @@ def r8_picture(deck, s):
     for i, (num, unit, label) in enumerate(C.FACTS):
         x = 660 + i * 170
         deck.text(s, x, 370, 160, 50, num, size=40, font=PLAYFAIR, color=k["char"], ea=SERIF)
-        deck.text(s, x, 424, 160, 40, f"{unit} · {label}", size=14, font=SERIF_LIGHT, color=k["gray"])
+        deck.text(s, x, 424, 160, 40, f"{unit} · {label}", size=16, font=SERIF_LIGHT, color=k["gray"])
     deck.text(s, 104, 660, 452, 20, "Photo: rawpixel, CC0", size=13, font=CORM, color=k["gray"], ea=SERIF)
 
 
@@ -94,7 +94,7 @@ def r9_data(deck, s):
                    gap_width=55)
     deck.text(s, 920, 280, 250, 120, "比 1 月\n少扔了近四成", size=34, font=KAI, color=k["terra"], line_spacing=1.3)
     deck.polygon(s, [(930, 400), (900, 430), (850, 440)], line=k["terra"], line_width=2.5, closed=False)
-    deck.text(s, 920, 470, 260, 60, "生鲜损耗率，2027 年 1–6 月\n（虚构示例）", size=15, font=MISANS, color=k["gray"],
+    deck.text(s, 920, 470, 260, 60, "生鲜损耗率，2027 年 1–6 月\n（虚构示例）", size=16, font=MISANS, color=k["gray"],
               line_spacing=1.5)
 
 
@@ -150,7 +150,7 @@ def r10_frame(deck, s, current, page):
 def r10_cover(deck, s):
     k = R10
     deck.rect(s, 860, 0, 420, 720, fill=k["navy"])
-    deck.text(s, 80, 80, 500, 24, "知野生鲜 · 管理层讨论材料", size=15, font=SANS, color=k["gray"])
+    deck.text(s, 80, 80, 500, 24, "知野生鲜 · 管理层讨论材料", size=16, font=SANS, color=k["gray"])
     deck.text(s, 80, 210, 720, 160, "把产地搬进社区：\n社区店升级半年回顾", size=48, font=SANS, bold=True, color=k["navy"], line_spacing=1.3)
     deck.rect(s, 80, 400, 64, 4, fill=k["teal"])
     deck.text(s, 80, 424, 600, 30, "2027 年 7 月", size=18, font=SANS, color=k["gray"])
@@ -167,9 +167,9 @@ def r10_data(deck, s):
     r10_frame(deck, s, 1, 3)
     deck.text(s, 80, 86, 1120, 100, "损耗率半年下降 3.7 个百分点，已比同城同业低 3.2 个百分点", size=30, font=SANS, bold=True,
               color=k["navy"], line_spacing=1.3)
-    deck.text(s, 80, 140, 700, 24, "生鲜损耗率，%，2027 年 1–6 月", size=15, font=SANS, color=k["gray"])
+    deck.text(s, 80, 140, 700, 26, "生鲜损耗率，%，2027 年 1–6 月", size=17, font=SANS, color=k["gray"])
     deck.line_chart(s, 70, 180, 720, 470, C.MONTHS, {"知野": C.LOSS, "同城同业": C.LOSS_PEERS}, colors=[k["primary"], "A9B3C1"],
-                    number_format='0.0"%"', font=SANS, size=15, grid="EEF1F4", label_bg="FFFFFF", width=3)
+                    number_format='0.0"%"', font=SANS, size=16, grid="EEF1F4", label_bg="FFFFFF", width=3)
     deck.rect(s, 840, 190, 360, 2, fill=k["navy"])
     deck.text(s, 840, 204, 360, 30, "关键发现", size=18, font=SANS, bold=True, color=k["navy"])
     finds = [("采购端贡献最多", "产地直采、按日订货合计 −1.6 个百分点"), ("3 月是拐点", "按日订货全面执行后，降幅明显加快"),
@@ -211,7 +211,7 @@ def r10_signature(deck, s):
     k = R10
     r10_frame(deck, s, 2, 5)
     deck.text(s, 80, 86, 1120, 60, "损耗率下降 3.7 个百分点，采购端贡献最多", size=30, font=SANS, bold=True, color=k["navy"])
-    deck.text(s, 80, 140, 700, 24, "生鲜损耗率，个百分点，1 月 → 6 月", size=15, font=SANS, color=k["gray"])
+    deck.text(s, 80, 140, 700, 24, "生鲜损耗率，个百分点，1 月 → 6 月", size=17, font=SANS, color=k["gray"])
     bars = [("1 月", 9.6, None), ("采购端", -1.6, None), ("仓储端", -1.2, None), ("门店端", -0.9, None), ("6 月", 5.9, None)]
     base_y, scale, w, gap, x0 = 600, 40, 150, 70, 120
     level = 0
@@ -247,11 +247,11 @@ def r11_bg(deck, s, spots=None):
 def r11_cover(deck, s):
     k = R11
     r11_bg(deck, s)
-    deck.text(s, 80, 120, 400, 24, "ZHIYE / 2027.07", size=14, font=MONO, color=k["gray"], ea=MISANS)
+    deck.text(s, 80, 120, 400, 24, "ZHIYE / 2027.07", size=16, font=MONO, color=k["gray"], ea=MISANS)
     deck.text(s, 80, 220, 620, 220, "把产地\n搬进社区", size=84, font=MISANS_SEMI, color=k["text"], line_spacing=1.1, spacing=-0.01)
     deck.text(s, 84, 450, 560, 30, "知野 App：下单 30 分钟送到家", size=22, font=MISANS, color=k["gray"])
     deck.rect(s, 800, 200, 360, 300, fill=k["panel"], line=k["border"], radius=20, alpha=0.85)
-    deck.text(s, 830, 226, 300, 22, "今日订单", size=15, font=MISANS, color=k["gray"])
+    deck.text(s, 830, 226, 300, 22, "今日订单", size=16, font=MISANS, color=k["gray"])
     deck.text(s, 830, 254, 300, 70, "12,480", size=52, font=MONO, color=k["text"], ea=MISANS)
     for i, v in enumerate([42, 58, 50, 66, 74, 90, 82]):
         deck.rect(s, 830 + i * 44, 460 - v * 1.2, 28, v * 1.2, fill=k["amber"] if i == 5 else "343844", radius=6)
@@ -263,9 +263,9 @@ def r11_data(deck, s):
     r11_bg(deck, s, spots=[(0.15, 0.85, 0.28), (0.9, 0.15, 0.2)])
     deck.text(s, 80, 70, 1100, 60, "损耗率连续 6 个月下降", size=40, font=MISANS_SEMI, color=k["text"])
     deck.rect(s, 80, 160, 1120, 490, fill=k["panel"], line=k["border"], radius=20, alpha=0.88)
-    deck.text(s, 120, 190, 400, 24, "loss_rate  %", size=14, font=MONO, color=k["gray"], ea=MISANS)
+    deck.text(s, 120, 190, 400, 24, "loss_rate  %", size=16, font=MONO, color=k["gray"], ea=MISANS)
     deck.line_chart(s, 110, 220, 760, 400, C.MONTHS, {"知野": C.LOSS, "同业": C.LOSS_PEERS}, colors=[k["amber"], "4A4F5C"],
-                    number_format='0.0"%"', font=MONO, size=14, axis_color=k["gray"], axis_line=k["border"], width=3.5,
+                    number_format='0.0"%"', font=MONO, size=16, axis_color=k["gray"], axis_line=k["border"], width=3.5,
                     min_value=4)
     deck.text(s, 920, 260, 260, 26, "6 月", size=16, font=MISANS, color=k["gray"])
     deck.text(s, 920, 290, 260, 90, "5.9%", size=72, font=MONO, color=k["amber"], ea=MISANS)
@@ -331,7 +331,7 @@ def r12_data(deck, s):
         deck.text(s, 1090, 250 + i * 34, 140, 28, f"{c}  {C.CITY_LOSS[c][-1]:.1f}", size=16, font=SANS, bold=True,
                   color=VIRIDIS[C.CITIES.index(c)])
     deck.text(s, 80, 620, 1120, 60, "图 1｜各城市生鲜损耗率（%），2027 年 1–6 月。右侧城市名按 6 月数值从高到低排列，与线尾上下位置一致。n = 126 家门店"
-              "（虚构示例）。", size=15, font=SERIF, color=k["gray"], line_spacing=1.5)
+              "（虚构示例）。", size=17, font=SERIF, color=k["gray"], line_spacing=1.45)
 
 
 @example("recipes", "R12-c", "R12 学术研究 · 图片页", "一张图版两个面板 A、B：照片作证据、图表作度量；图注逐项说明。", (SERIF, SANS))
@@ -344,8 +344,8 @@ def r12_picture(deck, s):
     deck.bar_chart(s, 680, 150, 520, 360, ["采购端", "仓储端", "门店端"], [43, 32, 24], highlight={0}, color=VIRIDIS[1],
                    base="B7C0CA", number_format='0"%"', font=SANS, size=16, label_color=k["text"], axis_color=k["text"])
     deck.text(s, 80, 560, 1120, 90, "图 2｜A. 叶菜到店时的状态（示意图片；USDA，公有领域）。B. 各环节对损耗下降的贡献占比，"
-              "以 1 月至 6 月的下降幅度（3.7 个百分点）为 100%；因四舍五入合计不为 100%（虚构示例）。", size=15, font=SERIF,
-              color=k["gray"], line_spacing=1.6)
+              "以 1 月至 6 月的下降幅度（3.7 个百分点）为 100%；因四舍五入合计不为 100%（虚构示例）。", size=17, font=SERIF,
+              color=k["gray"], line_spacing=1.5)
 
 
 @example("recipes", "R12-d", "R12 学术研究 · 特色页", "一页一个研究问题：问题、方法、结果三栏，引用编号写在文中，来源列在页脚。", (SERIF, SANS))
@@ -408,7 +408,7 @@ def r13_signature(deck, s):
     for i, (key, cap) in enumerate(shots):
         x = 60 + i * 395
         deck.picture(s, photo(key), x, 120, 375, 420)
-        deck.text(s, x, 556, 375, 24, cap, size=15, font=PLEX, color=k["gray"], ea=SANS)
+        deck.text(s, x, 556, 375, 26, cap, size=17, font=PLEX, color=k["gray"], ea=SANS)
     deck.text(s, 60, 50, 800, 40, "清晨、上午、餐桌", size=28, font=SERIF, bold=True, color=k["text"])
-    deck.text(s, 60, 620, 1160, 50, "照片：~MVI~ (warped)，CC BY 2.0；Wonderlane，CC BY 2.0；rawpixel，CC0（均为示意）", size=12,
+    deck.text(s, 60, 620, 1160, 50, "照片：~MVI~ (warped)，CC BY 2.0；Wonderlane，CC BY 2.0；rawpixel，CC0（均为示意）", size=13,
               font=SANS, color="8A8A8A")

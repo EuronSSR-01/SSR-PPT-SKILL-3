@@ -1,480 +1,671 @@
 """改写：the same page before and after, inside a company template. The "a" page is the usual text version
-(labels and short sentences in a grid, icons only in the headings); the "b" page keeps every item and
-carries most of them with pictures: illustrations, dot charts, clock and timer icons, flow arrows,
-proportion bars, charts. The template (title top-left, logo top-right, hairline, two-colour footer band) is
-fictional and only stands in for a real company template: its colours and fonts are kept, pictures are
-added inside its content area. All content is fictional (知野生鲜, see content.py)."""
+(labels and sentences, icons only in the headings); the "b" page (and "c" for C04) is drawn from the same
+material, keeps every item with its qualifiers (约、预计、估算, time starts, conditions) and carries most of
+them with pictures: illustrations, time bars, dot and icon arrays, flow bands, proportion bars, charts.
+
+Three fictional organisations, each with its own template frame, stand in for real company templates:
+青川医院 (header band), 启明中学 (side bar), 恒川电机 (top rule, footer logo). Their colours and fonts are
+kept; pictures go inside the content area. Every name and number is invented; each page's material is
+the FACTS list next to it, and the A, B (and C) pages are drawn from that same list and its numbers.
+
+Type sizes are canvas px on 1280 x 720 (pt = px x 0.75): labels beside pictures at least 16px (12pt),
+sentences 18px or more; only footers go below that."""
+from pathlib import Path
+
 from gallery import example
 from look import SANS
-from content import CITY_TABLE, OPTIONS, LOSS, ORDERS
 
-# the fictional company template
-G = "1E6B52"        # template primary
-G2 = "2E8B6A"
-MINT = "DDEEE5"
-AMBER = "F29F38"
-AMBER_D = "B86F12"
-RED = "C2410C"
-INK = "1F2A37"
-MUTED = "5E6B78"
-FAINT = "98A2AD"
-LINE = "DCE2E8"
-PANEL = "F2F5F3"
-L, R = 80, 1200
-ILL = dict(primary=G2, accent=AMBER)
+HERE = Path(__file__).resolve().parent
+COMPRESSOR = HERE / "art" / "air-compressor.svg"   # drawn for this example, see assets/illustrations/README.md
 FONTS = ("Noto Sans SC",)
-
-
-def frame(deck, s, title, page):
-    """The company template: title, logo, hairline, footer band and page number."""
-    deck.text(s, L, 32, 960, 46, title, size=28, font=SANS, bold=True, color=INK)
-    deck.ellipse(s, 1104, 54, 15, fill=G)
-    deck.icon(s, "leaf", 1095, 45, size=18, color="FFFFFF", stroke=2.4)
-    deck.text(s, 1088, 40, 112, 28, "知野生鲜", size=19, font=SANS, bold=True, color=G, align="right")
-    deck.line(s, 40, 92, 1240, 92, color=LINE, width=1)
-    deck.rect(s, 0, 708, 320, 12, fill=AMBER)
-    deck.rect(s, 320, 708, 960, 12, fill=G)
-    deck.text(s, L, 682, 500, 18, "知野生鲜 · 内部汇报 · 虚构示例", size=12, font=SANS, color=FAINT)
-    deck.text(s, 1000, 682, 200, 18, f"{page:02d}", size=12, font=SANS, color=FAINT, align="right")
-
-
-def t(deck, s, x, y, w, h, content, size=15, color=INK, bold=False, align="left", **kw):
-    return deck.text(s, x, y, w, h, content, size=size, font=SANS, color=color, bold=bold, align=align, **kw)
-
-
-def num(deck, s, x, y, w, value, unit, size=34, color=G, unit_size=None):
-    """A big number with its unit on one line."""
-    t(deck, s, x, y, w, size * 1.3, [[(value, {"size": size, "bold": True, "color": color}),
-                                      (unit, {"size": unit_size or max(14, int(size * 0.45)), "bold": True,
-                                              "color": color})]], wrap=False)
 
 
 def width_of(text, size):
     return sum(size if ord(c) > 255 else size * 0.56 for c in text)
 
 
-def chip(deck, s, x, y, text, size=14, color=G):
-    w = width_of(text, size) + 20
-    deck.rect(s, x, y, w, size + 14, fill="FFFFFF", line=color, line_width=1, radius=(size + 14) / 2)
-    t(deck, s, x, y + 6, w, size + 4, text, size=size, color=color, align="center", wrap=False)
+def t(deck, s, x, y, w, h, content, size=18, color="1E2433", bold=False, align="left", **kw):
+    return deck.text(s, x, y, w, h, content, size=size, font=SANS, color=color, bold=bold, align=align, **kw)
+
+
+def num(deck, s, x, y, w, value, unit, size=34, color="1E2433", unit_size=None, align="left", pre=None):
+    """A big number with its unit on one line; pre is a qualifier set small before it ("约", "≤")."""
+    small = unit_size or max(16, int(size * 0.5))
+    runs = [(pre + " ", {"size": small, "bold": True, "color": color})] if pre else []
+    runs += [(value, {"size": size, "bold": True, "color": color}), (unit, {"size": small, "bold": True, "color": color})]
+    t(deck, s, x, y, w, size * 1.3, [runs], wrap=False, align=align)
+
+
+def chip(deck, s, x, y, text, color, size=16, fill="FFFFFF"):
+    w = width_of(text, size) + 22
+    deck.rect(s, x, y, w, size + 14, fill=fill, line=color, line_width=1.2, radius=(size + 14) / 2)
+    t(deck, s, x, y + 6, w, size + 4, text, size=size, color=color, bold=True, align="center", wrap=False)
     return w
 
 
-def chevron(deck, s, x1, x2, y, color="C9D3DC", h=14):
-    """A flat arrow from x1 to x2 at height y: the direction goods move."""
-    deck.polygon(s, [(x1, y - h / 2), (x2 - h, y - h / 2), (x2 - h, y - h), (x2, y), (x2 - h, y + h),
-                     (x2 - h, y + h / 2), (x1, y + h / 2)], fill=color)
+def machine(deck, s, x, y, body, screen, slot, w=28, h=46):
+    """A small self-service kiosk: body, screen, slot."""
+    deck.rect(s, x, y, w, h, fill=body, radius=3)
+    deck.rect(s, x + 5, y + 6, w - 10, 12, fill=screen, radius=2)
+    deck.rect(s, x + 7, y + h - 15, w - 14, 4, fill=slot, radius=2)
 
 
-def dots(deck, s, x, y, total, marked, per_row, r=7, gap=19, on=G2, off=MINT):
-    """Dot chart: one dot per item, the first `marked` in the strong colour."""
-    for i in range(total):
-        deck.ellipse(s, x + r + (i % per_row) * gap, y + r + (i // per_row) * gap, r, fill=on if i < marked else off)
-
-
-def heading(deck, s, x, w, text, color=G2, y=106):
-    t(deck, s, x, y, w, 26, text, size=18, bold=True)
-    deck.rect(s, x, y + 32, w, 3, fill=color)
-
-
-def pairs(deck, s, x, y, w, items, step=74):
-    """The 'before' habit: a label and a short sentence, repeated down a column."""
+def before_pairs(deck, s, x, y, w, items, label_color, step=92):
+    """The 'before' habit: a label and a sentence, repeated down a column."""
     for label, value in items:
-        t(deck, s, x, y, w, 20, label, size=14, bold=True, color=G2)
-        t(deck, s, x, y + 24, w, 44, value, size=15, color=MUTED, line_spacing=1.3)
+        t(deck, s, x, y, w, 22, label, size=16, bold=True, color=label_color)
+        t(deck, s, x, y + 26, w, 52, value, size=18, color="4F5866", line_spacing=1.3)
         y += step
 
 
-# ------------------------------------------------------------------ C01 一条链
-CHAIN_TITLE = "一条链：从产地到社区，货一天走完"
-CHAIN = [
-    ("产地", "leaf", [("合作农场", "48 家，其中合作社 30 家"), ("规模", "大到产地批发市场，小到单个农户"),
-                      ("采摘", "清晨 5 点采摘")]),
-    ("冷链干线", "truck", [("车辆", "自有冷藏车 26 辆"), ("时效", "采摘后 4 小时内入仓"), ("温度", "全程 0–4℃")]),
-    ("城市仓", "warehouse", [("数量", "城市仓 5 座"), ("分拣", "入仓后 2 小时完成"), ("覆盖", "杭州、苏州、南京、宁波")]),
-    ("门店与到家", "store", [("门店", "社区门店 126 家"), ("上架", "上午 10 点前上架"), ("到家", "下单后 30 分钟送达")]),
+def bullets(deck, s, x, y, w, lines, color="4F5866", size=18, step=40, h=30):
+    for line in lines:
+        t(deck, s, x, y, w, h, "· " + line, size=size, color=color, line_spacing=1.3)
+        y += step
+    return y
+
+
+# ================================================================== 青川医院：页眉色带
+A = dict(main="0F5C6E", mid="2A8C9E", soft="7FB9C4", tint="E3F1F3", hot="E2725B", hot_d="B24A33",
+         ink="1E2B33", muted="56636B", faint="8C979E", panel="F1F6F7", grey="C3CDD1")
+A_L, A_R = 64, 1216
+
+
+def frame_hospital(deck, s, title, page, section):
+    """青川医院 template: full-width colour band holding the title, a cross mark and the section."""
+    deck.rect(s, 0, 0, 1280, 88, fill=A["main"])
+    deck.rect(s, A_L + 9, 30, 10, 30, fill="FFFFFF", radius=2)
+    deck.rect(s, A_L, 39, 28, 10, fill="FFFFFF", radius=2)
+    t(deck, s, A_L + 46, 22, 860, 44, title, size=30, bold=True, color="FFFFFF")
+    t(deck, s, 960, 34, A_R - 960, 24, f"{section} · {page:02d}", size=16, color="CFE7EC", align="right")
+    t(deck, s, A_L, 684, 600, 20, "青川医院 · 门诊部 · 虚构示例", size=13, color=A["faint"])
+
+
+# ------------------------------------------------------------------ C01 门诊时间
+VISIT = dict(month="9 月", online=72, wait=38, wait_before=52, target=25, target_by="12 月前", consult=9,
+             pay=4, pickup=6, kiosks=6, total=57, tests="约四成", blood="预计 2 小时内")
+V = VISIT
+VISIT_FACTS = [
+    f"{V['month']}门诊运营数据。",
+    f"线上预约占 {V['online']}%，现场挂号占 {100 - V['online']}%。",
+    f"签到后平均候诊 {V['wait']} 分钟；8 月平均为 {V['wait_before']} 分钟。",
+    f"目标：{V['target_by']}把候诊降到 {V['target']} 分钟以内。",
+    f"医生问诊平均约 {V['consult']} 分钟。",
+    f"{V['tests']}患者需要做检查，抽血结果{V['blood']}出。",
+    f"诊间扫码缴费，平均 {V['pay']} 分钟。",
+    f"自助取药机 {V['kiosks']} 台，取药平均 {V['pickup']} 分钟。",
+    f"不需要做检查的患者，从签到到取药平均 {V['total']} 分钟。",
 ]
-COLS = [80, 365, 650, 935]
-CW = 265
+VISIT_TITLE = "看一次门诊：近三分之二的时间在候诊"
 
 
-@example("convert", "C01-a", "产业链 A：改写前，16 条信息全是字",
-         "标签加短句排成四栏格子，图标只在栏头：每格都要读一句话，看不出哪个是物件、哪个是数量、哪个是流向。"
-         "信息 16 条：图 0 · 文 16。", fonts=FONTS)
-def chain_before(deck, s):
-    frame(deck, s, CHAIN_TITLE, 4)
-    for x, (name, icon, items) in zip(COLS, CHAIN):
-        deck.rect(s, x, 110, CW, 46, fill=PANEL)
-        deck.icon(s, icon, x + 14, 121, size=24, color=G2, stroke=2.0)
-        t(deck, s, x + 48, 120, CW - 60, 26, name, size=18, bold=True)
-        pairs(deck, s, x, 178, CW, items, step=92)
-    deck.line(s, L, 466, R, 466, color=LINE, width=1)
-    rows = [("结算", "公司向农场预付三成货款，到货后结清。"),
-            ("顾客付款", "小程序付款占 68%，门店收银占 32%。"),
-            ("损耗", "全程生鲜损耗率 5.9%（1 月为 9.6%）。")]
-    pairs(deck, s, L, 484, 1120, rows, step=60)
-
-
-@example("convert", "C01-b", "产业链 B：改写后，同样 16 条，14 条由图承载",
-         "每站一幅插画放在自己的栏头；农场数画成点阵，时间用时钟和计时图标，货的方向用箭头，钱的方向用带标签的"
-         "箭头，付款构成用比例条。文字只剩短标签。信息 16 条：图 14 · 文 2。", fonts=FONTS)
-def chain_after(deck, s):
-    frame(deck, s, CHAIN_TITLE, 4)
-    names = ["farm", "reefer-truck", "warehouse", "store"]
-    for i, (x, (name, _, _)) in enumerate(zip(COLS, CHAIN)):
-        heading(deck, s, x, CW, name)
-        deck.illustration(s, names[i], x, 150, 176, 104, **ILL)
-        if i < 3:
-            chevron(deck, s, x + 192, x + CW + 6, 204)
-    # 产地: farms as dots, size range
-    dots(deck, s, COLS[0], 268, 48, 30, 12)
-    t(deck, s, COLS[0], 348, CW, 22, [[("48 家合作农场", {"bold": True}), ("，绿色为合作社 30 家", {"color": MUTED})]],
-      size=14)
-    deck.icon(s, "clock", COLS[0], 384, size=24, color=G2, stroke=2.0)
-    t(deck, s, COLS[0] + 34, 383, 220, 26, [[("5:00", {"size": 20, "bold": True, "color": G}),
-                                             ("  清晨采摘", {"size": 14, "color": MUTED})]], wrap=False)
-    # 冷链
-    num(deck, s, COLS[1], 266, CW, "26", " 辆冷藏车")
-    deck.icon(s, "timer", COLS[1], 326, size=24, color=G2, stroke=2.0)
-    t(deck, s, COLS[1] + 34, 325, 220, 26, [[("4 小时", {"size": 20, "bold": True, "color": G}),
-                                             ("内入仓", {"size": 14, "color": MUTED})]], wrap=False)
-    chip(deck, s, COLS[1], 380, "全程 0–4℃", color=G2)
-    # 城市仓
-    num(deck, s, COLS[2], 266, CW, "5", " 座城市仓")
-    deck.icon(s, "timer", COLS[2], 326, size=24, color=G2, stroke=2.0)
-    t(deck, s, COLS[2] + 34, 325, 220, 26, [[("2 小时", {"size": 20, "bold": True, "color": G}),
-                                             ("分拣完", {"size": 14, "color": MUTED})]], wrap=False)
-    deck.icon(s, "map-pin", COLS[2], 384, size=20, color=MUTED, stroke=2.0)
-    t(deck, s, COLS[2] + 26, 384, 240, 20, "杭州、苏州、南京、宁波", size=14, color=MUTED)
-    # 门店与到家
-    num(deck, s, COLS[3], 266, CW, "126", " 家门店")
-    deck.icon(s, "clock", COLS[3], 326, size=24, color=G2, stroke=2.0)
-    t(deck, s, COLS[3] + 34, 325, 220, 26, [[("10:00", {"size": 20, "bold": True, "color": G}),
-                                             (" 前上架", {"size": 14, "color": MUTED})]], wrap=False)
-    deck.icon(s, "house", COLS[3], 384, size=24, color=AMBER_D, stroke=2.0)
-    t(deck, s, COLS[3] + 34, 383, 220, 26, [[("30 分钟", {"size": 20, "bold": True, "color": AMBER_D}),
-                                             ("到家", {"size": 14, "color": MUTED})]], wrap=False)
-    # money: who pays whom
-    deck.rect(s, L, 440, R - L, 124, fill=PANEL)
-    deck.icon(s, "banknote", L + 16, 452, size=22, color=MUTED, stroke=2.0)
-    t(deck, s, L + 46, 453, 300, 20, "钱怎么走", size=14, bold=True, color=MUTED)
-    x = L + 20
-    for c in ("预付三成", "到货结清"):
-        x += chip(deck, s, x, 486, c) + 8
-    deck.line(s, COLS[2] + 120, 538, L + 20, 538, color=G, width=2.2, arrow=True)
-    t(deck, s, L + 20, 544, 300, 16, "公司 → 农场", size=12, color=FAINT)
-    t(deck, s, COLS[3], 456, CW, 20, "顾客 → 门店：怎么付款", size=14, color=MUTED)
-    deck.rect(s, COLS[3], 486, CW * 0.68, 30, fill=G2)
-    deck.rect(s, COLS[3] + CW * 0.68 + 2, 486, CW * 0.32 - 2, 30, fill=AMBER)
-    t(deck, s, COLS[3] + 10, 492, 160, 20, "小程序 68%", size=14, bold=True, color="FFFFFF", wrap=False)
-    t(deck, s, COLS[3] + CW * 0.68 + 6, 492, 80, 20, "收银 32%", size=13, bold=True, color="FFFFFF", wrap=False)
-    # size range of the farms, loss rate
-    t(deck, s, L, 586, 80, 22, "农场规模", size=14, bold=True, color=MUTED)
-    deck.icon(s, "building-2", L + 84, 578, size=40, color=G2, stroke=1.8)
-    t(deck, s, L + 134, 588, 140, 22, "产地批发市场", size=14, color=MUTED)
-    deck.line(s, L + 238, 600, L + 330, 600, color=FAINT, width=1.2, dash=True)
-    deck.polygon(s, [(L + 330, 595), (L + 340, 600), (L + 330, 605)], fill=FAINT)
-    t(deck, s, L + 350, 588, 100, 22, "单个农户", size=14, color=MUTED)
-    deck.icon(s, "user", L + 418, 590, size=22, color=G2, stroke=2.0)
-    deck.icon(s, "leaf", COLS[2], 592, size=30, color=G2, stroke=2.0)
-    num(deck, s, COLS[2] + 40, 584, 120, "5.9", "%", size=30)
-    t(deck, s, COLS[2] + 140, 598, 300, 22, "全程生鲜损耗率（1 月为 9.6%）", size=14, color=MUTED)
-
-
-# ------------------------------------------------------------------ C02 三件事
-ASK_TITLE = "需要总部支持的三件事"
-X3 = [80, 475, 870]
-W3 = 330
-
-
-@example("convert", "C02-a", "三项诉求 A：改写前，三段要点",
-         "每项一个标题加两三句话：数字埋在句子里，城市、系统、账期都要读完才看得出。信息 14 条：图 0 · 文 14。",
-         fonts=FONTS)
-def asks_before(deck, s):
-    frame(deck, s, ASK_TITLE, 9)
-    sections = [
-        ("01", "在合肥、无锡建城市仓", [
-            "六座城市里合肥、无锡还没有城市仓，下单到送达分别要 35 分钟、34 分钟，杭州只要 26 分钟。",
-            "两城生鲜损耗率 7.2%、6.9%，高于杭州的 5.1%。",
-            "每座自建城市仓约 2,400 万元，6 个月上线。"]),
-        ("02", "统一门店收银系统", [
-            "门店现在用 3 套收银系统，同一位会员在不同门店是不同账号，会员数据不通。",
-            "建议统一为一套，12 月随会员体系上线。"]),
-        ("03", "缩短农场账期", [
-            "合作农场多为合作社，资金紧张；现在的账期是 45 天。",
-            "建议缩短到 15 天，需要周转资金约 3,000 万元，换来采购价下降约 3%。"]),
+@example("convert", "C01-a", "门诊时间 A：改写前，四栏标签加句子",
+         "四栏“标签＋句子”：每格都要读，看不出时间花在哪一段、候诊比问诊长多少。"
+         "材料与 B 页相同（convert_examples.py 的 VISIT_FACTS），12 条信息全是字。", fonts=FONTS)
+def visit_before(deck, s):
+    frame_hospital(deck, s, VISIT_TITLE, 3, "门诊运营")
+    t(deck, s, A_L, 108, 900, 26, f"{V['month']}门诊运营数据", size=18, color=A["muted"])
+    cols = [
+        ("挂号", "smartphone", [("方式", f"线上预约占 {V['online']}%，现场挂号占 {100 - V['online']}%")]),
+        ("候诊", "hourglass", [("时长", f"签到后平均候诊 {V['wait']} 分钟"), ("变化", f"8 月平均为 {V['wait_before']} 分钟"),
+                               ("目标", f"{V['target_by']}降到 {V['target']} 分钟以内")]),
+        ("问诊与检查", "clipboard-list", [("问诊", f"医生问诊平均约 {V['consult']} 分钟"),
+                                          ("检查", f"{V['tests']}患者需要做检查"), ("抽血", f"结果{V['blood']}出")]),
+        ("缴费与取药", "package", [("缴费", f"诊间扫码缴费，平均 {V['pay']} 分钟"),
+                                   ("取药", f"自助取药机 {V['kiosks']} 台，平均 {V['pickup']} 分钟")]),
     ]
-    y = 112
-    for n, head, bullets in sections:
-        t(deck, s, L, y - 2, 60, 36, n, size=28, bold=True, color=G2)
-        t(deck, s, L + 64, y + 2, 900, 30, head, size=20, bold=True)
-        for i, b in enumerate(bullets):
-            t(deck, s, L + 64, y + 44 + i * 36, 1056, 26, "· " + b, size=16, color=MUTED)
-        y += 60 + len(bullets) * 36 + 40
-        if n != "03":
-            deck.line(s, L, y - 22, R, y - 22, color=LINE, width=1)
+    for i, (name, icon, items) in enumerate(cols):
+        x = A_L + i * 292
+        deck.rect(s, x, 148, 276, 50, fill=A["panel"])
+        deck.icon(s, icon, x + 14, 160, size=26, color=A["mid"], stroke=2.0)
+        t(deck, s, x + 50, 159, 220, 28, name, size=20, bold=True, color=A["ink"])
+        before_pairs(deck, s, x, 218, 276, items, A["mid"], step=100)
+    deck.line(s, A_L, 540, A_R, 540, color="DCE3E6", width=1)
+    before_pairs(deck, s, A_L, 560, 1152, [("全程", f"不需要做检查的患者，从签到到取药平均 {V['total']} 分钟。")], A["mid"])
 
 
-@example("convert", "C02-b", "三项诉求 B：改写后，每项一张小图",
-         "城市仓画成六个城市格子（有的打勾、没有的打叉）加送达时间条形图；收银系统画成三台收银机连着同一位会员，"
-         "再合成一台；账期画成两根长短不同的条，资金和采购价用图标加数字。信息 14 条：图 12 · 文 2。", fonts=FONTS)
-def asks_after(deck, s):
-    frame(deck, s, ASK_TITLE, 9)
-    heads = [("01", "在合肥、无锡建城市仓"), ("02", "统一门店收银系统"), ("03", "缩短农场账期")]
-    for x0, (n, head) in zip(X3, heads):
-        t(deck, s, x0, 104, 50, 36, n, size=26, bold=True, color=G2)
-        t(deck, s, x0 + 46, 108, W3 - 46, 30, head, size=20, bold=True)
-        deck.line(s, x0, 152, x0 + W3, 152, color=LINE, width=1)
-
-    # 01 city warehouses: which cities have one, delivery time, cost
-    x0 = X3[0]
-    t(deck, s, x0, 164, W3, 20, "哪些城市有城市仓", size=13, color=MUTED)
-    has = {r[0]: int(r[2]) for r in CITY_TABLE[1:]}
-    for i, city in enumerate(["杭州", "苏州", "南京", "宁波", "合肥", "无锡"]):
-        tx, ty = x0 + (i % 3) * 113, 188 + (i // 3) * 48
-        ok = has[city] > 0
-        deck.rect(s, tx, ty, 104, 40, fill=MINT if ok else "FFFFFF", line=None if ok else AMBER, radius=6,
-                  dash=not ok)
-        deck.icon(s, "warehouse" if ok else "circle-x", tx + 10, ty + 9, size=22, color=G if ok else AMBER_D,
-                  stroke=2.0)
-        t(deck, s, tx + 40, ty + 10, 60, 22, city, size=15, bold=True, color=G if ok else AMBER_D)
-    t(deck, s, x0, 296, W3, 20, "下单到送达（分钟）", size=13, color=MUTED)
-    rows = sorted(((r[0], int(r[3])) for r in CITY_TABLE[1:]), key=lambda p: -p[1])
-    deck.bar_chart(s, x0, 316, W3, 170, [c for c, _ in rows], [m for _, m in rows], highlight=[0, 1],
-                   color=AMBER, base="C5CED6", font=SANS, size=14, label_color=MUTED, gap_width=45)
-    t(deck, s, x0, 494, W3, 22, "两城损耗率也最高：7.2%、6.9%（杭州 5.1%）", size=14, color=MUTED)
-    deck.icon(s, "coins", x0, 540, size=26, color=G2, stroke=2.0)
-    num(deck, s, x0 + 34, 532, 170, "2,400", " 万元/座", size=24)
-    deck.icon(s, "calendar", x0 + 196, 540, size=26, color=G2, stroke=2.0)
-    num(deck, s, x0 + 230, 532, 110, "6", " 个月上线", size=24)
-
-    # 02 one till system: three tills, one member with three accounts, merged into one
-    x0 = X3[1]
-    cx = x0 + W3 / 2
-    tills = [(x0 + 30, G2, "系统 A"), (x0 + 145, AMBER_D, "系统 B"), (x0 + 260, MUTED, "系统 C")]
-    for tx, colour, label in tills:
-        deck.icon(s, "monitor", tx, 170, size=40, color=colour, stroke=1.8)
-        t(deck, s, tx - 10, 214, 60, 20, label, size=13, color=colour, align="center")
-        deck.line(s, tx + 20, 238, cx, 280, color=FAINT, width=1.2, dash=True)
-    deck.icon(s, "user", cx - 20, 282, size=40, color=INK, stroke=1.8)
-    t(deck, s, x0, 328, W3, 22, "同一位会员，3 个账号，数据不通", size=14, color=MUTED, align="center")
-    deck.line(s, cx, 362, cx, 404, color=G, width=2.2, arrow=True)
-    deck.rect(s, x0 + 20, 414, W3 - 40, 76, fill=MINT, radius=8)
-    deck.icon(s, "monitor", x0 + 40, 430, size=44, color=G, stroke=1.8)
-    deck.icon(s, "circle-check", x0 + 72, 462, size=22, color=G, stroke=2.4)
-    t(deck, s, x0 + 104, 438, 200, 28, "统一为一套", size=20, bold=True, color=G)
-    t(deck, s, x0 + 104, 466, 200, 20, "会员一个账号走遍门店", size=13, color=MUTED)
-    deck.icon(s, "calendar", x0 + 20, 540, size=26, color=G2, stroke=2.0)
-    num(deck, s, x0 + 54, 532, 80, "12", " 月", size=24)
-    t(deck, s, x0 + 128, 544, 200, 20, "随会员体系上线", size=14, color=MUTED)
-
-    # 03 farm payment terms: 45 days now, 15 days asked; money needed and what it buys
-    x0 = X3[2]
-    t(deck, s, x0, 164, W3, 20, "付给农场的账期（天）", size=13, color=MUTED)
-    full = W3 - 60
-    t(deck, s, x0, 196, 50, 22, "现在", size=14, color=MUTED)
-    deck.rect(s, x0 + 50, 192, full, 30, fill="C5CED6")
-    t(deck, s, x0 + 50 + full - 70, 197, 64, 22, "45 天", size=15, bold=True, color="FFFFFF", align="right")
-    t(deck, s, x0, 244, 50, 22, "建议", size=14, color=G, bold=True)
-    deck.rect(s, x0 + 50, 240, full / 3, 30, fill=G2)
-    t(deck, s, x0 + 56 + full / 3, 245, 80, 22, "15 天", size=15, bold=True, color=G)
-    deck.icon(s, "users", x0, 300, size=24, color=MUTED, stroke=2.0)
-    t(deck, s, x0 + 34, 302, W3 - 34, 22, "合作农场多为合作社，资金紧", size=14, color=MUTED)
-    deck.icon(s, "coins", x0, 366, size=30, color=G2, stroke=2.0)
-    num(deck, s, x0 + 42, 356, 260, "3,000", " 万元", size=32)
-    t(deck, s, x0 + 42, 402, 260, 20, "需要的周转资金", size=14, color=MUTED)
-    deck.icon(s, "trending-down", x0, 454, size=30, color=G2, stroke=2.0)
-    num(deck, s, x0 + 42, 444, 260, "约 −3", "%", size=32)
-    t(deck, s, x0 + 42, 490, 260, 20, "换来的采购价下降", size=14, color=MUTED)
-
-
-# ------------------------------------------------------------------ C03 公司概况
-PROFILE_TITLE = "知野生鲜：六座城市、126 家社区店"
-
-
-@example("convert", "C03-a", "公司概况 A：改写前，一段话加五条要点",
-         "公司概况写成一段介绍和一列要点：13 条信息都要读，规模、设施、经营数字混在一起。信息 13 条：图 0 · 文 13。",
-         fonts=FONTS)
-def profile_before(deck, s):
-    frame(deck, s, PROFILE_TITLE, 2)
-    t(deck, s, L, 120, 500, 220, "知野生鲜成立于 2019 年，是一家社区生鲜连锁，在杭州、苏州、合肥、南京、宁波、无锡 6 座城市"
-      "开设 126 家社区门店，会员 52 万人。", size=19, color=INK, line_spacing=1.6)
-    points = ["自有城市仓 5 座、冷藏车 26 辆，下单到送达 30 分钟。",
-              "在售商品约 1,800 种，生鲜占销售额 64%。",
-              "员工约 2,300 人。",
-              "月订单从 1 月的 18 万单增长到 6 月的 36 万单。",
-              f"生鲜损耗率 {LOSS[-1]}%，同城同业均值 9.1%。"]
-    for i, p in enumerate(points):
-        t(deck, s, 660, 124 + i * 58, 540, 50, "· " + p, size=17, color=MUTED, line_spacing=1.4)
-
-
-@example("convert", "C03-b", "公司概况 B：改写后，规模、设施、经营各成一组",
-         "门店用插画加大数字，六座城市排成标签；城市仓、冷藏车、员工各配一幅小插画，送达、商品、会员、成立年份配图标；"
-         "订单增长画成折线，生鲜占比画成比例条，损耗和同业并排成两根短条。信息 13 条：图 11 · 文 2。", fonts=FONTS)
-def profile_after(deck, s):
-    frame(deck, s, PROFILE_TITLE, 2)
-    # scale
-    deck.illustration(s, "store", L, 112, 240, 150, **ILL)
-    num(deck, s, L, 272, 360, "126", " 家社区门店", size=44)
-    x, y = L, 338
-    for i, city in enumerate(r[0] for r in CITY_TABLE[1:]):
-        if i == 3:
-            x, y = L, 376
-        x += chip(deck, s, x, y, city, color=G2) + 8
-    deck.icon(s, "users", L, 440, size=28, color=G2, stroke=2.0)
-    num(deck, s, L + 38, 430, 200, "52", " 万会员", size=30)
-    deck.icon(s, "calendar", L, 500, size=28, color=G2, stroke=2.0)
-    num(deck, s, L + 38, 490, 200, "2019", " 年成立", size=30)
-    # facilities and people
-    cells = [("ill", "warehouse", "5", " 座城市仓"), ("ill", "reefer-truck", "26", " 辆冷藏车"),
-             ("ill", "team", "约 2,300", " 名员工"), ("icon", "clock", "30", " 分钟送达"),
-             ("icon", "package", "约 1,800", " 种商品")]
-    for i, (kind, name, value, unit) in enumerate(cells):
-        cx0, cy0 = 470 + (i % 2) * 190, 112 + (i // 2) * 158
-        if kind == "ill":
-            deck.illustration(s, name, cx0, cy0, 120, 72, **ILL)
+@example("convert", "C01-b", "门诊时间 B：改写后，一根时间条加四张小图",
+         "从签到到取药画成一根按分钟比例的时间条，候诊一段最长、用强调色；候诊的变化和目标画成三根条，"
+         "挂号方式画成比例条，要做检查的患者画成十个人里涂四个，取药机画成六台。“不需要做检查”“约”“预计”都留在图旁。"
+         "12 条信息：10 条在图里，字只剩标题和一行口径。", fonts=FONTS)
+def visit_after(deck, s):
+    frame_hospital(deck, s, VISIT_TITLE, 3, "门诊运营")
+    t(deck, s, A_L, 112, 820, 26, [[(f"{V['month']}平均", {"bold": True, "color": A["main"]}),
+                                     ("  ·  不需要做检查的患者，从签到到取药", {"color": A["muted"]})]], size=18)
+    num(deck, s, 980, 100, A_R - 980, str(V["total"]), " 分钟", size=40, color=A["main"], align="right")
+    deck.illustration(s, "hospital", A_L, 160, 150, 112, primary=A["mid"], accent=A["hot"])
+    x0, x1, y0, h = 236, A_R, 190, 56
+    scale = (x1 - x0) / V["total"]
+    parts = [("候诊", V["wait"], A["hot"], "hourglass", f"{V['wait']} 分钟"),
+             ("问诊", V["consult"], A["main"], "clipboard-list", f"约 {V['consult']} 分钟"),
+             ("扫码缴费", V["pay"], A["mid"], "qr-code", f"{V['pay']} 分钟"),
+             ("取药", V["pickup"], A["soft"], "package", f"{V['pickup']} 分钟")]
+    x = x0
+    for i, (name, minutes, colour, icon, label) in enumerate(parts):
+        w = minutes * scale - (3 if i < len(parts) - 1 else 0)
+        deck.rect(s, x, y0, w, h, fill=colour)
+        if i == 0:
+            deck.icon(s, icon, x + 18, y0 + 12, size=32, color="FFFFFF", stroke=2.2)
+            t(deck, s, x + 62, y0 + 13, 300, 32, [[("候诊 ", {"size": 22}), (label, {"size": 24, "bold": True})]],
+              color="FFFFFF", wrap=False)
         else:
-            deck.icon(s, name, cx0 + 4, cy0 + 20, size=40, color=G2, stroke=1.8)
-        num(deck, s, cx0, cy0 + 80, 180, value, unit, size=26)
-    # business
-    bx = 880
-    t(deck, s, bx, 112, 320, 20, "月订单（万单）", size=13, color=MUTED)
-    deck.line_chart(s, bx, 134, 320, 150, ["1月", "2月", "3月", "4月", "5月", "6月"], {"订单": ORDERS},
-                    colors=[G2], labels="all", font=SANS, size=13, label_color=G, axis_color=MUTED)
-    t(deck, s, bx, 314, 320, 20, "生鲜占销售额", size=13, color=MUTED)
-    deck.rect(s, bx, 338, 320 * 0.64, 30, fill=G2)
-    deck.rect(s, bx + 320 * 0.64 + 2, 338, 320 * 0.36 - 2, 30, fill="D5DCE2")
-    t(deck, s, bx + 10, 343, 120, 22, "64%", size=16, bold=True, color="FFFFFF")
-    t(deck, s, bx, 400, 320, 20, "生鲜损耗率（%）", size=13, color=MUTED)
-    for i, (label, value, colour) in enumerate((("知野", LOSS[-1], G2), ("同城同业", 9.1, "C5CED6"))):
-        yy = 426 + i * 40
-        t(deck, s, bx, yy + 4, 70, 22, label, size=14, color=MUTED)
-        deck.rect(s, bx + 74, yy, 200 * value / 9.1, 28, fill=colour)
-        t(deck, s, bx + 80 + 200 * value / 9.1, yy + 3, 60, 22, f"{value}", size=15, bold=True,
-          color=G if i == 0 else MUTED)
+            cx = x + w / 2
+            deck.icon(s, icon, cx - 15, y0 - 40, size=30, color=A["main"], stroke=2.0)
+            t(deck, s, cx - 60, y0 + h + 10, 120, 22, name, size=16, color=A["muted"], align="center")
+            t(deck, s, cx - 60, y0 + h + 34, 120, 26, label, size=20, bold=True, color=A["ink"], align="center",
+              wrap=False)
+        x += minutes * scale
+
+    panels = ["候诊在缩短（分钟）", "挂号方式", "要做检查的患者", "自助取药机"]
+    for i, head in enumerate(panels):
+        px = A_L + i * 292
+        deck.rect(s, px, 344, 276, 300, fill=A["panel"], radius=10)
+        t(deck, s, px + 20, 362, 240, 26, head, size=18, bold=True, color=A["ink"])
+    # 1 waiting time: August, September, target
+    px = A_L
+    rows = [("8 月", V["wait_before"], A["grey"], A["muted"], str(V["wait_before"])),
+            ("9 月", V["wait"], A["hot"], A["hot_d"], str(V["wait"])),
+            ("目标", V["target"], None, A["main"], f"≤{V['target']}")]
+    for k, (label, minutes, fill, ink, value) in enumerate(rows):
+        y = 414 + k * 54
+        t(deck, s, px + 20, y + 4, 50, 22, label, size=16, color=A["muted"])
+        w = 150 * minutes / V["wait_before"]
+        deck.rect(s, px + 70, y, w, 30, fill=fill, line=None if fill else A["main"], line_width=1.6, dash=not fill)
+        t(deck, s, px + 78 + w, y + 2, 60, 26, value, size=20, bold=True, color=ink, wrap=False)
+    t(deck, s, px + 20, 584, 240, 22, f"目标在{V['target_by']}达到", size=16, color=A["main"])
+    # 2 how people book
+    px = A_L + 292
+    deck.icon(s, "smartphone", px + 20, 412, size=40, color=A["main"], stroke=1.8)
+    deck.icon(s, "user", px + 216, 412, size=40, color=A["faint"], stroke=1.8)
+    bw = 236
+    deck.rect(s, px + 20, 470, bw * V["online"] / 100 - 2, 40, fill=A["main"])
+    deck.rect(s, px + 20 + bw * V["online"] / 100, 470, bw * (100 - V["online"]) / 100, 40, fill=A["grey"])
+    num(deck, s, px + 20, 522, 150, f"{V['online']}", "%", size=28, color=A["main"])
+    t(deck, s, px + 20, 562, 150, 22, "线上预约", size=16, color=A["muted"])
+    num(deck, s, px + 156, 522, 100, f"{100 - V['online']}", "%", size=28, color=A["muted"], align="right")
+    t(deck, s, px + 156, 562, 100, 22, "现场挂号", size=16, color=A["muted"], align="right")
+    # 3 four in ten need a test
+    px = A_L + 2 * 292
+    for k in range(10):
+        deck.icon(s, "user", px + 20 + (k % 5) * 48, 404 + (k // 5) * 48, size=36,
+                  color=A["hot"] if k < 4 else A["grey"], stroke=2.2)
+    t(deck, s, px + 20, 510, 240, 32, [[(V["tests"], {"size": 24, "bold": True, "color": A["hot_d"]}),
+                                        (" 要做检查", {"size": 16, "color": A["muted"]})]], wrap=False)
+    deck.icon(s, "clock", px + 20, 566, size=26, color=A["main"], stroke=2.0)
+    t(deck, s, px + 54, 568, 210, 24, f"抽血结果{V['blood']}出", size=16, color=A["ink"])
+    # 4 self-service kiosks
+    px = A_L + 3 * 292
+    for k in range(V["kiosks"]):
+        machine(deck, s, px + 20 + k * 38, 410, A["main"], A["tint"], "0B4654")
+    num(deck, s, px + 20, 476, 200, str(V["kiosks"]), " 台", size=40, color=A["main"])
 
 
-# ------------------------------------------------------------------ C04 门店分布
-MAP_TITLE = "门店分布：杭州最多，合肥、无锡还没有城市仓"
-# rough relative positions (not a map, no borders): west to east, north to south
-PLACES = {"合肥": (190, 360), "南京": (360, 250), "无锡": (560, 230), "苏州": (700, 330), "杭州": (590, 500),
-          "宁波": (820, 560)}
+# ================================================================== 启明中学：左侧竖条
+B = dict(main="283C7A", mid="4A62A8", soft="AEBBE0", tint="E8ECF7", gold="E9A23B", gold_d="A86A10",
+         ink="1E2433", muted="5A6273", faint="8E95A3", panel="F4F5F9", grey="D3D8E2")
+B_L, B_R = 88, 1192
 
 
-@example("convert", "C04-a", "门店分布 A：改写前，六行城市清单",
-         "每座城市一行字：门店数、城市仓数、送达时间要逐行读、自己比较。信息 19 条：图 0 · 文 19。", fonts=FONTS)
-def map_before(deck, s):
-    frame(deck, s, MAP_TITLE, 5)
-    for i, (city, stores, wh, minutes, *_rest) in enumerate(CITY_TABLE[1:]):
-        x, y = L + (i % 2) * 570, 128 + (i // 2) * 92
-        t(deck, s, x, y, 520, 26, city, size=19, bold=True, color=G2)
-        t(deck, s, x, y + 34, 540, 24, f"门店 {stores} 家，城市仓 {wh} 座，下单到送达 {minutes} 分钟。",
-          size=16, color=MUTED)
-    deck.line(s, L, 418, R, 418, color=LINE, width=1)
-    t(deck, s, L, 436, 1120, 26, "合肥、无锡还没有城市仓，送达时间是六座城市里最长的。", size=17, color=INK)
+def frame_school(deck, s, title, page, kicker):
+    """启明中学 template: a full-height bar on the left with the mark and page number, a kicker above the
+    title. The content area keeps equal margins from the page edges."""
+    deck.rect(s, 0, 0, 36, 720, fill=B["main"])
+    deck.icon(s, "book-open", 6, 26, size=24, color="FFFFFF", stroke=2.0)
+    t(deck, s, 0, 684, 36, 20, f"{page:02d}", size=13, color="FFFFFF", align="center")
+    t(deck, s, B_L, 28, 700, 22, kicker, size=15, bold=True, color=B["gold_d"], spacing=0.04)
+    t(deck, s, B_L, 52, 1104, 44, title, size=30, bold=True, color=B["main"])
+    t(deck, s, B_L, 684, 600, 20, "启明中学 · 虚构示例", size=13, color=B["faint"])
 
 
-@example("convert", "C04-b", "门店分布 B：改写后，城市圆点按大致方位摆放",
-         "圆的大小是门店数，实心是有城市仓（旁边几个仓库图标就是几座），虚线圈是还没有；送达分钟标在城市名旁。"
-         "位置只是大致方位，不画省界，不是地图。信息 19 条：图 18 · 文 1。", fonts=FONTS)
-def map_after(deck, s):
-    frame(deck, s, MAP_TITLE, 5)
-    for city, stores, wh, minutes, *_rest in CITY_TABLE[1:]:
-        cx, cy = PLACES[city]
-        r = 11 * int(stores) ** 0.5
-        has = int(wh) > 0
-        deck.ellipse(s, cx, cy, r, fill=G2 if has else "FFFFFF", line=None if has else AMBER, line_width=2,
-                     dash=not has)
-        t(deck, s, cx - r, cy - 17, 2 * r, 34, stores, size=26, bold=True, color="FFFFFF" if has else AMBER_D,
-          align="center", valign="middle", wrap=False)
-        lx = cx + r + 12
-        t(deck, s, lx, cy - 30, 140, 26, city, size=19, bold=True, color=INK)
-        t(deck, s, lx, cy + 2, 140, 22, [[(minutes, {"bold": True, "color": AMBER_D if not has else G, "size": 17}),
-                                          (" 分钟送达", {"color": MUTED, "size": 13})]], wrap=False)
-        if has:
-            for k in range(int(wh)):
-                deck.icon(s, "warehouse", lx + k * 24, cy + 30, size=20, color=G, stroke=2.0)
-        else:
-            t(deck, s, lx, cy + 30, 120, 20, "无城市仓", size=13, bold=True, color=AMBER_D)
-    # legend
-    lx = 980
-    deck.rect(s, lx - 20, 112, 240, 300, fill=PANEL, radius=8)
-    t(deck, s, lx, 128, 200, 20, "怎么看", size=14, bold=True, color=MUTED)
-    deck.ellipse(s, lx + 16, 178, 16, fill=G2)
-    t(deck, s, lx + 44, 168, 160, 20, "有城市仓", size=14, color=INK)
-    deck.icon(s, "warehouse", lx + 6, 212, size=20, color=G, stroke=2.0)
-    t(deck, s, lx + 44, 212, 160, 20, "一个图标一座仓", size=14, color=INK)
-    deck.ellipse(s, lx + 16, 266, 16, fill="FFFFFF", line=AMBER, line_width=2, dash=True)
-    t(deck, s, lx + 44, 256, 160, 20, "还没有城市仓", size=14, color=INK)
-    t(deck, s, lx, 302, 200, 60, "圆越大，门店越多；\n圆里的数字是门店数", size=14, color=INK, line_spacing=1.3)
-    t(deck, s, lx, 364, 190, 40, "位置为大致方位，不是地图", size=12, color=FAINT)
+# ------------------------------------------------------------------ C03 图书馆改造
+LIB = dict(seats=(120, 260), hours=((8, 17), (7.5, 21.5)), kiosks=4, rooms=6, room_size="6–8",
+           visits=(310, 640), cost=380, grant="七成", own="三成", peak=300)
+L_ = LIB
+LIB_FACTS = [
+    f"座位从 {L_['seats'][0]} 个增加到 {L_['seats'][1]} 个。",
+    "开放时间（周一至周五）从 8:00–17:00 延长到 7:30–21:30。",
+    f"新增自助借还机 {L_['kiosks']} 台，原来没有。",
+    f"新增小组讨论室 {L_['rooms']} 间，每间可坐 {L_['room_size']} 人。",
+    f"9 月日均进馆约 {L_['visits'][1]} 人次，去年 9 月约 {L_['visits'][0]} 人次。",
+    f"改造费用约 {L_['cost']} 万元，区教育局专项承担约{L_['grant']}，学校自筹约{L_['own']}。",
+    f"期中考试周预计高峰需要约 {L_['peak']} 个座位，仍差约 {L_['peak'] - L_['seats'][1]} 个。",
+    "建议下学期试点周六开放。",
+]
+LIB_TITLE = "图书馆改造后：座位翻倍，晚上开到 21:30"
 
 
-# ------------------------------------------------------------------ C05 方案选择
-OPTION_TITLE = "城市仓怎么建：自建投入最高，但两年收回"
+@example("convert", "C03-a", "图书馆改造 A：改写前，两栏要点",
+         "改造前后的变化写成一列句子，费用和下一步写在右边：座位、时间、人次都要读完才比得出。"
+         "材料与 B 页相同（LIB_FACTS），10 条信息全是字。", fonts=FONTS)
+def library_before(deck, s):
+    frame_school(deck, s, LIB_TITLE, 4, "图书馆改造 · 9 月汇报")
+    t(deck, s, B_L, 124, 600, 28, "改造带来的变化", size=20, bold=True, color=B["main"])
+    bullets(deck, s, B_L, 168, 600, LIB_FACTS[:5], step=56, h=50)
+    deck.rect(s, 736, 124, B_R - 736, 400, fill=B["panel"], radius=10)
+    t(deck, s, 760, 144, 400, 28, "费用", size=20, bold=True, color=B["main"])
+    bullets(deck, s, 760, 184, B_R - 784, LIB_FACTS[5:6], h=80)
+    t(deck, s, 760, 300, 400, 28, "下一步", size=20, bold=True, color=B["main"])
+    bullets(deck, s, 760, 340, B_R - 784, LIB_FACTS[6:], step=80, h=76)
 
 
-@example("convert", "C05-a", "方案选择 A：改写前，三段方案说明",
-         "三种建法各写一句，推荐理由写在最后：投入、时间、损耗要在三句话之间来回比。信息 12 条：图 0 · 文 12。",
-         fonts=FONTS)
-def options_before(deck, s):
-    frame(deck, s, OPTION_TITLE, 7)
-    lines = [("自建城市仓", "投入约 2,400 万元，6 个月上线，损耗最低。"),
-             ("租用第三方仓", "投入约 600 万元，2 个月上线，损耗中等。"),
-             ("门店前置仓", "投入约 900 万元，3 个月上线，损耗受门店面积限制。")]
-    for i, (name, text) in enumerate(lines):
-        y = 124 + i * 96
-        t(deck, s, L, y, 400, 28, name, size=20, bold=True, color=G2)
-        t(deck, s, L, y + 38, 1120, 26, text, size=17, color=MUTED)
-    deck.rect(s, L, 430, 1120, 96, fill=PANEL, radius=8)
-    t(deck, s, L + 24, 448, 1080, 28, "推荐：自建城市仓", size=19, bold=True, color=G)
-    t(deck, s, L + 24, 484, 1080, 26, "按每年少损耗约 1,200 万元估算，两年收回投入。", size=17, color=MUTED)
+@example("convert", "C03-b", "图书馆改造 B：改写后，六个小图各管一件事",
+         "座位画成方格（一格 20 个，考试周还差的两格用虚线），开放时间画在一条时间轴上、晚上延长的一段换色，"
+         "人次画成两根柱，新增的借还机和讨论室直接画出台数和间数，费用画成比例条，建议画成一周七格、周六虚线。"
+         "10 条信息：9 条在图里。", fonts=FONTS)
+def library_after(deck, s):
+    frame_school(deck, s, LIB_TITLE, 4, "图书馆改造 · 9 月汇报")
+    cols, rows, w, h = [B_L, 464, 840], [116, 392], 352, 256
+    heads = ["座位", "开放时间（周一至周五）", "日均进馆（人次）", "新增设施", f"改造费用", "下学期"]
+    for i, head in enumerate(heads):
+        x, y = cols[i % 3], rows[i // 3]
+        deck.rect(s, x, y, w, h, fill=B["panel"], radius=10)
+        t(deck, s, x + 20, y + 16, w - 40, 26, head, size=18, bold=True, color=B["ink"])
 
+    # seats: one square = 20 seats
+    x, y = cols[0], rows[0]
+    before, after = L_["seats"]
+    lines = [(f"改造前 ", str(before), before // 20, B["soft"], B["muted"]),
+             ("改造后 ", str(after), after // 20, B["main"], B["main"])]
+    for k, (label, value, n, fill, ink) in enumerate(lines):
+        yy = y + 52 + k * 58
+        t(deck, s, x + 20, yy, 300, 24, [[(label, {"color": B["muted"]}), (value, {"bold": True, "color": ink,
+                                                                               "size": 20})]], size=16)
+        for q in range(n):
+            deck.rect(s, x + 20 + q * 21, yy + 28, 16, 16, fill=fill, radius=2)
+    yy = y + 168
+    gap = (L_["peak"] - after) // 20
+    t(deck, s, x + 20, yy, 320, 24, [[("考试周预计需要约 ", {"color": B["muted"]}),
+                                      (str(L_["peak"]), {"bold": True, "color": B["gold_d"], "size": 20}),
+                                      ("，差约 ", {"color": B["muted"]}),
+                                      (str(L_["peak"] - after), {"bold": True, "color": B["gold_d"], "size": 20})]],
+      size=16)
+    for q in range(after // 20 + gap):
+        filled = q < after // 20
+        deck.rect(s, x + 20 + q * 21, yy + 28, 16, 16, fill=B["grey"] if filled else None,
+                  line=None if filled else B["gold_d"], line_width=1.4, dash=not filled, radius=2)
+    t(deck, s, x + 20, y + h - 34, 300, 20, "一格 = 20 个座位", size=16, color=B["faint"])
 
-@example("convert", "C05-b", "方案选择 B：改写后，三列同尺比较，回收期画成两段",
-         "每种建法一幅插画；投入画成同一比例的条，上线时间画成月份圆点，损耗画成三格刻度；推荐的一列加底色和勾。"
-         "回收期画成两段“每年 1,200 万”拼满 2,400 万。信息 12 条：图 11 · 文 1。", fonts=FONTS)
-def options_after(deck, s):
-    frame(deck, s, OPTION_TITLE, 7)
-    pictures = ["warehouse", "pallet-rack", "store"]
-    money = [2400, 600, 900]
-    months = [6, 2, 3]
-    loss = [1, 2, None]                      # 1 = lowest of three steps, 2 = middle; None = no level
-    deck.rect(s, X3[0] - 16, 102, W3 + 32, 346, fill=MINT, radius=10)
-    for i, (x0, (name, cells, best)) in enumerate(zip(X3, OPTIONS)):
-        deck.illustration(s, pictures[i], x0 + 70, 112, 190, 104, **ILL)
-        t(deck, s, x0, 222, W3, 30, name, size=21, bold=True, color=G if best else INK, align="center")
-        if best:
-            deck.icon(s, "circle-check", x0 + 248, 226, size=24, color=G, stroke=2.4)
-            chip(deck, s, x0 + 6, 116, "推荐", size=14, color=AMBER_D)
-        t(deck, s, x0, 270, 60, 20, "投入", size=13, color=MUTED)
-        deck.rect(s, x0 + 50, 268, 200 * money[i] / 2400, 24, fill=G2 if best else "B9C4CE")
-        t(deck, s, x0 + 58 + 200 * money[i] / 2400, 268, 120, 24, cells[0], size=15, bold=True, color=INK, wrap=False)
-        t(deck, s, x0, 322, 60, 20, "上线", size=13, color=MUTED)
-        for m in range(6):
-            deck.ellipse(s, x0 + 62 + m * 26, 332, 9, fill=(G2 if best else "8A97A4") if m < months[i] else "E3E8EC")
-        t(deck, s, x0 + 220, 321, 100, 22, cells[1], size=15, bold=True, color=INK, wrap=False)
-        t(deck, s, x0, 374, 60, 20, "损耗", size=13, color=MUTED)
-        if loss[i]:
-            for k in range(3):
-                fill = (G2 if loss[i] == 1 else AMBER) if k < loss[i] else "E3E8EC"
-                deck.rect(s, x0 + 50 + k * 54, 372, 50, 22, fill=fill)
-            t(deck, s, x0 + 220, 371, 100, 24, cells[2], size=15, bold=True, color=INK, wrap=False)
-        else:
-            deck.icon(s, "ruler", x0 + 50, 370, size=24, color=AMBER_D, stroke=2.0)
-            t(deck, s, x0 + 82, 372, 240, 24, cells[2], size=15, bold=True, color=AMBER_D)
-    t(deck, s, X3[0], 420, W3, 20, "损耗刻度：一格最低，三格最高", size=12, color=FAINT)
-    # payback: two years of savings fill the investment
-    y0 = 500
-    deck.icon(s, "coins", L, y0 + 4, size=28, color=G, stroke=2.0)
-    t(deck, s, L + 38, y0 + 4, 260, 26, "自建两年收回", size=19, bold=True, color=G)
-    bx, bw = 330, 600
-    deck.rect(s, bx, y0, bw / 2 - 2, 36, fill=G2)
-    deck.rect(s, bx + bw / 2 + 2, y0, bw / 2 - 2, 36, fill=G)
-    t(deck, s, bx, y0 + 8, bw / 2, 22, "第 1 年少损耗 1,200 万", size=14, bold=True, color="FFFFFF", align="center")
-    t(deck, s, bx + bw / 2, y0 + 8, bw / 2, 22, "第 2 年少损耗 1,200 万", size=14, bold=True, color="FFFFFF",
+    # opening hours on a 7:00-22:00 axis
+    x, y = cols[1], rows[0]
+    ax0, ax1 = x + 20, x + w - 20
+    hx = lambda hour: ax0 + (hour - 7) * (ax1 - ax0) / 15
+    (b0, b1), (a0, a1) = L_["hours"]
+    t(deck, s, x + 20, y + 54, 200, 22, "改造前", size=16, color=B["muted"])
+    deck.rect(s, hx(b0), y + 80, hx(b1) - hx(b0), 30, fill=B["soft"])
+    t(deck, s, hx(b0), y + 85, hx(b1) - hx(b0), 22, "8:00–17:00", size=16, bold=True, color=B["ink"],
       align="center")
-    deck.line(s, bx, y0 + 52, bx + bw, y0 + 52, color=INK, width=1.2)
-    deck.line(s, bx, y0 + 46, bx, y0 + 58, color=INK, width=1.2)
-    deck.line(s, bx + bw, y0 + 46, bx + bw, y0 + 58, color=INK, width=1.2)
-    t(deck, s, bx, y0 + 62, bw, 22, "= 投入 2,400 万元", size=15, bold=True, color=INK, align="center")
+    t(deck, s, x + 20, y + 120, 200, 22, "改造后", size=16, bold=True, color=B["main"])
+    deck.rect(s, hx(a0), y + 146, hx(17) - hx(a0), 30, fill=B["main"])
+    deck.rect(s, hx(17), y + 146, hx(a1) - hx(17), 30, fill=B["gold"])
+    t(deck, s, hx(a0) + 6, y + 151, 80, 22, "7:30", size=16, bold=True, color="FFFFFF")
+    t(deck, s, hx(a1) - 66, y + 151, 60, 22, "21:30", size=16, bold=True, color=B["ink"], align="right")
+    deck.line(s, ax0, y + 194, ax1, y + 194, color=B["faint"], width=1)
+    for hour in (8, 12, 16, 20):
+        deck.line(s, hx(hour), y + 190, hx(hour), y + 198, color=B["faint"], width=1)
+        t(deck, s, hx(hour) - 30, y + 204, 60, 20, f"{hour} 时", size=16, color=B["faint"], align="center")
+
+    # visits per day: last September vs this September
+    x, y = cols[2], rows[0]
+    base, top = y + 206, 118
+    for k, (label, value, fill, ink, size) in enumerate((("去年 9 月", L_["visits"][0], B["soft"], B["muted"], 20),
+                                                         ("今年 9 月", L_["visits"][1], B["main"], B["main"], 24))):
+        bx = x + 56 + k * 140
+        bh = top * value / L_["visits"][1]
+        deck.rect(s, bx, base - bh, 96, bh, fill=fill)
+        t(deck, s, bx - 22, base - bh - 34, 140, 30, f"约 {value}", size=size, bold=True, color=ink, align="center")
+        t(deck, s, bx - 22, base + 10, 140, 22, label, size=16, color=B["muted"], align="center")
+
+    # new facilities: kiosks and group rooms, drawn one by one
+    x, y = cols[0], rows[1]
+    chip(deck, s, x + w - 120, y + 14, "原来没有", B["gold_d"])
+    for k in range(L_["kiosks"]):
+        machine(deck, s, x + 20 + k * 40, y + 60, B["main"], B["tint"], "1B2A57")
+    num(deck, s, x + 196, y + 56, 60, str(L_["kiosks"]), " 台", size=30, color=B["main"])
+    t(deck, s, x + 196, y + 96, 140, 22, "自助借还机", size=16, color=B["muted"])
+    for k in range(L_["rooms"]):
+        deck.rect(s, x + 20 + k * 52, y + 136, 44, 44, fill=B["tint"], line=B["mid"], line_width=1.2, radius=6)
+        deck.icon(s, "users", x + 30 + k * 52, y + 146, size=24, color=B["main"], stroke=2.0)
+    t(deck, s, x + 20, y + 194, 320, 26, [[("讨论室 ", {"color": B["muted"]}),
+                                           (f"{L_['rooms']} 间", {"bold": True, "color": B["main"], "size": 20}),
+                                           (f" · 每间 {L_['room_size']} 人", {"color": B["muted"]})]], size=16)
+
+    # cost and who pays
+    x, y = cols[1], rows[1]
+    num(deck, s, x + 20, y + 52, 300, str(L_["cost"]), " 万元", size=40, color=B["main"], pre="约")
+    bw = w - 40
+    deck.rect(s, x + 20, y + 124, bw * 0.7 - 2, 40, fill=B["main"])
+    deck.rect(s, x + 20 + bw * 0.7, y + 124, bw * 0.3, 40, fill=B["soft"])
+    t(deck, s, x + 20, y + 133, bw * 0.7 - 2, 22, f"约{L_['grant']}", size=16, bold=True, color="FFFFFF",
+      align="center")
+    t(deck, s, x + 20 + bw * 0.7, y + 133, bw * 0.3, 22, f"约{L_['own']}", size=16, bold=True, color=B["ink"],
+      align="center")
+    deck.icon(s, "landmark", x + 20, y + 178, size=24, color=B["main"], stroke=2.0)
+    t(deck, s, x + 50, y + 180, 150, 22, "区教育局专项", size=16, color=B["ink"])
+    deck.icon(s, "school", x + w - 44, y + 178, size=24, color=B["mid"], stroke=2.0)
+    t(deck, s, x + w - 140, y + 180, 90, 22, "学校自筹", size=16, color=B["muted"], align="right")
+
+    # proposal: open on Saturdays next term
+    x, y = cols[2], rows[1]
+    deck.illustration(s, "school", x + 196, y + 34, 136, 100, primary=B["mid"], accent=B["gold"])
+    chip(deck, s, x + 20, y + 58, "建议", B["gold_d"])
+    t(deck, s, x + 20, y + 100, 180, 28, "试点周六开放", size=20, bold=True, color=B["ink"])
+    for k, day in enumerate("一二三四五六日"):
+        dx = x + 20 + k * 45
+        if k < 5:
+            deck.rect(s, dx, y + 156, 40, 40, fill=B["main"], radius=4)
+            colour = "FFFFFF"
+        elif k == 5:
+            deck.rect(s, dx, y + 156, 40, 40, fill="FFFFFF", line=B["gold_d"], line_width=1.6, dash=True, radius=4)
+            colour = B["gold_d"]
+        else:
+            deck.rect(s, dx, y + 156, 40, 40, fill="FFFFFF", line=B["grey"], line_width=1.2, radius=4)
+            colour = B["faint"]
+        t(deck, s, dx, y + 165, 40, 22, day, size=16, bold=True, color=colour, align="center")
+    t(deck, s, x + 20, y + 206, 320, 22, "实色为开放日，虚线为试点", size=16, color=B["faint"])
+
+
+# ------------------------------------------------------------------ C04 开放日人数：位置和排序
+SITES = [("实验楼", 1240), ("宿舍样板间", 1050), ("图书馆", 980), ("体育馆", 860), ("食堂", 610), ("艺术楼", 420),
+         ("校史馆", 260)]
+OPEN_DAY = dict(date="10 月 12 日 9:00–16:00", count="人次为志愿者每小时点数相加，约数", busy=1000, queue="20 分钟",
+                gate="南门")
+O = OPEN_DAY
+OPEN_FACTS = [f"{name}：约 {n:,} 人次。" for name, n in SITES] + [
+    f"开放时间 {O['date']}；{O['count']}。",
+    f"超过 1,000 人次的两处，下午排队超过 {O['queue']}。",
+    f"入口在{O['gate']}。",
+]
+OPEN_TITLE = "开放日：实验楼和宿舍样板间人最多"
+# rough positions on the campus (not to scale, no paths: the material gives none)
+PLACES = {"宿舍样板间": (610, 196), "实验楼": (262, 250), "体育馆": (664, 396), "图书馆": (430, 372),
+          "艺术楼": (210, 452), "食堂": (590, 520), "校史馆": (300, 548)}
+
+
+@example("convert", "C04-a", "开放日人数 A：改写前，七行数字",
+         "七个展点一行一个数字，排队和入口写在最后：要逐行读、自己比大小，也看不出人挤在哪里。"
+         "材料与 B、C 页相同（SITES、OPEN_FACTS），11 条信息全是字。", fonts=FONTS)
+def open_day_before(deck, s):
+    frame_school(deck, s, OPEN_TITLE, 6, "校园开放日 · 复盘")
+    t(deck, s, B_L, 116, 1104, 26, f"{O['date']} · {O['count']}", size=18, color=B["muted"])
+    for i, (name, n) in enumerate(SITES):
+        x, y = B_L + (i % 2) * 560, 168 + (i // 2) * 76
+        t(deck, s, x, y, 520, 28, name, size=20, bold=True, color=B["main"])
+        t(deck, s, x, y + 32, 520, 26, f"到访约 {n:,} 人次。", size=18, color=B["muted"])
+    deck.line(s, B_L, 488, B_R, 488, color=B["grey"], width=1)
+    bullets(deck, s, B_L, 508, 1104, OPEN_FACTS[-2:], step=44)
+
+
+@example("convert", "C04-b", "开放日人数 B：改写后，按大致位置摆",
+         "展点按校园里的大致方位摆，圆越大人次越多，排长队的两处换色并配沙漏，入口画在南门。"
+         "看得出人挤在哪里、离入口多远，适合安排路线和志愿者；比较多少要在圆之间来回找。"
+         "11 条信息：8 条在图里，时间和口径留在图例。", fonts=FONTS)
+def open_day_place(deck, s):
+    frame_school(deck, s, OPEN_TITLE, 6, "校园开放日 · 复盘")
+    deck.rect(s, B_L, 116, 760, 536, fill=B["panel"], radius=14)
+    for name, n in SITES:
+        cx, cy = PLACES[name]
+        r = 1.3 * n ** 0.5
+        busy = n > O["busy"]
+        deck.ellipse(s, cx, cy, r, fill=B["gold"] if busy else B["mid"])
+        lx = cx + r + 12
+        if busy:
+            deck.icon(s, "hourglass", lx, cy - 30, size=24, color=B["gold_d"], stroke=2.2)
+        t(deck, s, lx + (30 if busy else 0), cy - 30, 160, 26, name, size=18, bold=True, color=B["ink"], wrap=False)
+        t(deck, s, lx, cy + 2, 140, 22, f"约 {n:,}", size=16, color=B["muted"], wrap=False)
+    gx, gy = 468, 600  # the south gate: two posts and a lintel on the campus edge
+    deck.rect(s, gx - 40, gy, 12, 52, fill=B["main"], radius=2)
+    deck.rect(s, gx + 28, gy, 12, 52, fill=B["main"], radius=2)
+    deck.rect(s, gx - 48, gy - 8, 96, 12, fill=B["main"], radius=3)
+    t(deck, s, gx + 56, gy + 14, 160, 24, f"{O['gate']} · 入口", size=18, bold=True, color=B["main"])
+    lx = 880
+    t(deck, s, lx, 124, 312, 26, "怎么看", size=18, bold=True, color=B["ink"])
+    deck.ellipse(s, lx + 16, 186, 16, fill=B["mid"])
+    deck.ellipse(s, lx + 54, 186, 9, fill=B["mid"])
+    t(deck, s, lx + 76, 175, 230, 22, "圆越大，人次越多", size=16, color=B["ink"])
+    deck.ellipse(s, lx + 16, 236, 16, fill=B["gold"])
+    deck.icon(s, "hourglass", lx + 44, 224, size=24, color=B["gold_d"], stroke=2.2)
+    t(deck, s, lx + 76, 214, 236, 46, f"超过 1,000 人次，\n下午排队超过 {O['queue']}", size=16, color=B["ink"],
+      line_spacing=1.25)
+    deck.line(s, lx, 288, B_R, 288, color=B["grey"], width=1)
+    t(deck, s, lx, 302, 312, 120, [O["date"], O["count"], "位置为大致方位，不按比例"], size=16, color=B["muted"],
+      line_spacing=1.35, space_after=6)
+
+
+@example("convert", "C04-c", "开放日人数 C：同一份数据，按人次排序",
+         "同样的七个数按多少排成条形图，超过 1,000 的两根换色、旁边写排队：一眼比出谁多谁少，适合排名和取舍；"
+         "看不出位置，入口只能写在旁边。B、C 都没丢信息，按这一页要回答的问题选：问“在哪里”用位置，问“谁多”用排序。",
+         fonts=FONTS)
+def open_day_sorted(deck, s):
+    frame_school(deck, s, OPEN_TITLE, 6, "校园开放日 · 复盘")
+    t(deck, s, B_L, 116, 760, 26, "到访人次，从多到少（约数）", size=18, color=B["muted"])
+    names = [n for n, _ in SITES]
+    deck.bar_chart(s, B_L, 150, 760, 500, names, [v for _, v in SITES], highlight=[0, 1], color=B["gold"],
+                   base=B["soft"], font=SANS, size=18, label_color=B["ink"], axis_color=B["ink"], gap_width=55,
+                   number_format="#,##0")
+    lx = 880
+    deck.rect(s, lx, 150, B_R - lx, 102, fill=B["panel"], radius=10)
+    deck.rect(s, lx + 20, 174, 28, 18, fill=B["gold"])
+    deck.icon(s, "hourglass", lx + 22, 208, size=24, color=B["gold_d"], stroke=2.2)
+    t(deck, s, lx + 64, 170, 240, 60, f"超过 1,000 人次的两处\n下午排队超过 {O['queue']}", size=18, bold=True,
+      color=B["ink"], line_spacing=1.3)
+    deck.icon(s, "flag", lx, 300, size=24, color=B["main"], stroke=2.0)
+    t(deck, s, lx + 34, 301, 280, 24, f"入口在{O['gate']}", size=16, color=B["ink"])
+    t(deck, s, lx, 350, 312, 100, [O["date"], O["count"]], size=16, color=B["muted"], line_spacing=1.35,
+      space_after=6)
+
+
+# ================================================================== 恒川电机：顶部细条，页脚标志
+C = dict(main="2F5D7C", mid="5E88A6", soft="A9C1D3", tint="E6EDF2", hot="E8742A", hot_d="B4521A",
+         ink="23262B", muted="5C636D", faint="8F959D", panel="F3F4F6", warm="FFF1E6", grey="CDD3D9")
+C_L, C_R = 64, 1216
+
+
+def frame_factory(deck, s, title, page):
+    """恒川电机 template: an orange rule along the top edge, a short rule under the title, the logo and
+    page number together at the bottom left."""
+    deck.rect(s, 0, 0, 1280, 8, fill=C["hot"])
+    t(deck, s, C_L, 34, 1120, 46, title, size=30, bold=True, color=C["ink"])
+    deck.rect(s, C_L, 90, 56, 4, fill=C["hot"])
+    t(deck, s, C_L, 680, 700, 22, [[("恒川电机", {"bold": True, "color": C["ink"], "size": 16}),
+                                    (f"   |   设备部 · 虚构示例   |   {page:02d}", {"color": C["faint"]})]], size=13)
+
+
+# ------------------------------------------------------------------ C02 边角料去向
+SCRAP = dict(total=120, melt=70, sell=38, landfill=12, period="1–9 月平均", buyers=2, pickups="每周 2 次",
+             landfill_fee=180, cement_fee=260, extra="约 1.2 万元")
+S_ = SCRAP
+SCRAP_FACTS = [
+    f"冲压和绕线每月产生边角料约 {S_['total']} 吨（{S_['period']}）。",
+    f"约 {S_['melt']} 吨回炉，在本厂铸造车间自用。",
+    f"约 {S_['sell']} 吨卖给 {S_['buyers']} 家回收商，按吨结算、月结；回收商上门拉运，{S_['pickups']}。",
+    f"约 {S_['landfill']} 吨送填埋场，主要是漆包线头和油污铁屑；填埋处置费每吨约 {S_['landfill_fee']} 元。",
+    "建议：填埋部分改为与水泥厂协同处置，预计明年起填埋降到 0。",
+    f"协同处置每吨约 {S_['cement_fee']} 元，比填埋高约 {S_['cement_fee'] - S_['landfill_fee']} 元；预计每年多付{S_['extra']}。",
+]
+SCRAP_TITLE = f"边角料去向：每月约 {S_['total']} 吨，一成仍在填埋"
+
+
+@example("convert", "C02-a", "边角料去向 A：改写前，分段要点",
+         "三个去向各写一两句，建议放在右边：吨数、结算方式、处置费都埋在句子里，看不出量的大小和流向。"
+         "材料与 B 页相同（SCRAP_FACTS），13 条信息全是字。", fonts=FONTS)
+def scrap_before(deck, s):
+    frame_factory(deck, s, SCRAP_TITLE, 6)
+    t(deck, s, C_L, 116, 1150, 28, SCRAP_FACTS[0], size=18, color=C["ink"])
+    y = 168
+    for head, lines in (("回炉自用", [SCRAP_FACTS[1]]),
+                        ("卖给回收商", [f"约 {S_['sell']} 吨卖给 {S_['buyers']} 家回收商，按吨结算、月结。",
+                                    f"回收商上门拉运，{S_['pickups']}。"]),
+                        ("填埋", [f"约 {S_['landfill']} 吨送填埋场，主要是漆包线头和油污铁屑。",
+                                f"填埋处置费每吨约 {S_['landfill_fee']} 元。"])):
+        t(deck, s, C_L, y, 600, 28, head, size=20, bold=True, color=C["main"])
+        y = bullets(deck, s, C_L, y + 38, 640, lines) + 18
+    deck.rect(s, 752, 168, C_R - 752, 300, fill=C["panel"], radius=10)
+    t(deck, s, 776, 188, 400, 28, "建议", size=20, bold=True, color=C["hot_d"])
+    bullets(deck, s, 776, 230, C_R - 800, ["填埋部分改为与水泥厂协同处置，预计明年起填埋降到 0。"], h=70)
+    bullets(deck, s, 776, 310, C_R - 800, [f"协同处置每吨约 {S_['cement_fee']} 元，比填埋高约 "
+                                          f"{S_['cement_fee'] - S_['landfill_fee']} 元。",
+                                          f"预计每年多付{S_['extra']}。"], step=44)
+
+
+@example("convert", "C02-b", "边角料去向 B：改写后，按吨数画宽窄的流向",
+         "工厂插画出发，三条流向按吨数画宽窄（2 像素 = 1 吨），结算和拉运方式写在回收商那条上；"
+         "回收商配货车插画，填埋一条换成强调色。建议画成填埋 12 → 0 和两根处置费条，多付的钱写成数字。"
+         "13 条信息：10 条在图里。", fonts=FONTS)
+def scrap_after(deck, s):
+    frame_factory(deck, s, SCRAP_TITLE, 6)
+    deck.illustration(s, "factory", C_L, 128, 200, 150, primary=C["main"], accent=C["hot"])
+    num(deck, s, C_L, 288, 220, str(S_["total"]), " 吨/月", size=36, color=C["ink"], pre="约")
+    t(deck, s, C_L, 340, 210, 50, ["冲压和绕线", S_["period"]], size=16, color=C["muted"], line_spacing=1.2)
+    k = 2  # px per tonne
+    src_x, bend0, bend1, end_x = 280, 400, 580, 760
+    flows = [(S_["melt"], 112, C["main"]), (S_["sell"], 300, C["mid"]), (S_["landfill"], 470, C["hot"])]
+    sy = 150
+    for tonnes, dy, colour in flows:
+        th = tonnes * k
+        deck.polygon(s, [(src_x, sy), (bend0, sy), (bend1, dy), (end_x, dy), (end_x + 22, dy + th / 2),
+                         (end_x, dy + th), (bend1, dy + th), (bend0, sy + th), (src_x, sy + th)], fill=colour)
+        sy += th
+    # how the sold part moves: on its band
+    t(deck, s, bend1 + 10, 308, 170, 22, "按吨结算 · 月结", size=16, bold=True, color="FFFFFF", wrap=False)
+    t(deck, s, bend1 + 10, 336, 170, 22, f"上门拉运 {S_['pickups']}", size=16, color="FFFFFF", wrap=False)
+    dx = 800
+    deck.icon(s, "recycle", dx, 140, size=44, color=C["main"], stroke=2.0)
+    num(deck, s, dx + 58, 128, 300, str(S_["melt"]), " 吨", size=32, color=C["main"], pre="约")
+    t(deck, s, dx + 58, 176, 340, 22, "回炉，铸造车间自用", size=16, color=C["muted"])
+    deck.illustration(s, "truck", dx - 6, 300, 112, 76, primary=C["mid"], accent=C["hot"])
+    num(deck, s, dx + 118, 300, 280, str(S_["sell"]), " 吨", size=28, color=C["mid"], pre="约")
+    t(deck, s, dx + 118, 342, 280, 22, f"卖给 {S_['buyers']} 家回收商", size=16, color=C["muted"])
+    deck.icon(s, "triangle-alert", dx, 458, size=32, color=C["hot"], stroke=2.0)
+    num(deck, s, dx + 46, 448, 300, str(S_["landfill"]), " 吨送填埋", size=28, color=C["hot_d"], pre="约")
+    t(deck, s, dx + 46, 490, 370, 22, f"漆包线头、油污铁屑 · 约 {S_['landfill_fee']} 元/吨", size=16,
+      color=C["muted"])
+
+    # proposal
+    y0 = 540
+    deck.rect(s, C_L, y0, C_R - C_L, 112, fill=C["warm"], radius=10)
+    chip(deck, s, C_L + 20, y0 + 18, "建议", C["hot_d"])
+    t(deck, s, C_L + 92, y0 + 20, 400, 28, "填埋改为水泥厂协同处置", size=20, bold=True, color=C["ink"])
+    t(deck, s, C_L + 20, y0 + 66, 120, 30, [[(f"约 {S_['landfill']} 吨", {"color": C["faint"], "size": 20})]],
+      wrap=False)
+    deck.line(s, C_L + 112, y0 + 80, C_L + 170, y0 + 80, color=C["hot_d"], width=2, arrow=True)
+    num(deck, s, C_L + 180, y0 + 60, 100, "0", " 吨", size=28, color=C["hot_d"])
+    t(deck, s, C_L + 260, y0 + 70, 140, 22, "预计明年起", size=16, color=C["muted"])
+    bx = 560
+    t(deck, s, bx, y0 + 16, 260, 22, "每吨处置费（元）", size=16, color=C["muted"])
+    for i, (label, fee, colour) in enumerate((("填埋", S_["landfill_fee"], C["grey"]),
+                                              ("协同处置", S_["cement_fee"], C["hot"]))):
+        yy = y0 + 46 + i * 30
+        t(deck, s, bx, yy + 2, 70, 22, label, size=16, color=C["ink"])
+        bw = 0.75 * fee
+        deck.rect(s, bx + 76, yy + 2, bw, 22, fill=colour)
+        t(deck, s, bx + 84 + bw, yy + 1, 70, 24, f"约 {fee}", size=16, bold=True, color=C["ink"], wrap=False)
+    num(deck, s, 1000, y0 + 22, 200, "1.2", " 万元", size=30, color=C["hot_d"], align="right", pre="约")
+    t(deck, s, 1000, y0 + 70, 200, 22, "预计每年多付", size=16, color=C["muted"], align="right")
+
+
+# ------------------------------------------------------------------ C05 空压机方案
+AIR = dict(age=14, power="约 10.4 万度", options=[
+    dict(name="大修旧机", cost=45, cost_text="约 45 万元", down=10, saving=None, extra="预计再用约 3 年"),
+    dict(name="换新变频机", cost=120, cost_text="约 120 万元", down=3, saving=30, extra=None),
+    dict(name="租赁变频机", cost=None, cost_text="每月约 3.8 万元 · 5 年期", down=2, saving=30, extra=None)],
+    pick=1, price=0.8, per_year=30, years=4)
+AIR_FACTS = [
+    f"现有空压机已用 {AIR['age']} 年，每月耗电{AIR['power']}。",
+    "大修旧机：约 45 万元，停机约 10 天；电耗不变，预计还能用约 3 年。",
+    "换新变频机：约 120 万元，停机约 3 天；电耗预计降约 30%。",
+    "租赁变频机：每月租金约 3.8 万元，5 年期；停机约 2 天；电耗预计降约 30%。",
+    f"推荐换新变频机：按电耗降约 30%、电价 {AIR['price']} 元/度估算，每年少付电费约 {AIR['per_year']} 万元，"
+    f"预计约 {AIR['years']} 年收回。",
+]
+AIR_TITLE = f"空压机：建议换新变频机，预计约 {AIR['years']} 年收回"
+
+
+@example("convert", "C05-a", "设备方案 A：改写前，三段方案说明",
+         "三种做法各写一句，推荐和测算写在最后：投入、停机、电耗要在三句话之间来回比。"
+         "材料与 B 页相同（AIR_FACTS），17 条信息全是字。", fonts=FONTS)
+def air_before(deck, s):
+    frame_factory(deck, s, AIR_TITLE, 9)
+    t(deck, s, C_L, 116, 1150, 28, AIR_FACTS[0], size=18, color=C["ink"])
+    for i, fact in enumerate(AIR_FACTS[1:4]):
+        name, text = fact.split("：", 1)
+        y = 170 + i * 92
+        t(deck, s, C_L, y, 400, 28, name, size=20, bold=True, color=C["main"])
+        t(deck, s, C_L, y + 36, 1150, 28, text, size=18, color=C["muted"])
+    deck.rect(s, C_L, 460, C_R - C_L, 120, fill=C["panel"], radius=10)
+    pick, reason = AIR_FACTS[4].split("：", 1)
+    t(deck, s, C_L + 24, 480, 1100, 28, pick, size=20, bold=True, color=C["main"])
+    t(deck, s, C_L + 24, 520, 1100, 50, reason, size=18, color=C["muted"], line_spacing=1.3)
+
+
+@example("convert", "C05-b", "设备方案 B：改写后，三列同尺比较，回收画成四段",
+         "每种做法配同一张空压机插画（为这个例子画的，见 art/air-compressor.svg）；一次性投入画成同一比例的条，"
+         "租赁按月付、不和一次性投入比长短，写成数字；停机按天画方块，电耗画成剩下的长度；推荐的一列加底色。"
+         "回收画成四段“每年约 30 万”拼成 120 万，“预计”“估算”和电价都留在旁边。17 条信息：14 条在图里。",
+         fonts=FONTS)
+def air_after(deck, s):
+    frame_factory(deck, s, AIR_TITLE, 9)
+    deck.icon(s, "hourglass", C_L, 112, size=24, color=C["muted"], stroke=2.0)
+    t(deck, s, C_L + 32, 113, 260, 24, [[("现有空压机已用 ", {}), (f"{AIR['age']} 年", {"bold": True, "color": C["ink"]})]],
+      size=16, color=C["muted"])
+    deck.icon(s, "zap", C_L + 250, 112, size=24, color=C["muted"], stroke=2.0)
+    t(deck, s, C_L + 282, 113, 300, 24, [[("每月耗电", {}), (AIR["power"], {"bold": True, "color": C["ink"]})]],
+      size=16, color=C["muted"])
+    xs, w = [C_L, 460, 856], 360
+    deck.rect(s, xs[AIR["pick"]] - 4, 148, w + 8, 372, fill=C["tint"], radius=12)
+    for i, (x, o) in enumerate(zip(xs, AIR["options"])):
+        best = i == AIR["pick"]
+        deck.illustration(s, str(COMPRESSOR), x + 100, 156, 160, 110, primary=C["main"] if best else C["soft"],
+                          accent=C["hot"])
+        if i == 0:
+            deck.icon(s, "wrench", x + 262, 166, size=34, color=C["muted"], stroke=2.0)
+        if i == 2:
+            deck.icon(s, "file-signature", x + 262, 166, size=34, color=C["muted"], stroke=2.0)
+        if best:
+            chip(deck, s, x + 16, 162, "推荐", C["hot_d"])
+        t(deck, s, x, 274, w, 30, o["name"], size=22, bold=True, color=C["main"] if best else C["ink"], align="center")
+        # one-off cost, on one scale; the lease is monthly, so it is a number, not a bar
+        t(deck, s, x + 16, 324, 54, 22, "投入", size=16, color=C["muted"])
+        if o["cost"]:
+            bw = 170 * o["cost"] / 120
+            deck.rect(s, x + 70, 322, bw, 26, fill=C["main"] if best else C["soft"])
+            t(deck, s, x + 78 + bw, 322, 120, 26, o["cost_text"].replace("元", ""), size=18, bold=True,
+              color=C["ink"], wrap=False)
+        else:
+            t(deck, s, x + 70, 322, 290, 26, o["cost_text"].replace("元", ""), size=18, bold=True, color=C["ink"],
+              wrap=False)
+            t(deck, s, x + 70, 350, 290, 22, "按月付，不和一次性投入比长短", size=16, color=C["faint"])
+        t(deck, s, x + 16, 386, 54, 22, "停机", size=16, color=C["muted"])
+        for d in range(o["down"]):
+            deck.rect(s, x + 70 + d * 19, 389, 15, 18, fill=C["hot"], radius=2)
+        t(deck, s, x + 78 + o["down"] * 19, 384, 120, 26, f"约 {o['down']} 天", size=18, bold=True, color=C["ink"],
+          wrap=False)
+        t(deck, s, x + 16, 440, 54, 22, "电耗", size=16, color=C["muted"])
+        if o["saving"]:
+            keep = 170 * (100 - o["saving"]) / 100
+            deck.rect(s, x + 70, 438, 170, 26, fill=None, line=C["grey"], line_width=1.2, dash=True)
+            deck.rect(s, x + 70, 438, keep, 26, fill=C["main"] if best else C["soft"])
+            t(deck, s, x + 248, 438, 110, 26, f"约 −{o['saving']}%", size=18, bold=True, color=C["ink"], wrap=False)
+            t(deck, s, x + 70, 468, 200, 22, "预计", size=16, color=C["faint"])
+        else:
+            deck.rect(s, x + 70, 438, 170, 26, fill=C["grey"])
+            t(deck, s, x + 248, 438, 110, 26, "不变", size=18, bold=True, color=C["ink"])
+        if o["extra"]:
+            deck.icon(s, "hourglass", x + 70, 480, size=22, color=C["muted"], stroke=2.0)
+            t(deck, s, x + 100, 480, 240, 24, o["extra"], size=16, color=C["ink"])
+
+    # payback of the recommended option: four years of savings fill the investment
+    y0 = 546
+    deck.icon(s, "coins", C_L, y0 + 2, size=28, color=C["main"], stroke=2.0)
+    t(deck, s, C_L + 38, y0 + 2, 300, 28, "换新的回收（预计）", size=20, bold=True, color=C["main"])
+    t(deck, s, C_L + 38, y0 + 38, 330, 48, f"按电耗降约 30%、电价 {AIR['price']} 元/度估算", size=16,
+      color=C["muted"])
+    bx, bw = 440, C_R - 440
+    seg = bw / AIR["years"]
+    for k in range(AIR["years"]):
+        deck.rect(s, bx + k * seg, y0, seg - 4, 38, fill=C["main"] if k % 2 == 0 else C["mid"])
+        t(deck, s, bx + k * seg, y0 + 9, seg - 4, 22, f"第 {k + 1} 年 约 {AIR['per_year']} 万", size=16, bold=True,
+          color="FFFFFF", align="center")
+    deck.line(s, bx, y0 + 54, C_R - 4, y0 + 54, color=C["ink"], width=1.2)
+    deck.line(s, bx, y0 + 48, bx, y0 + 60, color=C["ink"], width=1.2)
+    deck.line(s, C_R - 4, y0 + 48, C_R - 4, y0 + 60, color=C["ink"], width=1.2)
+    t(deck, s, bx, y0 + 66, bw, 24, "= 投入约 120 万元", size=18, bold=True, color=C["ink"], align="center")

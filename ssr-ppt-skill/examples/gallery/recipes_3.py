@@ -99,7 +99,7 @@ def r15_frame(deck, s):
 def r15_cover(deck, s):
     k = R15
     r15_frame(deck, s)
-    deck.text(s, 90, 100, 600, 24, "说明书 · 第 1 版 · 2027.07", size=15, font=MONO, color=k["gray"], ea=HOS)
+    deck.text(s, 90, 100, 600, 24, "说明书 · 第 1 版 · 2027.07", size=16, font=MONO, color=k["gray"], ea=HOS)
     deck.text(s, 90, 200, 560, 200, "把产地\n搬进社区", size=72, font=HOS, bold=True, color=k["ink"], line_spacing=1.15)
     deck.text(s, 90, 420, 520, 60, "社区店升级的四个步骤", size=24, font=HOS, color=k["ink"])
     deck.rect(s, 92, 470, 40, 4, fill=k["accent"])
@@ -112,7 +112,7 @@ def r15_data(deck, s):
     r15_frame(deck, s)
     deck.text(s, 90, 80, 1000, 50, "损耗率：6 个月从 9.6% 降到 5.9%", size=34, font=HOS, bold=True, color=k["ink"])
     deck.line_chart(s, 80, 150, 840, 400, C.MONTHS, {"损耗率": C.LOSS}, colors=[k["ink"]], labels="all",
-                    number_format='0.0"%"', font=MONO, size=14, axis_color=k["ink"], axis_line=k["ink"], width=2,
+                    number_format='0.0"%"', font=MONO, size=16, axis_color=k["ink"], axis_line=k["ink"], width=2,
                     markers=True, min_value=4)
     num_badge(deck, s, 432, 344, 1, fill=k["accent"])
     num_badge(deck, s, 852, 462, 2)
@@ -122,9 +122,9 @@ def r15_data(deck, s):
     deck.text(s, 600, 590, 40, 30, "②", size=22, font=HOS, color=k["ink"])
     deck.text(s, 640, 592, 500, 30, "6 月：5.9%，比 1 月低 3.7 个百分点", size=19, font=HOS, color=k["ink"])
     deck.rect(s, 940, 160, 260, 380, line=k["ink"], line_width=1, dash=True)
-    deck.text(s, 960, 180, 220, 24, "单位：%", size=14, font=MONO, color=k["gray"], ea=HOS)
-    deck.text(s, 960, 210, 220, 300, "口径：报损金额 ÷\n进货金额；打折售出\n不计入报损。\n\n数据为虚构示例。", size=15, font=HOS,
-              color=k["gray"], line_spacing=1.6)
+    deck.text(s, 960, 180, 220, 24, "单位：%", size=16, font=MONO, color=k["gray"], ea=HOS)
+    deck.text(s, 960, 214, 224, 300, "口径：报损金额 ÷\n进货金额；打折售出\n不计入报损。\n\n数据为虚构示例。", size=17, font=HOS,
+              color=k["gray"], line_spacing=1.55)
 
 
 @example("recipes", "R15-c", "R15 线描说明书 · 图片页", "一张线描图，三处带圈编号指到部位；右侧图例逐条说明，像零件表。", (HOS, MONO))

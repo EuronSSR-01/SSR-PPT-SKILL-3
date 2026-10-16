@@ -745,7 +745,7 @@ class Deck:
             value_axis.major_gridlines.format.line.color.rgb = rgb(grid)
             value_axis.major_gridlines.format.line.width = self.pt(1)
             value_axis.format.line.fill.background()
-            value_axis.tick_labels.font.size = self.pt(size * 0.85)
+            value_axis.tick_labels.font.size = self.pt(max(size * 0.85, min(size, 16)))  # not below 16px (12pt)
             value_axis.tick_labels.font.color.rgb = rgb(label_color)
             value_axis.tick_labels.number_format = number_format
             value_axis.tick_labels.number_format_is_linked = False

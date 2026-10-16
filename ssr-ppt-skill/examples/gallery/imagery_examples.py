@@ -31,7 +31,7 @@ def choose_photo(deck, s):
         verdict(deck, s, x, 450, ok, text, w=350)
     deck.rect(s, M, 560, W, 1, fill=LINE)
     deck.text(s, M, 576, W, 60, "写进 sources.md：图片 radishes.jpg｜第 5 页｜“20120414-DM-LSC-2796”, USDAgov, Public Domain｜"
-              "来源页 flickr.com/photos/41284017@N08/8427643419", size=15, font=SANS, color=MUTED, line_spacing=1.5)
+              "来源页 flickr.com/photos/41284017@N08/8427643419", size=16, font=SANS, color=MUTED, line_spacing=1.45)
 
 
 @example("imagery", "I02-a", "同一张照片的四种处理", "原图、黑白、降饱和偏暖、双色调：全套选一种并保持一致。", F)

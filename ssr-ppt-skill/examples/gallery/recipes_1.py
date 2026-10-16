@@ -50,7 +50,7 @@ def r1_data(deck, s):
     swiss_head(deck, s, "经营数据", "02")
     deck.text(s, 72, 96, 760, 130, "损耗率连续 6 个月下降，\n6 月降到 5.9%", size=44, font=SANS, bold=True, color=k["ink"],
               line_spacing=1.2)
-    deck.text(s, 72, 232, 600, 24, "生鲜损耗率，%，2027 年 1–6 月（虚构示例）", size=15, font=SANS, color=k["gray"])
+    deck.text(s, 72, 232, 600, 24, "生鲜损耗率，%，2027 年 1–6 月（虚构示例）", size=17, font=SANS, color=k["gray"])
     deck.bar_chart(s, 66, 280, 760, 370, C.MONTHS, C.LOSS, highlight={5}, horizontal=False, color=k["red"],
                    base="A8A8A2", number_format="0.0", font=INTER, size=16, label_color=k["ink"], axis_color=k["ink"],
                    gap_width=40)
@@ -58,7 +58,7 @@ def r1_data(deck, s):
     deck.text(s, 880, 296, 328, 130, "−3.7", size=110, font=INTER_BLACK, color=k["red"], ea=SANS)
     deck.text(s, 884, 430, 320, 60, "个百分点\n1 月 9.6% → 6 月 5.9%", size=17, font=SANS, color=k["ink"], line_spacing=1.5)
     deck.rect(s, 880, 520, 328, 1, fill=k["rule"])
-    deck.text(s, 884, 534, 320, 60, "3 月起按日订货，\n临期商品晚 8 点折扣", size=15, font=SANS, color=k["gray"], line_spacing=1.5)
+    deck.text(s, 884, 534, 320, 60, "3 月起按日订货，\n临期商品晚 8 点折扣", size=16, font=SANS, color=k["gray"], line_spacing=1.5)
 
 
 @example("recipes", "R01-c", "R1 瑞士编辑网格 · 图片页", "黑白高对比照片占 8 栏、硬边；数字在左侧纵列，用细线分隔。", (SANS, INTER_BLACK))
@@ -88,11 +88,11 @@ def r1_signature(deck, s):
         deck.rect(s, x, 0, 1, 720, fill="E2E2DC")
     swiss_head(deck, s, "一个数字", "04")
     deck.text(s, -40, 110, 1100, 420, "5.9%", size=380, font=INTER_BLACK, color=k["red"], wrap=False, ea=SANS)
-    deck.text(s, 72, 600, 250, 60, "生鲜损耗率\n2027 年 6 月", size=14, font=SANS, color=k["ink"], line_spacing=1.5)
-    deck.text(s, 72 + 3 * 96.7, 600, 250, 60, "1 月\n9.6%", size=14, font=INTER, color=k["gray"], line_spacing=1.5, ea=SANS)
-    deck.text(s, 72 + 6 * 96.7, 600, 250, 60, "同城同业\n9.1%", size=14, font=INTER, color=k["gray"], line_spacing=1.5,
+    deck.text(s, 72, 600, 250, 60, "生鲜损耗率\n2027 年 6 月", size=16, font=SANS, color=k["ink"], line_spacing=1.5)
+    deck.text(s, 72 + 3 * 96.7, 600, 250, 60, "1 月\n9.6%", size=16, font=INTER, color=k["gray"], line_spacing=1.5, ea=SANS)
+    deck.text(s, 72 + 6 * 96.7, 600, 250, 60, "同城同业\n9.1%", size=16, font=INTER, color=k["gray"], line_spacing=1.5,
               ea=SANS)
-    deck.text(s, 72 + 9 * 96.7, 600, 300, 60, "差距\n3.2 个百分点", size=14, font=SANS, color=k["ink"], line_spacing=1.5)
+    deck.text(s, 72 + 9 * 96.7, 600, 300, 60, "差距\n3.2 个百分点", size=16, font=SANS, color=k["ink"], line_spacing=1.5)
 
 
 # ====================================================================== R02 dark launch
@@ -120,7 +120,7 @@ def r2_data(deck, s):
                                       ("%", {"size": 80, "font": INTER, "color": k["gray"]})]], align="center", ea=HOS)
     deck.text(s, 0, 420, 1280, 40, "半年降了 3.7 个百分点", size=30, font=HOS, bold=True, color=k["acc"], align="center")
     deck.line_chart(s, 340, 480, 600, 170, C.MONTHS, {"损耗率": C.LOSS}, colors=[k["acc"]], labels=None, font=HOS,
-                    size=14, axis_color=k["gray"], axis_line="2A2A30", width=3, min_value=4)
+                    size=16, axis_color=k["gray"], axis_line="2A2A30", width=3, min_value=4)
 
 
 @example("recipes", "R02-c", "R2 暗场发布会 · 图片页", "暗调照片做背景，一句话配一张图；其余事实压成一行小字。", (HOS_BLACK,))
@@ -164,10 +164,10 @@ def r3_cover(deck, s):
     deck.text(s, 80, 150, 1000, 110, "把产地搬进社区", size=80, font=SERIF, bold=True, color=k["ink"])
     deck.text(s, 80, 270, 900, 80, "半年里，一家社区生鲜连锁把损耗率从 9.6% 降到 5.9%。\n我们把这 3.7 个百分点拆开来看。", size=22,
               font=SANS, color=k["ink"], line_spacing=1.6)
-    deck.text(s, 80, 372, 600, 22, "2027 年 7 月 · 虚构示例", size=14, font=SANS, color=k["gray"])
-    deck.text(s, 80, 430, 600, 24, "月订单，1 月 18 万单 → 6 月 36 万单", size=15, font=SANS, color=k["gray"])
+    deck.text(s, 80, 372, 600, 22, "2027 年 7 月 · 虚构示例", size=16, font=SANS, color=k["gray"])
+    deck.text(s, 80, 428, 600, 26, "月订单，1 月 18 万单 → 6 月 36 万单", size=17, font=SANS, color=k["gray"])
     deck.line_chart(s, 70, 456, 1140, 210, C.MONTHS, {"月订单": C.ORDERS}, colors=[k["red"]], labels="last",
-                    number_format='0" 万单"', font=SANS, size=15, axis_color=k["gray"], axis_line=k["grid"], width=4,
+                    number_format='0" 万单"', font=SANS, size=17, axis_color=k["gray"], axis_line=k["grid"], width=4,
                     min_value=0)
 
 
@@ -185,7 +185,7 @@ def r3_data(deck, s):
     deck.text(s, 1050, 386, 200, 30, "知野生鲜", size=17, font=SANS, bold=True, color=k["red"])
     deck.line(s, 502, 322, 502, 430, color=k["ink"], width=1)
     deck.ellipse(s, 502, 322, 4, fill=k["ink"])
-    deck.text(s, 510, 424, 260, 50, "3 月：按日订货\n全面执行", size=14, font=SANS, color=k["ink"], line_spacing=1.4)
+    deck.text(s, 510, 424, 260, 50, "3 月：按日订货\n全面执行", size=16, font=SANS, color=k["ink"], line_spacing=1.4)
     deck.text(s, 80, 664, 900, 22, "来源：知野生鲜经营数据；同城同业为三家公开披露数据的均值（均为虚构示例）", size=13, font=SANS,
               color=k["gray"])
 
@@ -234,7 +234,7 @@ def r4_cover(deck, s):
     bg(s, k["bg"])
     deck.picture(s, treated("radishes", "grade", saturation=0.72, warmth=0.05, brightness=1.04), 540, 96, 620, 528)
     deck.text(s, 432, 96, 64, 420, "把产地搬进社区", size=40, font=SERIF_SEMI, color=k["text"], vertical=True)
-    deck.text(s, 96, 96, 300, 22, "知 野 生 鲜", size=14, font=SERIF, color=k["text"], spacing=0.3)
+    deck.text(s, 96, 96, 300, 22, "知 野 生 鲜", size=16, font=SERIF, color=k["text"], spacing=0.3)
     deck.text(s, 96, 540, 330, 34, "Field to Neighbourhood", size=24, font=CORM, color=k["text"], ea=SERIF)
     deck.text(s, 96, 580, 330, 26, "No. 07  —  Summer 2027", size=16, font=CORM, color=k["gray"], ea=SERIF)
     deck.rect(s, 96, 624, 24, 2, fill=k["acc"])
@@ -247,22 +247,22 @@ def r4_data(deck, s):
     deck.text(s, 120, 120, 800, 50, "半年，损耗率从 9.6% 降到 5.9%", size=32, font=SERIF_SEMI, color=k["text"])
     deck.text(s, 120, 176, 600, 26, "生鲜损耗率，2027 年 1–6 月", size=16, font=SERIF, color=k["gray"])
     deck.line_chart(s, 110, 250, 760, 330, C.MONTHS, {"损耗率": C.LOSS}, colors=[k["text"]], labels="all",
-                    number_format='0.0"%"', font=SERIF, size=14, axis_color=k["gray"], axis_line=k["line"], width=1.75,
+                    number_format='0.0"%"', font=SERIF, size=16, axis_color=k["gray"], axis_line=k["line"], width=1.75,
                     markers=True, min_value=4)
     deck.text(s, 1040, 250, 40, 300, "按日订货　临期折扣", size=17, font=SERIF, color=k["gray"], vertical=True)
     deck.text(s, 1090, 250, 40, 300, "三月起实施", size=17, font=SERIF, color=k["acc"], vertical=True)
     deck.text(s, 120, 640, 400, 24, "— 07 —", size=16, font=CORM, color=k["gray"], ea=SERIF)
 
 
-@example("recipes", "R04-c", "R4 日式杂志留白 · 图片页", "一大幅照片配一小段文字；文字很小，靠位置和留白取胜。", (SERIF_SEMI,))
+@example("recipes", "R04-c", "R4 日式杂志留白 · 图片页", "一大幅照片配一小段文字；字不多，靠位置和留白取胜。", (SERIF_SEMI,))
 def r4_picture(deck, s):
     k = R4
     bg(s, k["bg"])
     deck.picture(s, treated("potatoes", "grade", saturation=0.7, warmth=0.06, brightness=1.08), 96, 96, 700, 528)
-    deck.text(s, 860, 400, 330, 50, "土豆出地，第二天进店。", size=26, font=SERIF_SEMI, color=k["text"])
-    deck.text(s, 860, 452, 320, 90, "清晨采摘，四小时内入城市仓，\n第二天上午摆上社区店的货架。", size=15, font=SERIF, color=k["gray"],
-              line_spacing=1.8)
-    deck.text(s, 860, 560, 320, 22, "30 分钟送达 · 126 家门店", size=13, font=SERIF, color=k["acc"])
+    deck.text(s, 860, 380, 340, 50, "土豆出地，第二天进店。", size=28, font=SERIF_SEMI, color=k["text"])
+    deck.text(s, 860, 440, 340, 100, "清晨采摘，四小时内入城市仓，\n第二天上午摆上社区店的货架。", size=18, font=SERIF,
+              color=k["gray"], line_spacing=1.7)
+    deck.text(s, 860, 560, 340, 24, "30 分钟送达 · 126 家门店", size=16, font=SERIF, color=k["acc"])
     deck.text(s, 96, 640, 400, 20, "Photo: rawpixel, CC0", size=13, font=CORM, color=k["gray"], ea=SERIF)
 
 
@@ -272,7 +272,7 @@ def r4_signature(deck, s):
     bg(s, k["bg"])
     deck.text(s, 1060, 90, 90, 560, "早上摘的菜", size=60, font=SERIF_SEMI, color=k["text"], vertical=True)
     deck.text(s, 990, 96, 44, 520, "中午就在社区店里了", size=24, font=SERIF, color=k["gray"], vertical=True)
-    deck.text(s, 944, 96, 40, 300, "杭州某社区店店长（虚构）", size=14, font=SERIF, color=k["acc"], vertical=True)
+    deck.text(s, 944, 96, 40, 300, "杭州某社区店店长（虚构）", size=16, font=SERIF, color=k["acc"], vertical=True)
     deck.picture(s, treated("radishes", "grade", saturation=0.72, warmth=0.05, brightness=1.04), 96, 360, 360, 264)
     deck.text(s, 96, 96, 400, 30, "Interview", size=22, font=CORM, color=k["text"], ea=SERIF)
     deck.rect(s, 96, 136, 24, 2, fill=k["acc"])
@@ -360,8 +360,8 @@ def r6_box(deck, s, x, y, w, h, label, tag=None, hot=False):
     k = R6
     deck.rect(s, x, y, w, h, fill=k["panel"], line=k["blue"] if hot else k["line"], line_width=1.5 if hot else 1)
     if tag:
-        deck.text(s, x + 12, y + 10, w - 24, 20, tag, size=12, font=MONO, color=k["blue"] if hot else k["gray"], ea=HOS)
-    deck.text(s, x + 12, y + (32 if tag else 14), w - 24, 30, label, size=18, font=HOS, bold=True, color=k["text"])
+        deck.text(s, x + 12, y + 9, w - 24, 22, tag, size=16, font=MONO, color=k["blue"] if hot else k["gray"], ea=HOS)
+    deck.text(s, x + 12, y + (35 if tag else 14), w - 24, 30, label, size=18, font=HOS, bold=True, color=k["text"])
 
 
 @example("recipes", "R06-a", "R6 工程蓝图 · 封面", "点阵底、等宽小标签、细线框；右侧一张简化架构图就是主视觉。", (HOS, MONO))
@@ -386,15 +386,15 @@ def r6_data(deck, s):
     r6_bg(deck, s)
     deck.text(s, 80, 70, 1000, 50, DATA_TITLE, size=34, font=HOS, bold=True, color=k["text"])
     deck.rect(s, 80, 150, 1120, 500, fill=k["panel"], line=k["line"])
-    deck.text(s, 104, 166, 600, 22, "loss_rate  ·  %  ·  2027-01 … 2027-06  （虚构示例）", size=13, font=MONO, color=k["gray"],
+    deck.text(s, 104, 166, 600, 22, "loss_rate  ·  %  ·  2027-01 … 2027-06  （虚构示例）", size=16, font=MONO, color=k["gray"],
               ea=HOS)
     deck.line_chart(s, 96, 200, 800, 430, C.MONTHS, {"知野": C.LOSS, "同业": C.LOSS_PEERS}, colors=[k["blue"], "4A5868"],
                     number_format='0.0"%"', font=MONO, size=16, axis_color=k["gray"], axis_line=k["line"], grid="1E2833",
                     label_bg=k["panel"], width=3, min_value=4)
     deck.rect(s, 920, 200, 1, 420, fill=k["line"])
-    deck.text(s, 950, 210, 230, 24, "delta", size=13, font=MONO, color=k["gray"], ea=HOS)
+    deck.text(s, 950, 210, 230, 24, "delta", size=16, font=MONO, color=k["gray"], ea=HOS)
     deck.text(s, 950, 236, 230, 70, "−3.7pt", size=48, font=MONO, color=k["green"], ea=HOS)
-    deck.text(s, 950, 330, 230, 24, "since", size=13, font=MONO, color=k["gray"], ea=HOS)
+    deck.text(s, 950, 330, 230, 24, "since", size=16, font=MONO, color=k["gray"], ea=HOS)
     deck.text(s, 950, 356, 230, 60, "2027-03\n按日订货上线", size=18, font=MONO, color=k["text"], ea=HOS, line_spacing=1.5)
 
 
@@ -409,7 +409,7 @@ def r6_picture(deck, s):
     for i, (key, val, label) in enumerate(specs):
         y = 200 + i * 130
         deck.rect(s, 760, y, 440, 1, fill=k["line"])
-        deck.text(s, 760, y + 14, 200, 22, key, size=14, font=MONO, color=k["gray"], ea=HOS)
+        deck.text(s, 760, y + 14, 200, 22, key, size=16, font=MONO, color=k["gray"], ea=HOS)
         deck.text(s, 760, y + 40, 440, 50, val, size=36, font=MONO, color=k["blue"], ea=HOS)
         deck.text(s, 960, y + 50, 240, 30, label, size=17, font=HOS, color=k["text"], align="right")
 
@@ -422,19 +422,19 @@ def r6_signature(deck, s):
     layers = [("前台", ["小程序", "门店收银", "骑手 App"]), ("中台", ["订单", "会员", "库存"]), ("后台", ["WMS", "供应商", "财务"])]
     for i, (name, mods) in enumerate(layers):
         y = 150 + i * 160
-        deck.text(s, 80, y + 30, 80, 24, name, size=14, font=MONO, color=k["gray"], ea=HOS)
+        deck.text(s, 80, y + 30, 80, 24, name, size=16, font=MONO, color=k["gray"], ea=HOS)
         for j, m in enumerate(mods):
             r6_box(deck, s, 160 + j * 170, y, 150, 90, m, f"{i}{j}", hot=(m == "库存"))
     deck.rect(s, 492, 302, 166, 106, line=k["blue"], line_width=1.5, dash=True)
     deck.line(s, 658, 302, 720, 150, color=k["blue"], width=1.2, dash=True)
     deck.line(s, 658, 408, 720, 650, color=k["blue"], width=1.2, dash=True)
     deck.rect(s, 720, 150, 480, 500, fill=k["panel"], line=k["blue"], line_width=1.5)
-    deck.text(s, 744, 170, 440, 22, "zoom / stock-service", size=13, font=MONO, color=k["blue"], ea=HOS)
+    deck.text(s, 744, 170, 440, 22, "zoom / stock-service", size=16, font=MONO, color=k["blue"], ea=HOS)
     rows = [("sync", "every 5 min"), ("scope", "按门店 × 按批次"), ("alert", "临期 < 24 h"), ("owner", "数据组 · 许安")]
     for i, (key, val) in enumerate(rows):
         y = 220 + i * 100
         deck.rect(s, 744, y, 432, 1, fill=k["line"])
-        deck.text(s, 744, y + 16, 140, 26, key, size=15, font=MONO, color=k["gray"], ea=HOS)
+        deck.text(s, 744, y + 16, 140, 26, key, size=16, font=MONO, color=k["gray"], ea=HOS)
         deck.text(s, 880, y + 12, 300, 34, val, size=22, font=MONO, color=k["text"], ea=HOS)
 
 

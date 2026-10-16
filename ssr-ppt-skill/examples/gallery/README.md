@@ -4,10 +4,11 @@
 
 | 文件 | 内容 |
 |---|---|
-| `content.py` | 共用的虚构内容（知野生鲜社区店升级）：所有名字和数字都是编的 |
+| `content.py` | 版式和配方示例共用的虚构内容（知野生鲜社区店升级）：所有名字和数字都是编的 |
 | `look.py` | 版式示例共用的中性外观（字体、颜色角色、边距） |
 | `layouts_1.py`–`layouts_3.py` | 版式原型 L01–L24 |
-| `convert_examples.py` | 改写 C01–C05：同一页改写前（A，文字）和改写后（B，信息不减、大部分画成图），套在一个虚构公司模板里 |
+| `convert_examples.py` | 改写 C01–C05：同一页改写前（A，文字）和改写后（B，信息不减、大部分画成图；C04 另有按排序画的 C），套在三个虚构机构的模板里；每组的材料是文件里的 `*_FACTS` 列表 |
+| `art/` | 只为某个示例画的插画（例如 C05 的空压机），画法同 `assets/illustrations/README.md` 的“只为一个项目画” |
 | `recipes_1.py`–`recipes_3.py` | 风格配方 R1–R19，每套 a 封面、b 数据页、c 图片页、d 特色页 |
 | `type_specimens.py` | 字体字样、字体搭配、数字对比 |
 | `imagery_examples.py` | 找图、照片处理、文字压图、裁切、插画换色、补画物体、图标 |
@@ -47,8 +48,15 @@ python examples/gallery/build.py --fonts path/to/fonts --section recipes --only 
 
 ## 加一个示例
 
-1. 在合适的文件里写一个函数，签名是 `(deck, s)`，用 `@example(section, id, title, note, fonts)` 注册；内容取自 `content.py`。
+1. 在合适的文件里写一个函数，签名是 `(deck, s)`，用 `@example(section, id, title, note, fonts)` 注册；内容取自 `content.py`，或在示例旁写一份编好的材料。
 2. `python examples/gallery/build.py --section <section> --only <id> --fonts <字体目录>`，打开 `review/` 里的图看。
 3. 在对应的文档（`references/layouts.md`、`style-recipes.md`、`typography.md`、`imagery.md`；改写示例也写在 `imagery.md`）里加链接和说明。
 
-再加一组改写对照时，A 页照常见的文字写法写（标签加短句、段落、要点），B 页保留 A 页的每一条信息，大部分画成图；两页的说明里都写“信息 N 条：图 x · 文 y”，数的时候以 A 页的条目为准。
+示例的内容只用编的。不要把真实任务、测试用的模板或材料改个名字做成示例：模型下次拿到同一份材料，会照抄示例而不是自己想，名称和数字也可能泄露。模板外框、页面类型和题材都换成和实际任务不相干的。
+
+再加一组改写对照时：
+
+- 先在示例旁写一份材料（`*_FACTS` 列表），A、B 页都从这份材料和它的数字画出来，说明里写明两页用同一份材料。
+- A 页照常见的文字写法写（标签加短句、段落、要点）；B 页保留 A 页的每一条信息和它的限定（约、预计、估算、时间起点、条件），大部分画成图。说明里可以写信息有几条、几条在图里，以 A 页的条目为准。
+- 字号照 `references/typography.md` 的下限：正文不小于 18px，图旁标签不小于 16px（12pt），只有页脚和来源可以更小。
+- 换一种外框（页眉、侧栏、页脚的组合）和一个新的虚构机构，让示例之间也不雷同。

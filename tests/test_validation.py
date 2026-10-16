@@ -422,7 +422,7 @@ class TextDensityTests(unittest.TestCase):
             text = preview.pptx_text(path, visual_first=True)
             heavy, light = text["slides"]
             kinds = sorted(f["kind"] for f in heavy["findings"])
-            self.assertEqual(kinds, ["long_paragraph", "long_text_block"])
+            self.assertEqual(kinds, ["long_paragraph", "long_text_block", "no_picture_slide"])
             self.assertEqual(preview.text_units(self.LONG), heavy["longest_paragraph"])  # title, headline, footer left out
             card = next(f for f in heavy["findings"] if f["kind"] == "long_text_block")
             self.assertEqual((card["rect"]["x"], card["rect"]["w"]), (540, 360))           # group coordinates mapped to points
@@ -443,7 +443,7 @@ class TextDensityTests(unittest.TestCase):
                    str(work / "review"), "--soffice", str(work / "no-such-soffice.exe"), "--visual-first"]
             result = subprocess.run(cmd, capture_output=True, timeout=120)
             self.assertEqual(result.returncode, 0, result.stderr.decode(errors="replace"))
-            self.assertIn("visual-first hints: 2", result.stdout.decode("utf-8"))
+            self.assertIn("visual-first hints: 3", result.stdout.decode("utf-8"))
             report = json.loads((work / "review/report.json").read_text(encoding="utf-8"))
             self.assertTrue(report["text"]["visual_first"])
             self.assertNotIn("text", {c["name"] for c in report["checks"]})                 # never a pass/fail check
@@ -483,6 +483,22 @@ class LineThroughTextTests(unittest.TestCase):
             doc.close()
         self.assertEqual([(f["kind"], f["severity"], f["text"]) for f in findings],
                          [("line_through_text", "warning", "Crossed label")])
+
+    def test_small_body_text_on_a_rendered_page(self):
+        pm = preview.pymupdf_or_none()
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "small.pdf"
+            doc = pm.open()
+            for size in (9, 13):          # 9pt on a 960pt-wide page is 12px on the 1280 canvas; 13pt is 17px
+                page = doc.new_page(width=960, height=540)
+                for i in range(6):
+                    page.insert_text((80, 120 + i * 40), "Small label text set here", fontname="helv", fontsize=size)
+            doc.save(path)
+            doc.close()
+            doc = pm.open(path)
+            kinds = [[f["kind"] for f in preview.pdf_layout(page, pm)] for page in doc]
+            doc.close()
+        self.assertEqual(kinds, [["small_text"], []])
 
     def test_pptx_check_uses_supplied_pdf(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -702,6 +718,48 @@ class FrameAndHintTests(unittest.TestCase):
         self.assertGreater(summary["units"], preview.PAGE_TEXT)      # all body text is still reported
         self.assertEqual(summary["sentence_units"], 0)
         self.assertEqual(summary["findings"], [])
+
+    def test_small_text_needs_much_small_body_text(self):
+        line = "说明文字写得很小很小"  # 10 字
+        many = [(line, 13, 200 + i * 30, 215 + i * 30) for i in range(5)]
+        self.assertEqual(preview.small_text(many, 720), (50, 50, [13]))
+        self.assertIsNone(preview.small_text(many[:3], 720))                          # 30 字 is too little
+        big = [(line * 3, 22, 100 + i * 40, 125 + i * 40) for i in range(1, 6)]
+        self.assertIsNone(preview.small_text(many + big, 720))                         # small share under 30%
+        footer = [(line, 12, 690, 705)] * 10
+        self.assertIsNone(preview.small_text(footer, 720))                             # footer band left out
+        self.assertIsNone(preview.small_text([(line, 15.6, 200, 215)] * 6, 720))       # 11.7pt rounding is fine
+
+    def test_bare_slide_hint_only_without_pictures(self):
+        summary = lambda units: {"units": units, "findings": []}
+        self.assertEqual([f["kind"] for f in preview.bare_slide(summary(120), 0, True)["findings"]], ["no_picture_slide"])
+        self.assertEqual(preview.bare_slide(summary(120), 1, True)["findings"], [])
+        self.assertEqual(preview.bare_slide(summary(60), 0, True)["findings"], [])
+        self.assertEqual(preview.bare_slide(summary(120), 0, False)["findings"], [])
+        self.assertEqual(preview.bare_slide(summary(120), 0, False)["visuals"], 0)
+
+    def test_pictures_charts_and_tables_count_but_header_logos_do_not(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            Image.new("RGB", (200, 120), "#3366AA").save(work / "pic.png")
+            prs = Presentation()
+            prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
+            body = "门诊候诊时间较长，挂号方式以线上预约为主，取药使用自助机。" * 5   # 125 字
+            for kind in ("none", "logo", "picture", "table"):
+                slide = prs.slides.add_slide(prs.slide_layouts[6])
+                slide.shapes.add_textbox(Inches(0.8), Inches(1.5), Inches(6), Inches(3)).text = body
+                if kind == "logo":     # a logo in the header band is not a picture of the content
+                    slide.shapes.add_picture(str(work / "pic.png"), Inches(11), Inches(0.2), Inches(1.6), Inches(0.6))
+                elif kind == "picture":
+                    slide.shapes.add_picture(str(work / "pic.png"), Inches(7.5), Inches(1.5), Inches(4), Inches(2.4))
+                elif kind == "table":
+                    slide.shapes.add_table(2, 2, Inches(7.5), Inches(1.5), Inches(4), Inches(1))
+            prs.save(work / "deck.pptx")
+            slides = preview.pptx_text(work / "deck.pptx", visual_first=True)["slides"]
+        self.assertEqual([s["visuals"] for s in slides], [0, 0, 1, 1])
+        self.assertEqual([[f["kind"] for f in s["findings"] if f["kind"] == "no_picture_slide"] for s in slides],
+                         [["no_picture_slide"], ["no_picture_slide"], [], []])
 
     def test_lone_character_ignores_punctuation_but_not_digits(self):
         self.assertTrue(preview.lone_character("间；"))

@@ -201,7 +201,7 @@ def relink(manifest, docs):
 
 SECTION_INFO = {
     "layouts": ("版式原型", "每个原型的几种排法。为了看清构图，每页只放了三五条信息；真实页面放多少由材料决定。说明见 references/layouts.md；代码见 examples/gallery/layouts_*.py。"),
-    "convert": ("改写", "同一页的改写前（A）和改写后（B）：信息一条不少，从文字改成图（插画、图标、点阵、箭头、比例条、图表），文字只剩短标签。都套在一个虚构公司的模板里，模板的配色和字体不变。说明见 references/imagery.md 的“把一页文字改成图”；代码见 examples/gallery/convert_examples.py。"),
+    "convert": ("改写", "同一页的改写前（A）和改写后（B）：信息和它的限定一条不少，从文字改成图（插画、图标、时间条、点阵、流向、比例条、图表），文字只剩短标签。套在三个虚构机构的模板里（医院、学校、工厂），模板的配色和字体不变；每组 A、B 依据同一份编好的材料。C04 另有一页 C，把同样的数按多少排序，和按位置摆的 B 对照。说明见 references/imagery.md 的“把一页文字改成图”；代码见 examples/gallery/convert_examples.py。"),
     "recipes": ("风格配方", "每套配方用同一份内容做 a 封面、b 数据页、c 图片页，再加一页 d 特色页。说明见 references/style-recipes.md。"),
     "type": ("字体", "每款字体同一句标题、同一段正文、同一组数字；P 开头是搭配，N01 是数字对比。说明见 references/typography.md。"),
     "imagery": ("配图", "找图、照片处理、文字压图、裁切、插画换色、补画物体、图标。说明见 references/imagery.md。"),
@@ -250,7 +250,7 @@ footer { color:var(--muted); font-size:13px; max-width:1280px; margin:0 auto; pa
 <body>
 <header>
 <h1>设计示例</h1>
-<p class="lead">SSR-PPT-SKILL 自带的成品示例：都是用 scripts/pptx_kit.py 做成的原生 PPTX，经 LibreOffice 渲染。内容是虚构的“知野生鲜社区店升级”，照片来源见 examples/gallery/photos.json。这些是参考，不是模板：可以照做、改编、组合，也可以完全自定。</p>
+<p class="lead">SSR-PPT-SKILL 自带的成品示例：都是用 scripts/pptx_kit.py 做成的原生 PPTX，经 LibreOffice 渲染。内容都是虚构的：版式、配方、字体、配图用“知野生鲜社区店升级”，改写一节用三个虚构机构；照片来源见 examples/gallery/photos.json。这些是参考，不是模板：可以照做、改编、组合，也可以完全自定。</p>
 </header>
 <nav><div class="in">__NAV__<input id="q" type="search" placeholder="搜索编号或名称，如 L05、数据新闻" aria-label="搜索"></div></nav>
 <main id="main"></main>
@@ -317,6 +317,11 @@ def build(sections, out_dir, assets_dir, fonts_dir=None, width=960, only=None):
         items = [e for e in REGISTRY if e["section"] == section and (not only or e["id"] in only)]
         if not items:
             continue
+        if not only:  # a full rebuild of the section also drops examples that no longer exist
+            manifest = [m for m in manifest if m["section"] != section]
+            for old in (assets_dir / section).glob("*.*") if (assets_dir / section).exists() else ():
+                if old.stem not in {e["id"] for e in items}:
+                    old.unlink()
         deck = Deck()
         for e in items:
             s = deck.slide(bg="FFFFFF")
