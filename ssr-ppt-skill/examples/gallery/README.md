@@ -7,6 +7,7 @@
 | `content.py` | 共用的虚构内容（知野生鲜社区店升级）：所有名字和数字都是编的 |
 | `look.py` | 版式示例共用的中性外观（字体、颜色角色、边距） |
 | `layouts_1.py`–`layouts_3.py` | 版式原型 L01–L24 |
+| `convert_examples.py` | 改写 C01–C05：同一页改写前（A，文字）和改写后（B，信息不减、大部分画成图），套在一个虚构公司模板里 |
 | `recipes_1.py`–`recipes_3.py` | 风格配方 R1–R19，每套 a 封面、b 数据页、c 图片页、d 特色页 |
 | `type_specimens.py` | 字体字样、字体搭配、数字对比 |
 | `imagery_examples.py` | 找图、照片处理、文字压图、裁切、插画换色、补画物体、图标 |
@@ -48,4 +49,6 @@ python examples/gallery/build.py --fonts path/to/fonts --section recipes --only 
 
 1. 在合适的文件里写一个函数，签名是 `(deck, s)`，用 `@example(section, id, title, note, fonts)` 注册；内容取自 `content.py`。
 2. `python examples/gallery/build.py --section <section> --only <id> --fonts <字体目录>`，打开 `review/` 里的图看。
-3. 在对应的文档（`references/layouts.md`、`style-recipes.md`、`typography.md`、`imagery.md`）里加链接和说明。
+3. 在对应的文档（`references/layouts.md`、`style-recipes.md`、`typography.md`、`imagery.md`；改写示例也写在 `imagery.md`）里加链接和说明。
+
+再加一组改写对照时，A 页照常见的文字写法写（标签加短句、段落、要点），B 页保留 A 页的每一条信息，大部分画成图；两页的说明里都写“信息 N 条：图 x · 文 y”，数的时候以 A 页的条目为准。

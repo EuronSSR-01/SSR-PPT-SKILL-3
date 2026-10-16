@@ -8,7 +8,7 @@
 python -m unittest discover -s tests -v
 ```
 
-共 44 项（`test_validation.py`、`test_html.py`、`test_skill3.py`）。不设置浏览器时运行 39 项库层测试（LibreOffice 渲染测试在未安装时跳过，读取 PDF 的测试在没有 PyMuPDF 时跳过），5 项浏览器测试显式跳过。要验证浏览器行为，在可启动本机浏览器的环境中设置：
+共 47 项（`test_validation.py`、`test_html.py`、`test_skill3.py`）。不设置浏览器时运行 42 项库层测试（LibreOffice 渲染测试在未安装时跳过，读取 PDF 的测试在没有 PyMuPDF 时跳过），5 项浏览器测试显式跳过。要验证浏览器行为，在可启动本机浏览器的环境中设置：
 
 ```powershell
 $env:SSR_TEST_BROWSER = 'chrome'
@@ -61,3 +61,9 @@ POSIX 使用 `SSR_TEST_BROWSER=chromium python -m unittest discover -s tests -v`
 - LibreOffice 渲染下：超大展示字出血和同一句字错位叠印是警告、竖排文字不报孤字；普通文字超出页面和不同文字重叠仍是错误。
 - 示例图库：清单里的每张图和代码文件都存在，`design-examples.html` 含全部编号，文档里的本地链接都指向存在的文件，每张示例图都在对应文档里有链接。
 示例图库 165 页的生成与看图、版面检查结果见仓库 README 的“SKILL 3 的验证”。
+
+2026-10-16，Claude Code／Windows（Chrome、LibreOffice 26.8），SKILL 3 第二轮：47 项全部执行并通过（含 5 项浏览器测试）。新增 3 项：
+- 图旁的短标签（每行不超过约 20 字）不计入成段文字，满页短标签不会触发“字多”提示，总字数照常报告。
+- `find_images.py` 连不上任何图源时以“could not reach any image source”退出，不再提示换关键词。
+- `pptx_kit.line()` 画的线没有主题样式引用（否则默认主题会给线加阴影），箭头照常保留。
+示例图库（含新增的改写 C01–C05）重新生成后的结果见仓库 README 的“第二轮的验证”。

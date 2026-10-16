@@ -138,15 +138,22 @@ def contact_sheet(cands, out, cols=4, cell=320):
 
 
 def cmd_search(args):
-    cands, notes = [], []
+    cands, notes, tried = [], [], 0
     sources = [s.strip() for s in args.source.split(",")]
     for src, fn in (("openverse", search_openverse), ("commons", search_commons)):
         if src not in sources:
             continue
+        tried += 1
         try:
             cands += fn(args.query, args.license, args.n)
         except Exception as exc:
             notes.append(f"{src}: {exc}")
+    if tried and len(notes) == tried:  # no source answered: say so instead of "try other words"
+        for n in notes:
+            print(f"note: {n}", file=sys.stderr)
+        sys.exit("could not reach any image source (no network access, or the sites are blocked here). "
+                 "Use the bundled illustrations, draw an SVG, or use images the user provides; "
+                 "say so in the planning notes.")
     cands = [c for c in cands if c["url"] and (c["width"] or 0) >= args.min_width
              and orientation_ok(c["width"], c["height"], args.orientation)][:args.n]
     store = Path(args.json)

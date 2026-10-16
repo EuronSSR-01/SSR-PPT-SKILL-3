@@ -40,7 +40,7 @@ def r1_cover(deck, s):
     deck.text(s, 64, 120, 900, 340, "把产地\n搬进社区", size=150, font=SANS_BLACK, color=k["ink"], line_spacing=1.0)
     deck.text(s, 72, 470, 520, 70, "知野生鲜 2027 社区店升级计划\n半年回顾与下一步", size=20, font=SANS, color=k["gray"],
               line_spacing=1.5)
-    deck.text(s, 600, 430, 720, 330, "2027", size=280, font=INTER_BLACK, color=k["red"], wrap=False)
+    deck.text(s, 650, 470, 720, 300, "2027", size=250, font=INTER_BLACK, color=k["red"], wrap=False)
 
 
 @example("recipes", "R01-b", "R1 瑞士编辑网格 · 数据页", "细线、灰阶和一个红色；图表挂在网格上，结论数字在右侧单独成列。", (SANS, INTER))

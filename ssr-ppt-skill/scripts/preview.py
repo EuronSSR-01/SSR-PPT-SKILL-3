@@ -10,9 +10,9 @@
   preview.py sheet PNGS|DIR   --out FILE  contact sheet plus -gray and -blur variants
   preview.py compare A B ...  --out FILE  images side by side for comparing directions
 
-html and pptx also report body text per slide; with --visual-first they point at long paragraphs, boxes
-of points and text-heavy slides to shorten, move to notes or carry with icons and pictures (hints, not a
-pass/fail check). --zoom also writes four enlarged quarters of every slide for a second, closer look.
+html and pptx also report body text per slide (and how much of it is sentences rather than short labels);
+with --visual-first they point at long paragraphs, boxes of points and slides with many sentences, whose
+information should move into pictures, not be deleted (hints, not a pass/fail check). --zoom also writes four enlarged quarters of every slide for a second, closer look.
 The layout check flags text past its box, one-character lines and a content frame that sits off-centre on
 three or more slides (warnings to confirm by looking).
 
@@ -326,7 +326,8 @@ TEXT_JS = r"""(index) => {
 CJK_CHAR = re.compile(r"[㐀-鿿豈-﫿぀-ヿ가-힯]")
 LATIN_WORD = re.compile(r"[A-Za-z0-9]+(?:[.,'’%-][A-Za-z0-9]+)*")
 LONG_TEXT = 60  # 字 in one paragraph or one box of points; a Latin word or number counts as two
-PAGE_TEXT = 150  # 字 of body text on one slide
+PAGE_TEXT = 150  # 字 of sentences on one slide
+LABEL_TEXT = 20  # a line up to this long is a label (a name, a number, a short caption beside a picture)
 
 
 # Left and right edges of the content between the header band (top 11.5%) and the footer band (bottom 8%):
@@ -403,9 +404,11 @@ def text_units(text):
 
 def text_density(leaves, groups, visual_first):
     """Summarise one slide's body text. leaves: [{text, rect, groups}] where groups lists the enclosing
-    blocks (innermost first); groups: [rect]. With visual_first, long paragraphs, text-heavy boxes and
-    text-heavy slides become hints: shorten, move the explanation to the notes, or let an icon, picture or
-    chart carry it. They are not a pass/fail check."""
+    blocks (innermost first); groups: [rect]. units counts all body text; sentence_units only lines longer
+    than LABEL_TEXT, so short labels beside pictures do not make a slide look text-heavy. With visual_first,
+    long paragraphs, text-heavy boxes and slides with many sentences become hints: draw the information
+    they hold (illustration, icon with a short label, dot chart, arrow, chart), then cut repeats and move
+    explanations to the notes. Information is not deleted. They are not a pass/fail check."""
     for leaf in leaves:
         leaf["units"] = text_units(leaf["text"])
     findings, flagged = [], set()
@@ -414,9 +417,10 @@ def text_density(leaves, groups, visual_first):
             flagged.add(i)
             findings.append({"kind": "long_paragraph", "severity": "hint", "text": leaf["text"][:40],
                              "rect": leaf["rect"], "units": leaf["units"],
-                             "detail": f"About {leaf['units']} 字 in one paragraph. Shorten it, move the explanation "
-                                       "to the notes, or let an icon or picture carry part of it; keep conditions "
-                                       "that change the conclusion."})
+                             "detail": f"About {leaf['units']} 字 in one paragraph. Split it into its items and "
+                                       "draw what can be drawn (illustration, icon with a short label, dot chart, "
+                                       "arrow, chart); move only explanation and repeats to the notes; keep every "
+                                       "item and the conditions."})
     members = {}
     for i, leaf in enumerate(leaves):
         for g in leaf.get("groups", []):
@@ -428,23 +432,28 @@ def text_density(leaves, groups, visual_first):
             flagged.update(idx)
             findings.append({"kind": "long_text_block", "severity": "hint", "text": leaves[idx[0]]["text"][:40],
                              "rect": groups[g], "units": units,
-                             "detail": f"About {units} 字 of points in one box. Cut repeats, move detail to the "
-                                       "notes, or give each point an icon and a short label; keep conditions."})
+                             "detail": f"About {units} 字 of points in one box. Give each point a picture or an "
+                                       "icon with a short label, or draw them as one diagram; keep every point."})
     total = sum(l["units"] for l in leaves)
-    if visual_first and total > PAGE_TEXT:
+    sentences = sum(l["units"] for l in leaves if l["units"] > LABEL_TEXT)
+    if visual_first and sentences > PAGE_TEXT:
         findings.append({"kind": "text_heavy_slide", "severity": "hint", "text": "(whole slide)", "rect": None,
-                         "units": total,
-                         "detail": f"About {total} 字 of body text. Keep the conclusion, key numbers and short "
-                                   "labels on the slide; move explanations to the notes and drop repeats."})
-    return {"units": total, "longest_paragraph": max((l["units"] for l in leaves), default=0), "findings": findings}
+                         "units": sentences,
+                         "detail": f"About {sentences} 字 in sentences. Keep every information item on the slide "
+                                   "but carry most of them with pictures (illustration, icon with a short label, "
+                                   "dot chart, arrow, chart); move only explanations and repeats to the notes. "
+                                   "Short labels are fine and not counted."})
+    return {"units": total, "sentence_units": sentences,
+            "longest_paragraph": max((l["units"] for l in leaves), default=0), "findings": findings}
 
 
 def print_text(text):
-    print("text (字 per slide, body only): " + "  ".join(f"{s['slide']:02d}:{s['units']}" for s in text["slides"]))
+    print("text (字 per slide, body only; in sentences): "
+          + "  ".join(f"{s['slide']:02d}:{s['units']}({s['sentence_units']})" for s in text["slides"]))
     if text["visual_first"]:
         hints = [(s["slide"], f) for s in text["slides"] for f in s["findings"]]
-        print(f"visual-first hints: {len(hints)} (handle each one: cut, move to notes, or picture/icon; "
-              "not a pass/fail check)")
+        print(f"visual-first hints: {len(hints)} (handle each one: draw the information, then cut repeats or move "
+              "explanations to notes; never drop items; not a pass/fail check)")
         for n, f in hints:
             print(f"  slide {n:02d} hint    {f['kind']:<18} “{f['text']}” {f['detail']}")
 
@@ -1620,8 +1629,9 @@ def cmd_pptx(args):
 # ---------------------------------------------------------------- CLI
 
 VISUAL_FIRST_HELP = (f"the deck is visual-first: hint at any paragraph or box of points over {LONG_TEXT} 字 "
-                     f"and any slide over {PAGE_TEXT} 字 of body text (a Latin word or number counts as 2); "
-                     "hints only, never a failed check")
+                     f"and any slide over {PAGE_TEXT} 字 of sentences (lines over {LABEL_TEXT} 字; short labels "
+                     "are not counted; a Latin word or number counts as 2); draw the information instead of "
+                     "deleting it; hints only, never a failed check")
 ZOOM_HELP = "also write four enlarged, overlapping quarters of every slide to zoom/ for a second, closer look"
 
 

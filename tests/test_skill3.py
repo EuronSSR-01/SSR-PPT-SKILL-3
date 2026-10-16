@@ -192,6 +192,17 @@ class FindImagesTests(unittest.TestCase):
         self.assertIn("CC BY 2.0", line)
         self.assertIn("credit needed", out.getvalue())
 
+    def test_no_reachable_source_is_reported_as_such(self):
+        def offline(url):
+            raise OSError("network is unreachable")
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(find_images, "fetch_json", offline), \
+                contextlib.redirect_stderr(io.StringIO()):
+            args = type("A", (), dict(query="farm", source="openverse,commons", license="cc0", orientation="any",
+                                      min_width=0, n=4, json=str(Path(tmp) / "c.json"), sheet=None))
+            with self.assertRaises(SystemExit) as stop:
+                find_images.cmd_search(args)
+        self.assertIn("could not reach any image source", str(stop.exception.code))
+
 
 class KitAdditionTests(unittest.TestCase):
     def test_line_chart_labels_shapes_text_options(self):
@@ -220,6 +231,17 @@ class KitAdditionTests(unittest.TestCase):
         self.assertIn('<a:alpha val="25000"/>', slide)
         self.assertIn('vert="eaVert"', slide)
         self.assertRegex(slide, r'spc="\d+"')
+
+    def test_lines_carry_no_theme_style_and_so_no_shadow(self):
+        deck = Deck()
+        s = deck.slide()
+        plain_line = deck.line(s, 80, 100, 400, 100, color="DCE2E8")
+        arrow = deck.line(s, 80, 200, 400, 200, arrow=True, dash=True)
+        for conn in (plain_line, arrow):
+            xml = conn._element.xml
+            self.assertNotIn("<p:style>", xml)          # the style's effectRef paints a shadow
+            self.assertIn("<a:effectLst/>", xml)
+        self.assertIn('<a:tailEnd type="triangle"/>', arrow._element.xml)
 
     def test_pptx_md_example_runs(self):
         text = (SKILL / "references" / "pptx.md").read_text(encoding="utf-8")
@@ -308,7 +330,8 @@ class GalleryTests(unittest.TestCase):
 
     def test_every_layout_and_recipe_page_is_documented(self):
         manifest = json.loads((SKILL / "assets" / "gallery" / "manifest.json").read_text(encoding="utf-8"))
-        docs = {"layouts": "layouts.md", "recipes": "style-recipes.md", "type": "typography.md", "imagery": "imagery.md"}
+        docs = {"layouts": "layouts.md", "recipes": "style-recipes.md", "type": "typography.md", "imagery": "imagery.md",
+                "convert": "imagery.md"}
         for m in manifest:
             text = (SKILL / "references" / docs[m["section"]]).read_text(encoding="utf-8")
             self.assertIn(f"assets/gallery/{m['file']}", text, m["id"])

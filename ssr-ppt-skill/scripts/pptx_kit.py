@@ -480,7 +480,8 @@ class Deck:
         return plain(shape)
 
     def line(self, slide, x1, y1, x2, y2, color="1A1A1A", width=1, arrow=False, dash=False):
-        """Straight connector; arrow=True adds an arrowhead at (x2, y2)."""
+        """Straight connector; arrow=True adds an arrowhead at (x2, y2). Like the shapes it carries no theme
+        style, whose effect reference would give the line a shadow."""
         conn = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, self.px(x1), self.px(y1), self.px(x2), self.px(y2))
         conn.line.color.rgb = rgb(color)
         conn.line.width = self.pt(width)
@@ -490,7 +491,7 @@ class Deck:
             tail = OxmlElement("a:tailEnd")
             tail.set("type", "triangle")
             conn.line._get_or_add_ln().append(tail)
-        return conn
+        return plain(conn)
 
     def picture(self, slide, path, x, y, w, h, fit="cover"):
         """Picture cropped to fill the box (fit="cover") or shrunk to fit inside it (fit="contain")."""

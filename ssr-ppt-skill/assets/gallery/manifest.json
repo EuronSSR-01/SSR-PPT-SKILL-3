@@ -594,6 +594,116 @@
   ]
  },
  {
+  "section": "convert",
+  "id": "C01-a",
+  "title": "产业链 A：改写前，16 条信息全是字",
+  "note": "标签加短句排成四栏格子，图标只在栏头：每格都要读一句话，看不出哪个是物件、哪个是数量、哪个是流向。信息 16 条：图 0 · 文 16。",
+  "file": "convert/C01-a.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C01-b",
+  "title": "产业链 B：改写后，同样 16 条，14 条由图承载",
+  "note": "每站一幅插画放在自己的栏头；农场数画成点阵，时间用时钟和计时图标，货的方向用箭头，钱的方向用带标签的箭头，付款构成用比例条。文字只剩短标签。信息 16 条：图 14 · 文 2。",
+  "file": "convert/C01-b.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C02-a",
+  "title": "三项诉求 A：改写前，三段要点",
+  "note": "每项一个标题加两三句话：数字埋在句子里，城市、系统、账期都要读完才看得出。信息 14 条：图 0 · 文 14。",
+  "file": "convert/C02-a.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C02-b",
+  "title": "三项诉求 B：改写后，每项一张小图",
+  "note": "城市仓画成六个城市格子（有的打勾、没有的打叉）加送达时间条形图；收银系统画成三台收银机连着同一位会员，再合成一台；账期画成两根长短不同的条，资金和采购价用图标加数字。信息 14 条：图 12 · 文 2。",
+  "file": "convert/C02-b.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C03-a",
+  "title": "公司概况 A：改写前，一段话加五条要点",
+  "note": "公司概况写成一段介绍和一列要点：13 条信息都要读，规模、设施、经营数字混在一起。信息 13 条：图 0 · 文 13。",
+  "file": "convert/C03-a.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C03-b",
+  "title": "公司概况 B：改写后，规模、设施、经营各成一组",
+  "note": "门店用插画加大数字，六座城市排成标签；城市仓、冷藏车、员工各配一幅小插画，送达、商品、会员、成立年份配图标；订单增长画成折线，生鲜占比画成比例条，损耗和同业并排成两根短条。信息 13 条：图 11 · 文 2。",
+  "file": "convert/C03-b.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C04-a",
+  "title": "门店分布 A：改写前，六行城市清单",
+  "note": "每座城市一行字：门店数、城市仓数、送达时间要逐行读、自己比较。信息 19 条：图 0 · 文 19。",
+  "file": "convert/C04-a.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C04-b",
+  "title": "门店分布 B：改写后，城市圆点按大致方位摆放",
+  "note": "圆的大小是门店数，实心是有城市仓（旁边几个仓库图标就是几座），虚线圈是还没有；送达分钟标在城市名旁。位置只是大致方位，不画省界，不是地图。信息 19 条：图 18 · 文 1。",
+  "file": "convert/C04-b.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C05-a",
+  "title": "方案选择 A：改写前，三段方案说明",
+  "note": "三种建法各写一句，推荐理由写在最后：投入、时间、损耗要在三句话之间来回比。信息 12 条：图 0 · 文 12。",
+  "file": "convert/C05-a.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
+  "section": "convert",
+  "id": "C05-b",
+  "title": "方案选择 B：改写后，三列同尺比较，回收期画成两段",
+  "note": "每种建法一幅插画；投入画成同一比例的条，上线时间画成月份圆点，损耗画成三格刻度；推荐的一列加底色和勾。回收期画成两段“每年 1,200 万”拼满 2,400 万。信息 12 条：图 11 · 文 1。",
+  "file": "convert/C05-b.png",
+  "source": "examples/gallery/convert_examples.py",
+  "fonts": [
+   "Noto Sans SC"
+  ]
+ },
+ {
   "section": "recipes",
   "id": "R01-a",
   "title": "R1 瑞士编辑网格 · 封面",

@@ -27,7 +27,7 @@ sys.path.insert(0, str(SKILL / "scripts"))
 from pptx_kit import Deck, rgb  # noqa: E402
 
 REGISTRY = []
-SECTIONS = ("layouts", "recipes", "type", "imagery")
+SECTIONS = ("layouts", "convert", "recipes", "type", "imagery")
 
 
 def example(section, id, title, note="", fonts=()):
@@ -200,7 +200,8 @@ def relink(manifest, docs):
 
 
 SECTION_INFO = {
-    "layouts": ("版式原型", "每个原型的几种排法。说明见 references/layouts.md；代码见 examples/gallery/layouts_*.py。"),
+    "layouts": ("版式原型", "每个原型的几种排法。为了看清构图，每页只放了三五条信息；真实页面放多少由材料决定。说明见 references/layouts.md；代码见 examples/gallery/layouts_*.py。"),
+    "convert": ("改写", "同一页的改写前（A）和改写后（B）：信息一条不少，从文字改成图（插画、图标、点阵、箭头、比例条、图表），文字只剩短标签。都套在一个虚构公司的模板里，模板的配色和字体不变。说明见 references/imagery.md 的“把一页文字改成图”；代码见 examples/gallery/convert_examples.py。"),
     "recipes": ("风格配方", "每套配方用同一份内容做 a 封面、b 数据页、c 图片页，再加一页 d 特色页。说明见 references/style-recipes.md。"),
     "type": ("字体", "每款字体同一句标题、同一段正文、同一组数字；P 开头是搭配，N01 是数字对比。说明见 references/typography.md。"),
     "imagery": ("配图", "找图、照片处理、文字压图、裁切、插画换色、补画物体、图标。说明见 references/imagery.md。"),

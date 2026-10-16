@@ -18,7 +18,8 @@ sys.path.insert(0, str(HERE))
 
 import gallery  # noqa: E402
 
-MODULES = ["layouts_1", "layouts_2", "layouts_3", "recipes_1", "recipes_2", "recipes_3", "type_specimens", "imagery_examples"]
+MODULES = ["layouts_1", "layouts_2", "layouts_3", "convert_examples", "recipes_1", "recipes_2", "recipes_3",
+           "type_specimens", "imagery_examples"]
 
 
 def main():

@@ -696,6 +696,13 @@ class FrameAndHintTests(unittest.TestCase):
         self.assertIn("text_heavy_slide", kinds)
         self.assertEqual(preview.text_density(leaves, [], False)["findings"], [])
 
+    def test_short_labels_beside_pictures_do_not_make_a_slide_text_heavy(self):
+        labels = [{"text": f"门店 {i} 号", "rect": None, "groups": []} for i in range(40)]
+        summary = preview.text_density(labels, [], True)
+        self.assertGreater(summary["units"], preview.PAGE_TEXT)      # all body text is still reported
+        self.assertEqual(summary["sentence_units"], 0)
+        self.assertEqual(summary["findings"], [])
+
     def test_lone_character_ignores_punctuation_but_not_digits(self):
         self.assertTrue(preview.lone_character("间；"))
         self.assertTrue(preview.lone_character("在"))

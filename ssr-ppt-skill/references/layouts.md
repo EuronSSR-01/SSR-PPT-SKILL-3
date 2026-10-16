@@ -4,6 +4,7 @@
 
 - 成品图在 `assets/gallery/layouts/`，全部集中在 [`assets/design-examples.html`](../assets/design-examples.html)；制作代码在 `examples/gallery/layouts_1.py`、`layouts_2.py`、`layouts_3.py`，每一页是一个函数，可以照着改。
 - 示例内容是虚构的“知野生鲜社区店升级”，统一用思源黑体／思源宋体和中性配色，好让差别只在构图上。换成你的配方、字体和颜色后，构图照样成立。
+- **示例为了看清构图，每页只放了三五条信息。真实页面放多少信息由材料决定，不照示例的密度删内容**：材料里一页有十几条，就选能装下这些条目的排法，或把几个原型合在一页。信息多、又要图示优先时，先看“改写”一节的前后对照（`assets/gallery/convert/`，C01–C05，套在公司模板里），做法见 [imagery.md](imagery.md) 的“把一页文字改成图”。
 
 ## 怎么用
 

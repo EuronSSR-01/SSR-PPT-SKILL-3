@@ -213,7 +213,8 @@ def routes(r):
         "visual_review": "open the PNGs from preview.py and look at every final page, then again at the --zoom "
                          "quarters. The skill requires a model that can view images; a model that cannot should stop.",
         "text_hints": "visual-first decks: add --visual-first to preview.py html/pptx to list long paragraphs, "
-                      "boxes of points and text-heavy slides (hints only; the pptx check needs no rendering)"
+                      "boxes of points and slides with many sentences; draw that information, do not delete it "
+                      "(hints only; short labels are not counted; the pptx check needs no rendering)"
                       if pkg["python-pptx"] or html_check else
                       "missing: python-pptx or an HTML check; review text density by reading the planning",
     }
