@@ -1,6 +1,6 @@
 """Style recipe examples R08-R13 (same three common pages plus one signature page each). Fictional content."""
 import content as C
-from gallery import bg, crop, example, generated, photo, treated
+from gallery import bg, crop, example, generated, legend, photo, treated
 
 SANS, SANS_BLACK = "Noto Sans SC", "Noto Sans SC Black"
 SERIF, SERIF_LIGHT, SERIF_BLACK = "Noto Serif SC", "Noto Serif SC Light", "Noto Serif SC Black"
@@ -264,9 +264,10 @@ def r11_data(deck, s):
     deck.text(s, 80, 70, 1100, 60, "损耗率连续 6 个月下降", size=40, font=MISANS_SEMI, color=k["text"])
     deck.rect(s, 80, 160, 1120, 490, fill=k["panel"], line=k["border"], radius=20, alpha=0.88)
     deck.text(s, 120, 190, 400, 24, "loss_rate  %", size=16, font=MONO, color=k["gray"], ea=MISANS)
-    deck.line_chart(s, 110, 220, 760, 400, C.MONTHS, {"知野": C.LOSS, "同业": C.LOSS_PEERS}, colors=[k["amber"], "4A4F5C"],
+    deck.line_chart(s, 110, 220, 760, 400, C.MONTHS, {"知野": C.LOSS, "同业": C.LOSS_PEERS}, colors=[k["amber"], "6A7080"],
                     number_format='0.0"%"', font=MONO, size=16, axis_color=k["gray"], axis_line=k["border"], width=3.5,
-                    min_value=4)
+                    min_value=4, label_color=k["gray"])
+    legend(deck, s, 520, 190, [("知野", k["amber"]), ("同业", "6A7080")], MISANS, k["gray"], size=16)
     deck.text(s, 920, 260, 260, 26, "6 月", size=16, font=MISANS, color=k["gray"])
     deck.text(s, 920, 290, 260, 90, "5.9%", size=72, font=MONO, color=k["amber"], ea=MISANS)
     deck.text(s, 920, 400, 260, 60, "比 1 月 −3.7pt\n比同业 −3.2pt", size=18, font=MONO, color=k["text"], ea=MISANS, line_spacing=1.5)

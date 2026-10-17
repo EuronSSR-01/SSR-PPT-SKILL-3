@@ -520,6 +520,50 @@ class LineThroughTextTests(unittest.TestCase):
         self.assertIn(("low_contrast", "warning", "Pale grey label text"), found)
         self.assertFalse(any("Visible" in text for _, _, text in found))
 
+    def test_review_counter_examples_textured_cover_mixed_and_picture_backgrounds(self):
+        """Cases from the GPT review of a3c440f: a striped picture over a sentence (no pixel-level "no ink"),
+        a sentence running from a dark panel onto white, and pale text on a plain white picture."""
+        from io import BytesIO
+        from PIL import Image, ImageDraw
+        pm = preview.pymupdf_or_none()
+
+        def png(image):
+            stream = BytesIO()
+            image.save(stream, format="PNG")
+            return stream.getvalue()
+        doc = pm.open()
+        striped = doc.new_page(width=960, height=540)
+        striped.insert_text((80, 200), "Covered sentence here", fontname="helv", fontsize=20)
+        cover = Image.new("RGB", (800, 100), "white")
+        draw = ImageDraw.Draw(cover)
+        for x in range(0, 800, 4):
+            draw.rectangle((x, 0, x + 1, 99), fill="black")
+        striped.insert_image(pm.Rect(70, 165, 470, 215), stream=png(cover))
+        mixed = doc.new_page(width=960, height=540)
+        mixed.draw_rect(pm.Rect(70, 175, 195, 215), color=None, fill=(0.3, 0.3, 0.3))
+        mixed.insert_text((80, 200), "Contrast changes across this sentence", fontname="helv", fontsize=15)
+        plain = doc.new_page(width=960, height=540)
+        plain.insert_image(plain.rect, stream=png(Image.new("RGB", (960, 540), "white")))
+        plain.insert_text((80, 200), "Pale grey label text", fontname="helv", fontsize=20, color=(0.72, 0.72, 0.72))
+        kinds = [{f["kind"] for f in preview.pdf_layout(page, pm)} for page in doc]
+        doc.close()
+        self.assertIn("text_under_picture", kinds[0])
+        self.assertIn("low_contrast", kinds[1])
+        self.assertIn("low_contrast", kinds[2])
+
+    def test_template_text_on_both_pages_of_a_two_page_template_is_fixed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            for name, pages in (("template.pptx", [["演示公司·内部资料"], ["演示公司·内部资料"]]),
+                                ("deck.pptx", [["演示公司·内部资料"]])):
+                prs = Presentation()
+                for texts in pages:
+                    slide = prs.slides.add_slide(prs.slide_layouts[6])
+                    for i, text in enumerate(texts):
+                        slide.shapes.add_textbox(Inches(1), Inches(1 + i), Inches(6), Inches(0.8)).text = text
+                prs.save(work / name)
+            self.assertEqual(preview.template_sample_text(work / "deck.pptx", work / "template.pptx"), [])
+
     def test_template_sample_text_left_in_the_deck(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)

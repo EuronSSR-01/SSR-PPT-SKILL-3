@@ -1,7 +1,7 @@
 """Style recipe examples R01-R07. Every recipe draws the same three pages (a cover, b data, c picture) from
 content.py, plus one page (d) that shows what is special about it. Fictional content."""
 import content as C
-from gallery import bg, crop, example, generated, photo, treated
+from gallery import bg, crop, example, generated, legend, photo, treated
 
 SANS, SANS_BLACK, SANS_MED = "Noto Sans SC", "Noto Sans SC Black", "Noto Sans SC Medium"
 SERIF, SERIF_BLACK, SERIF_SEMI = "Noto Serif SC", "Noto Serif SC Black", "Noto Serif SC SemiBold"
@@ -388,9 +388,10 @@ def r6_data(deck, s):
     deck.rect(s, 80, 150, 1120, 500, fill=k["panel"], line=k["line"])
     deck.text(s, 104, 166, 600, 22, "loss_rate  ·  %  ·  2027-01 … 2027-06  （虚构示例）", size=16, font=MONO, color=k["gray"],
               ea=HOS)
-    deck.line_chart(s, 96, 200, 800, 430, C.MONTHS, {"知野": C.LOSS, "同业": C.LOSS_PEERS}, colors=[k["blue"], "4A5868"],
+    deck.line_chart(s, 96, 200, 800, 430, C.MONTHS, {"知野": C.LOSS, "同业": C.LOSS_PEERS}, colors=[k["blue"], "6B7A8C"],
                     number_format='0.0"%"', font=MONO, size=16, axis_color=k["gray"], axis_line=k["line"], grid="1E2833",
-                    label_bg=k["panel"], width=3, min_value=4)
+                    label_bg=k["panel"], width=3, min_value=4, label_color=k["gray"])
+    legend(deck, s, 690, 164, [("知野", k["blue"]), ("同业", "6B7A8C")], MONO, k["gray"], size=16)
     deck.rect(s, 920, 200, 1, 420, fill=k["line"])
     deck.text(s, 950, 210, 230, 24, "delta", size=16, font=MONO, color=k["gray"], ea=HOS)
     deck.text(s, 950, 236, 230, 70, "−3.7pt", size=48, font=MONO, color=k["green"], ea=HOS)

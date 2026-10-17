@@ -286,7 +286,7 @@ def bento(deck, s):
     x, y, w, h = cell(2, 0, 1, 1, fill=ACCENT)
     deck.text(s, x + 24, y + 22, w - 48, 90, [[("30", {"size": 72, "font": SANS_BLACK}), ("分钟", {"size": 26, "bold": True})]],
               color="FFFFFF", font=SANS)
-    deck.text(s, x + 24, y + h - 44, w - 48, 28, "下单到送达", size=18, font=SANS, color="FFE7D9")
+    deck.text(s, x + 24, y + h - 44, w - 48, 28, "下单到送达", size=18, font=SANS, color="FFFFFF")
     x, y, w, h = cell(3, 0, 1, 1)
     deck.icon(s, "leaf", x + 24, y + 24, size=34, color="2E7D6B")
     deck.text(s, x + 24, y + 72, w - 48, 60, [[("5.9", {"size": 52, "font": SANS_BLACK}), ("%", {"size": 24, "bold": True})]],

@@ -44,6 +44,16 @@ def bg(slide, colour):
     slide.background.fill.fore_color.rgb = rgb(colour)
 
 
+def legend(deck, slide, x, y, items, font, color, size=18, gap=36):
+    """A one-row key for line charts whose lines are not named at their ends: a short stroke in each series
+    colour, then the series name. items: [(name, colour)]. Returns the x after the last item."""
+    for name, colour in items:
+        deck.line(slide, x, y + size * 0.6, x + 28, y + size * 0.6, color=colour, width=4)
+        deck.text(slide, x + 36, y, 200, size + 8, name, size=size, font=font, color=color, wrap=False)
+        x += 36 + len(name) * size + gap
+    return x
+
+
 # ------------------------------------------------------------------ photos (downloaded on first use)
 PHOTOS = json.loads((HERE / "photos.json").read_text(encoding="utf-8"))
 CACHE = Path(os.environ.get("SSR_GALLERY_CACHE", Path(tempfile.gettempdir()) / "ssr-gallery-cache"))

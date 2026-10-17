@@ -1100,17 +1100,24 @@ def pdf_layout(page, pm, frame=None):
 
     # What the rendering shows: text that leaves no ink (covered by a shape or picture drawn later, or set in
     # the background colour) and text with too little contrast against what is painted behind it.
+    # These are clues: a clean result does not prove that every word can be seen and read (see visual-review).
     pixmap = page.get_pixmap(matrix=pm.Matrix(INK_ZOOM, INK_ZOOM), alpha=False)
     picture = Image_from_pixmap(pixmap)
-    for text, bbox, hidden, total in hidden_text(page, flags, picture, INK_ZOOM):
+    hidden = hidden_text(page, flags, picture, INK_ZOOM)
+    for text, bbox, count, total in hidden:
         add("text_hidden", "error", text, bbox,
-            f"{hidden} of {total} characters leave no ink in the rendering: a shape or picture drawn later covers "
+            f"{count} of {total} characters leave no ink in the rendering: a shape or picture drawn later covers "
             "them, or they are set in the background colour. Bring the text forward or move the shape.")
+    for text, bbox in text_under_picture(page, pm, flags, picture, INK_ZOOM, [b for _, b, _, _ in hidden]):
+        add("text_under_picture", "warning", text, bbox,
+            "A picture is drawn on top of this text. Look at the page: if the picture hides the words (a texture or "
+            "pattern can look like ink to the hidden-text check), bring the text forward or move the picture.")
     for (fg, bg, large), (ratio, chars, text, bbox) in low_contrast(page, picture, INK_ZOOM).items():
         add("low_contrast", "warning", text, bbox,
             f"Contrast {ratio:.2f}:1 for #{fg} on #{bg} (needs {3 if large else 4.5}:1 for "
-            f"{'large' if large else 'body'} text); {chars} 字 use this pair. Darken the text or lighten the "
-            "background; text on photos is not measured.")
+            f"{'large' if large else 'body'} text); {chars} 字 fall below it. Darken the text or lighten the "
+            "background. Measured per character from the rendering; over photos and gradients the estimate is "
+            "lenient, so look at such text yourself.")
     return findings
 
 
@@ -1161,44 +1168,118 @@ def contrast_ratio(a, b):
     return (hi + 0.05) / (lo + 0.05)
 
 
+def text_under_picture(page, pm, flags, picture, zoom, skip=()):
+    """Text that a picture drawn later lies on top of: (text, bbox). The paint order gives the candidates (a
+    picture painted after the text over most of its box); full-page pictures (grain, texture overlays) are
+    left out. The paint log holds a cropped picture's full, uncropped box, so each candidate is confirmed by
+    rendering a copy of the page without that picture: only text whose pixels change is reported. Text already
+    reported as hidden is skipped."""
+    log = page.get_bboxlog()
+    area = page.rect.width * page.rect.height
+    pictures = [(i, pm.Rect(r)) for i, (kind, r) in enumerate(log)
+                if kind in ("fill-image", "fill-imgmask") and pm.Rect(r).get_area() < 0.85 * area]
+    covered = []  # (text rect, picture rects drawn over it)
+    for i, (kind, r) in enumerate(log):
+        rect = pm.Rect(r)
+        if kind not in ("fill-text", "stroke-text") or rect.is_empty:
+            continue
+        over = [p for j, p in pictures if j > i and (rect & p).get_area() >= 0.6 * rect.get_area()]
+        if over:
+            covered.append((rect, over))
+    candidates = []
+    for block in page.get_text("dict", flags=flags)["blocks"]:
+        for span in (s for line in block.get("lines", []) for s in line["spans"]):
+            box = pm.Rect(span["bbox"])
+            text = span["text"].strip()
+            if not text or SYMBOLS.match(text) or box.is_empty or any(pm.Rect(b).intersects(box) for b in skip):
+                continue
+            over = [p for c, ps in covered if (box & c).get_area() >= 0.5 * box.get_area() for p in ps]
+            if over:
+                candidates.append((text, span["bbox"], over))
+    if not candidates:
+        return []
+    xrefs = {}
+    for info in page.get_image_info(xrefs=True):
+        rect = pm.Rect(info["bbox"])
+        for _, _, over in candidates:
+            for p in over:
+                if info.get("xref") and abs(rect.x0 - p.x0) + abs(rect.y0 - p.y0) + abs(rect.x1 - p.x1) + abs(rect.y1 - p.y1) < 2:
+                    xrefs[info["xref"]] = rect
+    if not xrefs:
+        return [(text, bbox) for text, bbox, _ in candidates]  # cannot confirm: report for a look
+    copy = pm.open("pdf", page.parent.tobytes())
+    try:
+        bare = copy[page.number]
+        for xref in xrefs:
+            bare.delete_image(xref)
+        without = Image_from_pixmap(bare.get_pixmap(matrix=pm.Matrix(zoom, zoom), alpha=False)).convert("L")
+    finally:
+        copy.close()
+    shown = picture.convert("L")
+    out = []
+    for text, bbox, _ in candidates:
+        x0, y0, x1, y1 = (int(v * zoom) for v in bbox)
+        box = (max(0, x0), max(0, y0), min(shown.width, max(x0 + 1, x1)), min(shown.height, max(y0 + 1, y1)))
+        a, b = list(shown.crop(box).getdata()), list(without.crop(box).getdata())
+        if a and sum(abs(p - q) for p, q in zip(a, b)) / len(a) > 6:
+            out.append((text, bbox))
+    return out
+
+
 def low_contrast(page, picture, zoom):
-    """Text colour against the background behind each span, read from the rendering: the background is the
-    5th or 95th percentile pixel inside the span box, whichever is farther from the text colour. Only body
-    text between the header and footer bands; text over pictures is left out (a photo has no one colour).
-    Returns {(fg, bg, large): (ratio, characters, first text, bbox)} for pairs under 4.5:1 (3:1 large)."""
+    """Text colour against what is painted behind each character, read from the rendering: inside each
+    character's box the darkest or lightest pixel, whichever is farther from the text colour, stands for the
+    background (on a flat fill that is the fill itself; over a photo or gradient it is the most favourable
+    pixel, so the estimate is lenient). A span is reported when at least 3 characters and a quarter of them
+    fall below 4.5:1 (3:1 for large text), so a sentence that runs from a light onto a dark panel is caught.
+    Only body text between the header and footer bands. Returns {(fg, bg, large): (ratio, characters, first
+    text, bbox)}, with the worst ratio and its background per colour pair."""
     width, height = page.rect.width, page.rect.height
     unit = 1280 / width
-    pictures = [info["bbox"] for info in page.get_image_info()]
+    gray = picture.convert("L")
+    luma = lambda rgb: round(rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114)
     found = {}
-    for block in page.get_text("dict")["blocks"]:
+    for block in page.get_text("rawdict")["blocks"]:
         for line in block.get("lines", []):
             for span in line["spans"]:
-                text = span["text"].strip()
+                text = "".join(c["c"] for c in span["chars"]).strip()
                 x0, y0, x1, y1 = span["bbox"]
                 if len(text) < 2 or SYMBOLS.match(text) or y0 < height * 0.115 or y1 > height * 0.92:
                     continue
-                if any(x0 < p[2] and p[0] < x1 and y0 < p[3] and p[1] < y1 for p in pictures):
-                    continue
                 c = span["color"]
                 fg = ((c >> 16) & 255, (c >> 8) & 255, c & 255)
-                box = (int(x0 * zoom), int(y0 * zoom), max(int(x0 * zoom) + 2, int(x1 * zoom)),
-                       max(int(y0 * zoom) + 2, int(y1 * zoom)))
-                crop = picture.crop(box)
-                pixels = sorted(crop.get_flattened_data() if hasattr(crop, "get_flattened_data") else crop.getdata(),
-                                key=relative_luminance)
-                if not pixels:
-                    continue
-                lo, hi = pixels[int(len(pixels) * 0.05)], pixels[min(len(pixels) - 1, int(len(pixels) * 0.95))]
-                fl = relative_luminance(fg)
-                bg = hi if abs(relative_luminance(hi) - fl) > abs(relative_luminance(lo) - fl) else lo
                 size = span["size"] * unit
                 large = size >= 24 or (size >= 18.66 and bool(span["flags"] & 16))
-                ratio = contrast_ratio(fg, bg)
-                if ratio < (3 if large else 4.5):
-                    key = ("%02X%02X%02X" % fg, "%02X%02X%02X" % bg, large)
+                need_ratio = 3 if large else 4.5
+                measured, failing, worst = 0, 0, None
+                for ch in span["chars"]:
+                    if not ch["c"].strip() or SYMBOLS.match(ch["c"]):
+                        continue
+                    a, b, cx, cy = (int(v * zoom) for v in ch["bbox"])
+                    box = (max(0, a), max(0, b), min(gray.width, max(a + 2, cx)), min(gray.height, max(b + 2, cy)))
+                    if box[0] >= box[2] or box[1] >= box[3]:
+                        continue
+                    lo, hi = gray.crop(box).getextrema()
+                    level = hi if abs(hi - luma(fg)) > abs(lo - luma(fg)) else lo
+                    measured += 1
+                    if contrast_ratio((level,) * 3, (luma(fg),) * 3) >= need_ratio + 1:
+                        continue  # clearly fine on the grey estimate; skip the exact colour lookup
+                    measured -= 1
+                    data = list(gray.crop(box).getdata())
+                    spot = data.index(level)
+                    bw = box[2] - box[0]
+                    bg = picture.getpixel((box[0] + spot % bw, box[1] + spot // bw))
+                    ratio = contrast_ratio(fg, bg)
+                    measured += 1
+                    if ratio < need_ratio:
+                        failing += 1
+                        if worst is None or ratio < worst[0]:
+                            worst = (ratio, bg)
+                if worst and failing >= 3 and failing >= 0.25 * measured:
+                    key = ("%02X%02X%02X" % fg, "%02X%02X%02X" % tuple(worst[1]), large)
                     old = found.get(key)
-                    found[key] = (ratio, len(text), text, span["bbox"]) if old is None else \
-                        (old[0], old[1] + len(text), old[2], old[3])
+                    found[key] = (worst[0], failing, text, span["bbox"]) if old is None else \
+                        (min(old[0], worst[0]), old[1] + failing, old[2], old[3])
     return found
 
 
@@ -1495,8 +1576,11 @@ def template_sample_text(pptx, template, min_len=5):
     for paras in samples:
         for p in paras:
             seen[p] = seen.get(p, 0) + 1
-    fixed = max(2, len(samples) // 2)
-    candidates = [p for p, n in seen.items() if n <= fixed and len(p.replace(" ", "")) >= min_len]
+    # Text on more than half of the template pages (and on at least two) is treated as a fixed element. That is
+    # only a filter: a sample department name repeated on most pages slips through, and so do fields shorter
+    # than min_len. What is listed is a candidate to check, not proof of leftover sample text.
+    candidates = [p for p, n in seen.items() if not (n >= 2 and n > len(samples) / 2)
+                  and len(p.replace(" ", "")) >= min_len]
     found = []
     for idx, slide in enumerate(Presentation(pptx).slides, 1):
         for para in slide_paragraphs(slide):
@@ -1846,8 +1930,10 @@ def cmd_pptx(args):
     for f in report["deck_layout"]:
         print(f"  deck     {f['severity']:<7} {f['kind']:<18} {f['detail']}")
     if "template_text" in report:
-        print(f"template sample text still in the deck: {len(report['template_text'])} (replace it with the material, "
-              "or list it as 待确认; text on most template slides is left out as a fixed element)")
+        print(f"text shared with the template's sample slides: {len(report['template_text'])} candidates to check "
+              "(keep fixed brand text and text the material needs; replace sample text; list what you cannot "
+              "confirm as 待确认). Text on most template slides is skipped, so repeated sample names and fields "
+              "under 5 characters can slip through: look at the cover, dates and titles yourself")
         for f in report["template_text"]:
             print(f"  slide {f['slide']:02d} warning template_text       “{f['text']}” shares “{f['shared']}” with "
                   f"the template's “{f['template_text']}”")

@@ -2,7 +2,7 @@
 story, line-drawing manual, bento grid, formal report, notebook, riso print, colour fields and cool airy.
 Fictional content."""
 import content as C
-from gallery import bg, crop, example, generated, photo, treated
+from gallery import bg, crop, example, generated, legend, photo, treated
 
 SANS, SANS_BLACK, SANS_MED = "Noto Sans SC", "Noto Sans SC Black", "Noto Sans SC Medium"
 SERIF, SERIF_BLACK = "Noto Serif SC", "Noto Serif SC Black"
@@ -199,6 +199,7 @@ def r16_data(deck, s):
     deck.line_chart(s, 70, 140, 740, 500, C.MONTHS, {"知野": C.LOSS, "同业": C.LOSS_PEERS}, colors=[k["accent"], "C7C7CC"],
                     number_format='0.0"%"', font=MISANS, size=16, axis_color=k["gray"], axis_line="E5E5EA", width=4,
                     min_value=4)
+    legend(deck, s, 520, 86, [("知野", k["accent"]), ("同业", "C7C7CC")], MISANS, k["ink"])
     tile(deck, s, 848, 48, 384, 300, fill=k["soft"])
     deck.text(s, 884, 80, 320, 30, "6 月损耗率", size=20, font=MISANS, color=k["accent"])
     deck.text(s, 884, 120, 320, 130, [[("5.9", {"size": 104, "font": MISANS_HEAVY}), ("%", {"size": 40, "font": MISANS_SEMI})]],
@@ -435,7 +436,7 @@ def r19_data(deck, s):
                    number_format='0.0"%"', font=SANS_MED, size=18, label_color=k["ink"], axis_color=k["ink"], gap_width=40)
     deck.ellipse(s, 1060, 380, 130, fill=k["blue"], alpha=0.9)
     deck.text(s, 930, 334, 260, 100, "−3.7", size=64, font="Archivo Black", ea=SANS_MED, color=k["paper"], align="center")
-    deck.text(s, 930, 410, 260, 40, "个百分点", size=22, font=SANS_MED, color=k["paper"], align="center")
+    deck.text(s, 930, 410, 260, 40, "个百分点", size=22, font=SANS_MED, bold=True, color="FFFFFF", align="center")
     r19_grain(deck, s)
 
 
@@ -562,6 +563,7 @@ def r21_data(deck, s):
     deck.line_chart(s, 100, 188, 720, 440, C.MONTHS, {"知野": C.LOSS, "同城同业": C.LOSS_PEERS}, colors=[k["accent"], "AEB9CC"],
                     number_format='0.0"%"', font=MISANS, size=16, label_color=k["gray"], axis_color=k["gray"],
                     axis_line=k["line"], grid="EEF2F7", label_bg=k["card"], width=3.5, min_value=4)
+    legend(deck, s, 540, 186, [("知野", k["accent"]), ("同城同业", "AEB9CC")], MISANS, k["gray"], size=16)
     icons = ["clock", "leaf", "repeat"]
     for i, ((name, before, after), fill, icon) in enumerate(zip(C.BEFORE_AFTER, (k["mint"], k["sky"], k["lilac"]), icons)):
         y = 168 + i * 168
