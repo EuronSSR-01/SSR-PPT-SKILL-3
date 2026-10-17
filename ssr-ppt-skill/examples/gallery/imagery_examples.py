@@ -126,4 +126,4 @@ def icon_use(deck, s):
         deck.icon(s, icon, 680, y + 6, size=36, color=ACCENT if i == 1 else PRIMARY)
         deck.text(s, 736, y + 8, 400, 34, text, size=24, font=SANS, color=INK)
     deck.text(s, M, 620, W, 60, "左：实心与线性混用、每个一种颜色、灯泡和火箭与内容无关。右：同一套线性图标、同样大小，强调色只给要讲的那一条。",
-              size=17, font=SANS, color=MUTED, line_spacing=1.5)
+              size=18, font=SANS, color=MUTED, line_spacing=1.5)

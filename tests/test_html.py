@@ -51,13 +51,18 @@ class HtmlTests(unittest.TestCase):
                  f'<span {abs_}left:80px;top:260px;font-size:16px;color:#fff;background:#c0392b;padding:4px">徽标</span>')
         small = "".join(f'<p {abs_}left:80px;top:{120 + i * 40}px;font-size:13px">第 {i + 1} 条说明写得很小，放了很多字</p>'
                         for i in range(8)) + f'<p {abs_}left:80px;top:684px;font-size:12px">来源：页脚的小字不算</p>'
+        sentences = "".join(f'<p {abs_}left:80px;top:{120 + i * 40}px;font-size:17px">第 {i + 1} 段是完整的句子，'
+                            '读者要停下来读，所以按正文算。</p>' for i in range(6))
+        labels = "".join(f'<p {abs_}left:80px;top:{120 + i * 40}px;font-size:17px">华东区第 {i + 1} 家门店</p>'
+                         for i in range(8))
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)
             deck = work / "lint.html"
             deck.write_text('<!doctype html><meta charset="utf-8"><style>' + css + '</style><div class="ssr-player">'
                             '<main class="ssr-stage"><div id="ssr-deck" data-width="1280" data-height="720">'
                             f'<section class="ssr-slide">{bad}</section><section class="ssr-slide">{clean}</section>'
-                            f'<section class="ssr-slide">{small}</section>'
+                            f'<section class="ssr-slide">{small}</section><section class="ssr-slide">{sentences}</section>'
+                            f'<section class="ssr-slide">{labels}</section>'
                             '</div></main></div><script>' + js + '</script>', encoding="utf-8")
             result = subprocess.run([sys.executable, str(SKILL / "scripts/preview.py"), "html", str(deck), "--out",
                                      str(work / "review"), "--browser", BROWSER, "--no-pdf"], capture_output=True, timeout=90)
@@ -75,6 +80,8 @@ class HtmlTests(unittest.TestCase):
             self.assertEqual(report["layout"][1]["findings"], [])
             self.assertNotIn("small_text", first)                       # one small label is not small body text
             self.assertEqual([f["kind"] for f in report["layout"][2]["findings"]], ["small_text"])
+            self.assertEqual([f["kind"] for f in report["layout"][3]["findings"]], ["small_text"])  # 17px sentences
+            self.assertEqual(report["layout"][4]["findings"], [])                                 # 17px labels
             checks = {c["name"]: c["status"] for c in report["checks"]}
             self.assertEqual(checks["layout"], "failed")
             self.assertTrue((work / "review/layout/slide-01.png").exists())

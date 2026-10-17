@@ -428,7 +428,7 @@ def open_day_place(deck, s):
     t(deck, s, lx + 76, 214, 236, 46, f"超过 1,000 人次，\n下午排队超过 {O['queue']}", size=16, color=B["ink"],
       line_spacing=1.25)
     deck.line(s, lx, 288, B_R, 288, color=B["grey"], width=1)
-    t(deck, s, lx, 302, 312, 120, [O["date"], O["count"], "位置为大致方位，不按比例"], size=16, color=B["muted"],
+    t(deck, s, lx, 302, 312, 120, [O["date"], O["count"], "位置为大致方位，不按比例"], size=18, color=B["muted"],
       line_spacing=1.35, space_after=6)
 
 

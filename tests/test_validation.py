@@ -551,6 +551,52 @@ class LineThroughTextTests(unittest.TestCase):
         self.assertIn("low_contrast", kinds[1])
         self.assertIn("low_contrast", kinds[2])
 
+    def test_rule_on_the_baseline_cuts_chinese_text_but_an_underline_does_not(self):
+        """Run 13: a footer rule drawn through the bottom of a paragraph's last line went unreported."""
+        pm = preview.pymupdf_or_none()
+        doc = pm.open()
+        page = doc.new_page(width=960, height=540)
+        page.insert_text((80, 200), "页脚线压在这一行字的底部", fontname="china-s", fontsize=20)
+        page.draw_line((60, 199.8), (700, 199.8), color=(0.8, 0.8, 0.8), width=0.75)    # on the baseline
+        page.insert_text((80, 300), "下划线不算穿字", fontname="china-s", fontsize=20)
+        page.draw_line((80, 302.4), (180, 302.4), color=(0, 0, 0), width=1)              # 0.12 em below it
+        findings = preview.pdf_layout(page, pm)
+        doc.close()
+        self.assertEqual([(f["kind"], f["text"]) for f in findings if f["kind"] == "line_through_text"],
+                         [("line_through_text", "页脚线压在这一行字的底部")])
+
+    def test_text_partly_covered_by_a_later_box(self):
+        """Run 13: a line that ran long sat half under the next box, and a callout covered the page number."""
+        pm = preview.pymupdf_or_none()
+        doc = pm.open()
+        page = doc.new_page(width=960, height=540)
+        page.insert_text((80, 200), "这一行字的下半截被后画的框盖住", fontname="china-s", fontsize=20)
+        page.draw_rect(pm.Rect(70, 195, 500, 260), color=None, fill=(0.93, 0.96, 0.98))  # painted after the text
+        page.insert_text((900, 520), "5", fontname="helv", fontsize=14)
+        page.draw_rect(pm.Rect(600, 512, 930, 530), color=None, fill=(0.91, 0.96, 0.86))
+        page.draw_rect(pm.Rect(70, 340, 500, 400), color=None, fill=(0.93, 0.96, 0.98))  # a card painted first
+        page.insert_text((80, 375), "卡片里的字照常显示", fontname="china-s", fontsize=20)
+        findings = preview.pdf_layout(page, pm)
+        doc.close()
+        found = {(f["kind"], f["text"]) for f in findings}
+        self.assertIn(("text_covered", "这一行字的下半截被后画的框盖住"), found)
+        self.assertIn(("text_covered", "5"), found)
+        self.assertFalse(any("卡片" in text for _, text in found))
+        self.assertNotIn("text_hidden", {kind for kind, _ in found})
+
+    def test_sentences_are_held_to_the_reading_floor_on_a_rendered_page(self):
+        """Run 13: paragraphs set at 16-17px passed because only text under 16px counted as small."""
+        pm = preview.pymupdf_or_none()
+        doc = pm.open()
+        for line in ("这里是一段完整的说明，用逗号和句号写成。", "华东区门店月度销售额排名"):  # 13pt here is about 17px
+            page = doc.new_page(width=960, height=540)
+            for i in range(6):
+                page.insert_text((80, 120 + i * 22), line, fontname="china-s", fontsize=13)
+        kinds = [{f["kind"] for f in preview.pdf_layout(page, pm)} for page in doc]
+        doc.close()
+        self.assertIn("small_text", kinds[0])
+        self.assertNotIn("small_text", kinds[1])
+
     def test_template_text_on_both_pages_of_a_two_page_template_is_fixed(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)
@@ -811,6 +857,17 @@ class FrameAndHintTests(unittest.TestCase):
         footer = [(line, 12, 690, 705)] * 10
         self.assertIsNone(preview.small_text(footer, 720))                             # footer band left out
         self.assertIsNone(preview.small_text([(line, 15.6, 200, 215)] * 6, 720))       # 11.7pt rounding is fine
+
+    def test_sentences_use_the_reading_floor_and_labels_the_label_floor(self):
+        sentence = "说明写成一整句话，读者要停下来读，所以按正文算。"
+        self.assertTrue(preview.is_sentence(sentence))
+        self.assertFalse(preview.is_sentence("冷链物流、氟化工、电商"))                     # a list of names
+        self.assertFalse(preview.is_sentence("同比 +123 万元，序时 80%"))                   # short, even with a comma
+        rows = [(sentence, 17, 200 + i * 30, 215 + i * 30, True) for i in range(3)]
+        n = 3 * preview.text_units(sentence)
+        self.assertEqual(preview.small_text(rows, 720), (n, n, [17]))
+        labels = [(sentence, 17, 200 + i * 30, 215 + i * 30, False) for i in range(3)]
+        self.assertIsNone(preview.small_text(labels, 720))
 
     def test_bare_slide_hint_only_without_pictures(self):
         summary = lambda units: {"units": units, "findings": []}

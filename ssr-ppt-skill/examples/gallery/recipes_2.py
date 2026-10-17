@@ -333,7 +333,7 @@ def r12_data(deck, s):
         deck.text(s, 1090, 250 + i * 34, 140, 28, f"{c}  {C.CITY_LOSS[c][-1]:.1f}", size=16, font=SANS, bold=True,
                   color=VIRIDIS_TEXT[C.CITIES.index(c)])
     deck.text(s, 80, 620, 1120, 60, "图 1｜各城市生鲜损耗率（%），2027 年 1–6 月。右侧城市名按 6 月数值从高到低排列，与线尾上下位置一致。n = 126 家门店"
-              "（虚构示例）。", size=17, font=SERIF, color=k["gray"], line_spacing=1.45)
+              "（虚构示例）。", size=18, font=SERIF, color=k["gray"], line_spacing=1.45)
 
 
 @example("recipes", "R12-c", "R12 学术研究 · 图片页", "一张图版两个面板 A、B：照片作证据、图表作度量；图注逐项说明。", (SERIF, SANS))
@@ -346,7 +346,7 @@ def r12_picture(deck, s):
     deck.bar_chart(s, 680, 150, 520, 360, ["采购端", "仓储端", "门店端"], [43, 32, 24], highlight={0}, color=VIRIDIS[1],
                    base="B7C0CA", number_format='0"%"', font=SANS, size=16, label_color=k["text"], axis_color=k["text"])
     deck.text(s, 80, 560, 1120, 90, "图 2｜A. 叶菜到店时的状态（示意图片；USDA，公有领域）。B. 各环节对损耗下降的贡献占比，"
-              "以 1 月至 6 月的下降幅度（3.7 个百分点）为 100%；因四舍五入合计不为 100%（虚构示例）。", size=17, font=SERIF,
+              "以 1 月至 6 月的下降幅度（3.7 个百分点）为 100%；因四舍五入合计不为 100%（虚构示例）。", size=18, font=SERIF,
               color=k["gray"], line_spacing=1.5)
 
 

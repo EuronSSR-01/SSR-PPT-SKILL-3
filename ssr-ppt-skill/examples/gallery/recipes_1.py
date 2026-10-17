@@ -183,9 +183,9 @@ def r3_data(deck, s):
                     label_bg=k["bg"], width=3.5)
     deck.text(s, 1050, 236, 200, 30, "同城同业", size=17, font=SANS, color=k["gray"])
     deck.text(s, 1050, 386, 200, 30, "知野生鲜", size=17, font=SANS, bold=True, color=k["red"])
-    deck.line(s, 502, 322, 502, 430, color=k["ink"], width=1)
+    deck.line(s, 502, 322, 502, 390, color=k["ink"], width=1)
     deck.ellipse(s, 502, 322, 4, fill=k["ink"])
-    deck.text(s, 510, 424, 260, 50, "3 月：按日订货\n全面执行", size=16, font=SANS, color=k["ink"], line_spacing=1.4)
+    deck.text(s, 510, 384, 260, 50, "3 月：按日订货\n全面执行", size=16, font=SANS, color=k["ink"], line_spacing=1.4)
     deck.text(s, 80, 664, 900, 22, "来源：知野生鲜经营数据；同城同业为三家公开披露数据的均值（均为虚构示例）", size=13, font=SANS,
               color=k["gray"])
 

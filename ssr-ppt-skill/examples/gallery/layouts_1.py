@@ -312,8 +312,9 @@ def _matrix(deck, s, x0, y0, size, bubbles=False):
         good = loss < 0.5 and margin > 0.5
         deck.ellipse(s, cx, cy, r, fill=ACCENT if good else PRIMARY, alpha=0.75 if bubbles else None)
         side = -1 if loss > 0.7 else 1
-        deck.text(s, cx + side * (r + 8) - (90 if side < 0 else 0), cy - 15, 90, 30, name, size=19, font=SANS, bold=True,
-                  color=INK, align="right" if side < 0 else "left")
+        dy = 0 if abs(margin - 0.5) >= 0.06 else (10 if margin < 0.5 else -10)  # keep labels off the midline
+        deck.text(s, cx + side * (r + 8) - (90 if side < 0 else 0), cy - 15 + dy, 90, 30, name, size=19, font=SANS,
+                  bold=True, color=INK, align="right" if side < 0 else "left")
 
 
 @example("layouts", "L10-a", "2×2 矩阵 A：点在真实位置", "两个轴都有方向；对象按数据落点，标签紧贴圆点；结论写在右侧。", F)

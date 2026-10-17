@@ -341,7 +341,9 @@ LATIN_WORD = re.compile(r"[A-Za-z0-9]+(?:[.,'’%-][A-Za-z0-9]+)*")
 LONG_TEXT = 60  # 字 in one paragraph or one box of points; a Latin word or number counts as two
 PAGE_TEXT = 150  # 字 of sentences on one slide
 LABEL_TEXT = 20  # a line up to this long is a label (a name, a number, a short caption beside a picture)
-SMALL_PX = 16  # body text under this size on a 1280-wide canvas (12pt on a 13.33-inch slide) is small
+SMALL_PX = 16  # labels under this size on a 1280-wide canvas (12pt on a 13.33-inch slide) are small
+READ_PX = 18  # sentences under this size (13.5pt on a 13.33-inch slide) are small: the reading floor for body text
+SENTENCE_MARK = re.compile(r"[，。；！？]|[,.;!?](?=\s|$)")
 SMALL_MIN, SMALL_SHARE = 40, 0.3  # warn when at least this many 字 and this share of the body text are small
 BARE_TEXT = 100  # 字 of body text on a slide with no picture, illustration, chart or table (visual-first hint)
 
@@ -638,10 +640,11 @@ def cmd_html(args):
             page.wait_for_timeout(60)
             page.locator("#ssr-deck").screenshot(path=str(slides_dir / f"slide-{i + 1:02d}.png"))
             lint = page.evaluate(LAYOUT_JS, i)
-            found = small_text([item[:4] for item in lint["sized"]], lint["height"])
+            sized = [(*item[:4], is_sentence(item[0]), item[4]) for item in lint["sized"]]
+            found = small_text([item[:5] for item in sized], lint["height"])
             if found:
                 count, total, sizes = found
-                rects = [item[4] for item in lint["sized"] if is_small(item[1])
+                rects = [item[5] for item in sized if is_small(item[1], item[4])
                          and lint["height"] * 0.115 <= item[2] and item[3] <= lint["height"] * 0.92]
                 x0, y0 = min(r["x"] for r in rects), min(r["y"] for r in rects)
                 x1, y1 = max(r["x"] + r["w"] for r in rects), max(r["y"] + r["h"] for r in rects)
@@ -771,18 +774,24 @@ SYMBOLS = re.compile(r"^[\W_]+$")
 DISPLAY_PT = 54  # text at least this large is display type (huge numbers, cover words) that may bleed on purpose
 
 
-def is_small(px):
-    return px < SMALL_PX - 0.5  # renderers draw 12pt chart text at about 11.8pt
+def is_sentence(text):
+    """A paragraph longer than a label that carries sentence punctuation is body text, not a label."""
+    return text_units(text) > LABEL_TEXT and bool(SENTENCE_MARK.search(text))
+
+
+def is_small(px, sentence=False):
+    return px < (READ_PX if sentence else SMALL_PX) - 0.5  # renderers draw 12pt chart text at about 11.8pt
 
 
 def small_text(items, page_height):
-    """items: [(text, size in canvas px, top, bottom)] on one slide, canvas px. Body text between the header
-    band (top 11.5%) and the footer band (bottom 8%), below headline size, counts. Returns (small, total,
-    sizes) in 字 when at least SMALL_MIN 字 and SMALL_SHARE of that body text is under SMALL_PX, else None."""
-    body = [(text, size) for text, size, top, bottom in items
-            if top >= page_height * 0.115 and bottom <= page_height * 0.92 and size < 36]
-    total = sum(text_units(text) for text, _ in body)
-    small = [(text, size) for text, size in body if is_small(size)]
+    """items: [(text, size in canvas px, top, bottom[, sentence])] on one slide, canvas px; sentence marks text
+    from a paragraph that is_sentence. Body text between the header band (top 11.5%) and the footer band
+    (bottom 8%), below headline size, counts. Returns (small, total, sizes) in 字 when at least SMALL_MIN 字
+    and SMALL_SHARE of that body text is small (sentences under READ_PX, other text under SMALL_PX)."""
+    body = [(item[0], item[1], len(item) > 4 and item[4]) for item in items
+            if item[2] >= page_height * 0.115 and item[3] <= page_height * 0.92 and item[1] < 36]
+    total = sum(text_units(text) for text, _, _ in body)
+    small = [(text, size) for text, size, sentence in body if is_small(size, sentence)]
     count = sum(text_units(text) for text, _ in small)
     if count >= SMALL_MIN and count >= SMALL_SHARE * total:
         return count, total, sorted({round(size, 1) for _, size in small})
@@ -791,10 +800,12 @@ def small_text(items, page_height):
 
 def small_text_detail(count, total, sizes, unit):
     shown = ", ".join(f"{s:g}{unit}" for s in sizes[:4])
-    return (f"About {count} of {total} 字 of body text is under 16px on a 1280-wide canvas (12pt on a 13.33-inch "
-            f"slide): {shown}. Look at what was flagged. Body text and chart labels below the typography.md floor "
-            "(talks 20px, reading 18px, labels 16px): enlarge, split the slide or draw it, never shrink to fit. "
-            "Sources, page numbers, footnotes and photo credits may stay small (12px or more); note where and why.")
+    return (f"About {count} of {total} 字 of body text is below the floor on a 1280-wide canvas: sentences (a "
+            "paragraph with sentence punctuation) under 18px, labels under 16px (13.5pt and 12pt on a 13.33-inch "
+            f"slide): {shown}. Look at what was flagged. A full sentence is body text even beside a picture "
+            "(talks 20px, reading 18px; labels 16px, see typography.md): enlarge, split the slide or draw it, never "
+            "shrink to fit. Sources, page numbers, footnotes and photo credits may stay small (12px or more); note "
+            "where and why.")
 
 
 def thin_segments(drawings, max_width=6.0):
@@ -844,8 +855,11 @@ def glyph_core(bbox, size):
 
 
 def lines_through_text(page, flags):
-    """Thin drawn lines that run through the middle of glyphs, as (text, span bbox). A filled shape painted
-    after the line over the glyph hides it; a horizontal stroke spanning exactly the run is a strikethrough."""
+    """Thin drawn lines that run through glyphs, as (text, span bbox): through the middle of Latin letters, and
+    anywhere from near the top of a Chinese/Japanese/Korean character down to just below its baseline, where a
+    rule sitting on the line still cuts the bottom of the character (underlines lie lower, about 0.1-0.2 em
+    below the baseline in LibreOffice and WPS). A filled shape painted after the line over the glyph hides it;
+    a horizontal stroke spanning exactly the run is a strikethrough."""
     drawings = page.get_drawings()
     segments = list(thin_segments(drawings))
     if not segments:
@@ -880,6 +894,9 @@ def lines_through_text(page, flags):
                 if not ch["c"].strip() or SYMBOLS.match(ch["c"]):
                     continue
                 core = glyph_core(ch["bbox"], span["size"])
+                if CJK_CHAR.match(ch["c"]):
+                    base = ch["origin"][1]
+                    core = (core[0], base - 0.8 * span["size"], core[2], base + 0.04 * span["size"])
                 crossed = any(segment_hits(seg, core) and not hidden(core, seq) for seg, seq in near)
             if crossed:
                 hits.append((text, span["bbox"]))
@@ -988,9 +1005,9 @@ def page_frame(page, blocks, drawings):
 
 def pdf_layout(page, pm, frame=None):
     """Text geometry on a rendered PPTX page, in points: text off the page, text over other text, a line of
-    about one character, text running out of its card or panel, tiny text, placeholders and drawn lines
-    through text. Backgrounds are not known, so no contrast. frame: a dict that receives the page's
-    content margins (see page_frame)."""
+    about one character, text running out of its card or panel, tiny and small text, placeholders and drawn
+    lines through text; then, from a rendering, hidden, partly covered and low-contrast text and text under a
+    picture. frame: a dict that receives the page's content margins (see page_frame)."""
     flags = getattr(pm, "TEXTFLAGS_DICT", 0) & ~getattr(pm, "TEXT_MEDIABOX_CLIP", 64)  # keep text past the edge
     width, height = page.rect.width, page.rect.height
     findings, spans = [], []
@@ -1024,7 +1041,8 @@ def pdf_layout(page, pm, frame=None):
         if tiny < 9:
             add("font_too_small", "warning", block_text, block["bbox"], f"{tiny:.1f}pt (< 9pt, about 12px).")
 
-    for g in text_groups(page, flags, containers):
+    groups = text_groups(page, flags, containers)
+    for g in groups:
         gx0, gy0, gx1, gy1 = g["bbox"]
         if gx0 < -1 or gy0 < -1 or gx1 > width + 1 or gy1 > height + 1:
             continue  # reported below as an error
@@ -1085,12 +1103,19 @@ def pdf_layout(page, pm, frame=None):
             "A drawn line runs through this text; move the line or the label, or give the label a background. "
             "An intentional strike or decoration can stay.")
 
-    # Small body text, judged on a 1280-wide canvas so 4:3 and 16:9 slides of any size compare alike.
+    # Small body text, judged on a 1280-wide canvas so 4:3 and 16:9 slides of any size compare alike. A span
+    # whose centre lies in a paragraph that reads as sentences is held to the reading floor.
     unit = 1280 / width
-    found = small_text([(s["text"], s["size"] * unit, s["bbox"][1] * unit, s["bbox"][3] * unit) for _, _, s in spans],
-                       height * unit)
+    paragraphs = [g["bbox"] for g in groups if is_sentence(" ".join(t for t, _ in g["lines"]))]
+
+    def in_sentence(s):
+        cx, cy = (s["bbox"][0] + s["bbox"][2]) / 2, (s["bbox"][1] + s["bbox"][3]) / 2
+        return any(b[0] - 1 <= cx <= b[2] + 1 and b[1] - 1 <= cy <= b[3] + 1 for b in paragraphs)
+    sentence = {id(s): in_sentence(s) for _, _, s in spans}
+    found = small_text([(s["text"], s["size"] * unit, s["bbox"][1] * unit, s["bbox"][3] * unit, sentence[id(s)])
+                        for _, _, s in spans], height * unit)
     if found:
-        small = [s for _, _, s in spans if is_small(s["size"] * unit)
+        small = [s for _, _, s in spans if is_small(s["size"] * unit, sentence[id(s)])
                  and height * 0.115 <= s["bbox"][1] and s["bbox"][3] <= height * 0.92]
         box = (min(s["bbox"][0] for s in small), min(s["bbox"][1] for s in small),
                max(s["bbox"][2] for s in small), max(s["bbox"][3] for s in small))
@@ -1108,6 +1133,10 @@ def pdf_layout(page, pm, frame=None):
         add("text_hidden", "error", text, bbox,
             f"{count} of {total} characters leave no ink in the rendering: a shape or picture drawn later covers "
             "them, or they are set in the background colour. Bring the text forward or move the shape.")
+    for text, bbox, count in text_covered(page, drawings, picture, INK_ZOOM, [b for _, b, _, _ in hidden]):
+        add("text_covered", "warning", text, bbox,
+            f"A shape drawn later covers part of {count} character(s) here: a box placed over a line that ran long, "
+            "or over a page number or footer. Look at the page; shorten or move the text, or move or shrink the shape.")
     for text, bbox in text_under_picture(page, pm, flags, picture, INK_ZOOM, [b for _, b, _, _ in hidden]):
         add("text_under_picture", "warning", text, bbox,
             "A picture is drawn on top of this text. Look at the page: if the picture hides the words (a texture or "
@@ -1127,6 +1156,59 @@ INK_ZOOM = 2.0  # rendering scale for the ink and contrast checks (2 px per poin
 def Image_from_pixmap(pixmap):
     Image = need("PIL.Image", "python -m pip install pillow")
     return Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
+
+
+def pixels(image):
+    """The pixel values of an image as a list (getdata is going away in Pillow 14)."""
+    flat = getattr(image, "get_flattened_data", None)
+    return list(flat() if flat else image.getdata())
+
+
+def text_covered(page, drawings, picture, zoom, skip=()):
+    """Text partly covered by an opaque filled shape painted after it: (text, bbox, characters). A character
+    counts when the shape lies over at least 15% of its em height across most of its width and the rendering
+    shows the shape's own colour there, so a curved shape whose bounding box merely overlaps is not reported.
+    Text already reported as hidden is skipped."""
+    fills = []
+    for d in drawings:
+        if d.get("fill") is None or d.get("type") not in ("f", "fs") or (d.get("fill_opacity") or 1) < 0.9:
+            continue
+        fills.append((d["seqno"], d["rect"], tuple(round(v * 255) for v in d["fill"][:3])))
+    if not fills:
+        return []
+    out = []
+    for span in page.get_texttrace():
+        if span.get("type") == 3 or (span.get("opacity") or 1) < 0.1:
+            continue  # invisible text
+        later = [(r, colour) for seq, r, colour in fills if seq > span["seqno"]]
+        if not later:
+            continue
+        chars = [ch for ch in span["chars"] if chr(ch[0]).isalnum()]
+        box = [min(ch[3][0] for ch in chars), min(ch[3][1] for ch in chars),
+               max(ch[3][2] for ch in chars), max(ch[3][3] for ch in chars)] if chars else None
+        if not box or any(b[0] <= box[2] and box[0] <= b[2] and b[1] <= box[3] and box[1] <= b[3] for b in skip):
+            continue
+        count = 0
+        for ch in chars:
+            x0, y0, x1, y1 = ch[3]
+            inset = max(0.0, (y1 - y0 - span["size"]) / 2)
+            dx = (x1 - x0) * 0.15
+            ex0, ey0, ex1, ey1 = x0 + dx, y0 + inset, x1 - dx, y1 - inset
+            for r, colour in later:
+                ix0, iy0, ix1, iy1 = max(ex0, r.x0), max(ey0, r.y0), min(ex1, r.x1), min(ey1, r.y1)
+                if iy1 - iy0 < 0.15 * (ey1 - ey0) or ix1 - ix0 < 0.5 * (ex1 - ex0):
+                    continue
+                crop = (int(ix0 * zoom), int(iy0 * zoom), int(ix1 * zoom), int(iy1 * zoom))
+                if crop[0] < 0 or crop[1] < 0 or crop[2] > picture.width or crop[3] > picture.height \
+                        or crop[2] <= crop[0] or crop[3] <= crop[1]:
+                    continue
+                values = pixels(picture.crop(crop))
+                if sum(max(abs(p[k] - colour[k]) for k in range(3)) <= 16 for p in values) >= 0.97 * len(values):
+                    count += 1
+                    break
+        if count:
+            out.append(("".join(chr(ch[0]) for ch in span["chars"]).strip(), tuple(box), count))
+    return out
 
 
 def hidden_text(page, flags, picture, zoom):
@@ -1220,7 +1302,7 @@ def text_under_picture(page, pm, flags, picture, zoom, skip=()):
     for text, bbox, _ in candidates:
         x0, y0, x1, y1 = (int(v * zoom) for v in bbox)
         box = (max(0, x0), max(0, y0), min(shown.width, max(x0 + 1, x1)), min(shown.height, max(y0 + 1, y1)))
-        a, b = list(shown.crop(box).getdata()), list(without.crop(box).getdata())
+        a, b = pixels(shown.crop(box)), pixels(without.crop(box))
         if a and sum(abs(p - q) for p, q in zip(a, b)) / len(a) > 6:
             out.append((text, bbox))
     return out
@@ -1265,7 +1347,7 @@ def low_contrast(page, picture, zoom):
                     if contrast_ratio((level,) * 3, (luma(fg),) * 3) >= need_ratio + 1:
                         continue  # clearly fine on the grey estimate; skip the exact colour lookup
                     measured -= 1
-                    data = list(gray.crop(box).getdata())
+                    data = pixels(gray.crop(box))
                     spot = data.index(level)
                     bw = box[2] - box[0]
                     bg = picture.getpixel((box[0] + spot % bw, box[1] + spot // bw))
